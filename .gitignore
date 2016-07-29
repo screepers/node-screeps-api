@@ -1,0 +1,4 @@
+node_modules
+auth.js
+credentials.js
+*.sublime-*
