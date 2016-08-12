@@ -80,13 +80,18 @@ class ScreepsAPI extends EventEmitter {
       ws.send(...data)
     }
     ws.on('message', msg => {
+      if (msg.slice(0, 3) == 'gz:')
+        msg = gz(msg)
       if (msg[0] == '[') msg = JSON.parse(msg)
       if (msg[0].match(/console/))
         this.emit('console', msg)
+      else if (msg[0].match(/memory/))
+        this.emit('memory', msg)
       else
         this.emit('message', msg)
     })
     ws.on('open', () => {
+      send('gzip on')
       send(`auth ${this.token}`)
       cb()
     })
@@ -102,3 +107,12 @@ class ScreepsAPI extends EventEmitter {
 }
 
 module.exports = { ScreepsAPI}
+
+function gz (data) {
+  let buf = new Buffer(data.slice(3), 'base64')
+  let zlib = require('zlib')
+  let ret = zlib.inflateSync(buf).toString()
+  // let ret = zlib.gunzipSync(buf).toString()
+  // console.log(data, ret)
+  return JSON.parse(ret)
+}
