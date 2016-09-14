@@ -33,7 +33,8 @@ class ScreepsAPI extends EventEmitter {
         'X-Token': this.token || undefined,
         'X-Username': this.token || undefined
       },
-      body: body || undefined
+      body: method == 'POST' ? body : undefined || undefined,
+      qs: method == 'GET' ? body : undefined || undefined
     }, (err, res, body) => {
       if (err) return cb(err)
       if (res.statusCode == 200) {
@@ -87,6 +88,8 @@ class ScreepsAPI extends EventEmitter {
         this.emit('console', msg)
       else if (msg[0].match(/memory/))
         this.emit('memory', msg)
+      else if (msg[0].match(/room/))
+        this.emit('room', msg)
       else
         this.emit('message', msg)
     })
@@ -98,11 +101,53 @@ class ScreepsAPI extends EventEmitter {
     this.ws = ws
   }
   subscribe (path) {
-    this.wssend(`subscribe user:${this.user._id}${path}`)
+    if (!path.match(/^([a-z]+):(.+?)$/))
+      path = `user:${this.user._id}${path}`
+    this.wssend(`subscribe ${path}`)
   }
   wssend (...data) {
     // console.log('ws', ...data)
     this.ws.send(...data)
+  }
+  get memory () {
+    return {
+      get: function get (path, def) {
+        return new Promise((resolve, reject) => {
+          api.req('GET', `/api/user/memory?path=${path}`, null, (err, data) => {
+            if (err || data.body.error) reject(err || data.body.error)
+            else resolve(data.body.data || def)
+          })
+        })
+      },
+      set: function set (path, value) {
+        return new Promise((resolve, reject) => {
+          api.req('POST', `/api/user/memory?path=${path}`, value, (err, data) => {
+            if (err || data.body.error) reject(err || data.body.error)
+            else resolve(data.body.data)
+          })
+        })
+      }
+    }
+  }
+  get market () {
+    return {
+      index: function () {
+        return new Promise((resolve, reject) => {
+          api.req('GET', `/api/game/market/index`, null, (err, data) => {
+            if (err || data.body.error) reject(err || data.body.error)
+            else resolve(data.body.list)
+          })
+        })
+      },
+      orders: function (type) {
+        return new Promise((resolve, reject) => {
+          api.req('GET', `/api/game/market/orders?resourceType=${type}`, null, (err, data) => {
+            if (err || data.body.error) reject(err || data.body.error)
+            else resolve(data.body.list)
+          })
+        })
+      }
+    }
   }
 }
 
