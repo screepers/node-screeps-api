@@ -7,8 +7,7 @@ const {ScreepsAPI} = require('./screepsAPI.js')
 
 let api = new ScreepsAPI(auth)
 
-api.socket(() => {
-})
+api.socket(()=>{})
 
 api.on('message', (msg) => {
   console.log('MSG', msg)

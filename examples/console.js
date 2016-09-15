@@ -1,5 +1,5 @@
 'use strict'
-const { ScreepsAPI } = require('../')
+const ScreepsAPI = require('../')
 // const auth = require('../auth')
 const readline = require('readline')
 const util = require('util')
