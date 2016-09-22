@@ -138,7 +138,7 @@ class ScreepsAPI extends EventEmitter {
           })
       },
       set: (path, value) => {
-        return this.req('POST', `/api/user/memory?path=${path || ''}`, value)
+        return this.req('POST', `/api/user/memory`, { path, value })
           .then(data=>{
             if (data.body.error) throw data.body.error
             return data.body.data
