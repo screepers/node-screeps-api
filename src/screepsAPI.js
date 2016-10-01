@@ -133,7 +133,7 @@ class ScreepsAPI extends EventEmitter {
           .then(data=>{
             if (data.body.error) throw data.body.error
             let ret = data.body.data || def
-            if(ret.slice(0,3) == 'gz:') ret = gz(ret)
+            if(typeof ret == 'string' && ret.slice(0,3) == 'gz:') ret = gz(ret)
             return ret
           })
       },
@@ -153,7 +153,7 @@ class ScreepsAPI extends EventEmitter {
           .then(data=>{
             if (data.body.error) throw data.body.error
             let ret = data.body.list
-            if(ret.slice(0,3) == 'gz:') ret = gz(ret)
+            if(typeof ret == 'string' && ret.slice(0,3) == 'gz:') ret = gz(ret)
             return ret
           })
       },
@@ -162,7 +162,7 @@ class ScreepsAPI extends EventEmitter {
           .then(data=>{
             if (data.body.error) throw data.body.error
             let ret = data.body.list
-            if(ret.slice(0,3) == 'gz:') ret = gz(ret)
+            if(typeof ret == 'string' && ret.slice(0,3) == 'gz:') ret = gz(ret)
             return ret
           })
       }

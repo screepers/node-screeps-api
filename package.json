@@ -1,12 +1,13 @@
 {
   "name": "screeps-api",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "description": "",
+  "repository":"screepers/node-screeps-api",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "gulp",
-    "pre-publish": "npm run build"
+    "prepublish": "npm run build"
   },
   "author": "Adam Shumann",
   "license": "ISC",
