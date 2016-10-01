@@ -25,6 +25,7 @@ class ScreepsAPI extends EventEmitter {
     })
   }
   req (method, path, body, cb) {
+    cb = cb || noop
     return new Promise((resolve,reject)=>{
       if (!this.token && !path.match(/auth/)) return this.getToken(() => this.req(method,path,body,cb))
       request({
@@ -43,22 +44,24 @@ class ScreepsAPI extends EventEmitter {
           if (res.headers['x-token'])
             this.token = res.headers['x-token']
         }
-        if(cb)
-          cb(null, { res, body})
+        cb(null, { res, body})
         resolve({res,body})
       })
     })
   }
   connect(cb){
+    cb = cb || noop
     console.log('connect')
     return this.getToken(cb)
   }
   auth (email, password, cb) {
+    cb = cb || noop
     this.email = email
     this.password = password
     return this.getToken((err, token) => cb(null, token !== 'unauthorized'))
   }
   getToken (cb) {
+    cb = cb || noop
     console.log('getToken')
     return new Promise((resolve,reject)=>{
       if(!cb) cb = (()=>{})
@@ -77,6 +80,7 @@ class ScreepsAPI extends EventEmitter {
     })
   }
   me (cb) {
+    cb = cb || noop
     if (!this.token) return this.getToken(() => this.socket(cb))
     this.req('GET', '/api/auth/me', null, (err, data) => {
       if (err) return cb(err)
@@ -89,6 +93,7 @@ class ScreepsAPI extends EventEmitter {
     })
   }
   socket (cb) {
+    cb = cb || noop
     if (!this.token) return this.getToken(() => this.socket(cb))
     if (!this.user) return this.me(() => this.socket(cb))
     let ws = new WebSocket('wss://screeps.com/socket/websocket')
@@ -189,3 +194,5 @@ function inflate (data) {
   // console.log(data, ret)
   return JSON.parse(ret)
 }
+
+function noop(){}
