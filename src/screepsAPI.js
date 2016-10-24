@@ -44,6 +44,10 @@ class ScreepsAPI extends EventEmitter {
           if (res.headers['x-token'])
             this.token = res.headers['x-token']
         }
+        if (res.statusCode == 401) {
+          this.token = ''
+          // this.getToken(()=>this.req(method,path,body,cb))
+        }
         cb(null, { res, body})
         resolve({res,body})
       })
@@ -167,6 +171,15 @@ class ScreepsAPI extends EventEmitter {
           .then(data=>{
             if (data.body.error) throw data.body.error
             let ret = data.body.list
+            if(typeof ret == 'string' && ret.slice(0,3) == 'gz:') ret = gz(ret)
+            return ret
+          })
+      },
+      stats: (type) => {
+        return this.req('GET', `/api/game/market/stats?resourceType=${type}`, null)
+          .then(data=>{
+            if (data.body.error) throw data.body.error
+            let ret = data.body.stats
             if(typeof ret == 'string' && ret.slice(0,3) == 'gz:') ret = gz(ret)
             return ret
           })
