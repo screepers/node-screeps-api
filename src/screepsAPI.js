@@ -26,8 +26,8 @@ class ScreepsAPI extends EventEmitter {
   }
   req (method, path, body, cb) {
     cb = cb || noop
-    return new Promise((resolve,reject)=>{
-      if (!this.token && !path.match(/auth/)) return this.getToken(() => this.req(method,path,body,cb))
+    return new Promise((resolve, reject) => {
+      if (!this.token && !path.match(/auth/)) return this.getToken(() => this.req(method, path, body, cb))
       request({
         url: `${this.prefix}${path}`,
         json: true,
@@ -46,14 +46,14 @@ class ScreepsAPI extends EventEmitter {
         }
         if (res.statusCode == 401) {
           this.token = ''
-          // this.getToken(()=>this.req(method,path,body,cb))
+        // this.getToken(()=>this.req(method,path,body,cb))
         }
         cb(null, { res, body})
         resolve({res,body})
       })
     })
   }
-  connect(cb){
+  connect (cb) {
     cb = cb || noop
     console.log('connect')
     return this.getToken(cb)
@@ -67,8 +67,9 @@ class ScreepsAPI extends EventEmitter {
   getToken (cb) {
     cb = cb || noop
     console.log('getToken')
-    return new Promise((resolve,reject)=>{
-      if(!cb) cb = (()=>{})
+    return new Promise((resolve, reject) => {
+      if (!cb) cb = (() => {
+        })
       let {email, password} = this.opts
       this.req('POST', '/api/auth/signin', { email, password}, (err, data) => {
         if (err) return cb(err)
@@ -100,7 +101,8 @@ class ScreepsAPI extends EventEmitter {
     cb = cb || noop
     if (!this.token) return this.getToken(() => this.socket(cb))
     if (!this.user) return this.me(() => this.socket(cb))
-    let ws = new WebSocket('wss://screeps.com/socket/websocket')
+    let wsprefix = this.prefix.replace(/^http/, 'ws')
+    let ws = new WebSocket(`${wsprefix}/socket/websocket`)
     let send = (...data) => {
       ws.send(...data)
     }
@@ -139,16 +141,16 @@ class ScreepsAPI extends EventEmitter {
     return {
       get: (path, def) => {
         return this.req('GET', `/api/user/memory?path=${path || ''}`, null)
-          .then(data=>{
+          .then(data => {
             if (data.body.error) throw data.body.error
             let ret = data.body.data || def
-            if(typeof ret == 'string' && ret.slice(0,3) == 'gz:') ret = gz(ret)
+            if (typeof ret == 'string' && ret.slice(0, 3) == 'gz:') ret = gz(ret)
             return ret
           })
       },
       set: (path, value) => {
-        return this.req('POST', `/api/user/memory`, { path, value })
-          .then(data=>{
+        return this.req('POST', `/api/user/memory`, { path, value})
+          .then(data => {
             if (data.body.error) throw data.body.error
             return data.body.data
           })
@@ -159,28 +161,28 @@ class ScreepsAPI extends EventEmitter {
     return {
       index: () => {
         return this.req('GET', `/api/game/market/index`, null)
-          .then(data=>{
+          .then(data => {
             if (data.body.error) throw data.body.error
             let ret = data.body.list
-            if(typeof ret == 'string' && ret.slice(0,3) == 'gz:') ret = gz(ret)
+            if (typeof ret == 'string' && ret.slice(0, 3) == 'gz:') ret = gz(ret)
             return ret
           })
       },
       orders: (type) => {
         return this.req('GET', `/api/game/market/orders?resourceType=${type}`, null)
-          .then(data=>{
+          .then(data => {
             if (data.body.error) throw data.body.error
             let ret = data.body.list
-            if(typeof ret == 'string' && ret.slice(0,3) == 'gz:') ret = gz(ret)
+            if (typeof ret == 'string' && ret.slice(0, 3) == 'gz:') ret = gz(ret)
             return ret
           })
       },
       stats: (type) => {
         return this.req('GET', `/api/game/market/stats?resourceType=${type}`, null)
-          .then(data=>{
+          .then(data => {
             if (data.body.error) throw data.body.error
             let ret = data.body.stats
-            if(typeof ret == 'string' && ret.slice(0,3) == 'gz:') ret = gz(ret)
+            if (typeof ret == 'string' && ret.slice(0, 3) == 'gz:') ret = gz(ret)
             return ret
           })
       }
@@ -208,4 +210,4 @@ function inflate (data) {
   return JSON.parse(ret)
 }
 
-function noop(){}
+function noop () {}
