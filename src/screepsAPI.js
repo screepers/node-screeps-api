@@ -142,6 +142,7 @@ class ScreepsAPI extends EventEmitter {
   get segment () {
     return {
       get: (id, def) => {
+        return this.req('GET', `/api/user/memory-segment?segment=${id}`, null)
           .then(data => {
             if (data.body.error) throw data.body.error
             let ret = data.body.data || def
