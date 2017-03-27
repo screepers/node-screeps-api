@@ -114,6 +114,8 @@ class ScreepsAPI extends EventEmitter {
         this.emit('console', msg)
       else if (msg[0].match(/memory/))
         this.emit('memory', msg)
+      else if (msg[0].match(/segment/))
+        this.emit('segment', msg)
       else if (msg[0].match(/code/))
         this.emit('code', msg)
       else if (msg[0].match(/room/))
@@ -136,6 +138,26 @@ class ScreepsAPI extends EventEmitter {
   wssend (...data) {
     // console.log('ws', ...data)
     this.ws.send(...data)
+  }
+  get segment () {
+    return {
+      get: (id, def) => {
+        return this.req('GET', `/api/user/memory-segment?segment=${id}`, null)
+          .then(data => {
+            if (data.body.error) throw data.body.error
+            let ret = data.body.data || def
+            if (typeof ret == 'string' && ret.slice(0, 3) == 'gz:') ret = gz(ret)
+            return ret
+          })
+      },
+      set: (id, value) => {
+        return this.req('POST', `/api/user/memory-segment`, { segment: id, data: value})
+          .then(data => {
+            if (data.body.error) throw data.body.error
+            return data.body.data
+          })
+      }
+    }
   }
   get memory () {
     return {
