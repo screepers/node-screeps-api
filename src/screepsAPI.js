@@ -86,12 +86,8 @@ class ScreepsAPI extends EventEmitter {
   }
   me (cb) {
     cb = cb || noop
-    if (!this.token) return this.getToken(() => this.socket(cb))
-    this.req('GET', '/api/auth/me', null, (err, data) => {
-      if (err) return cb(err)
-      this.user = data.body
-      cb(err, data.body)
-    })
+    if (!this.token) return this.getToken(() => this.me(cb))
+    return this.req('GET', '/api/auth/me').then(data=>(this.user = data.body,cb(data),data))
   }
   console (expression) {
     this.req('POST', '/api/user/console', { expression}, (err, data) => {
