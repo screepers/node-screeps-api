@@ -235,6 +235,15 @@ class RawAPI extends EventEmitter {
       }
     }
   }
+  auth(email,password){
+    return this.raw.auth.signin(email,password)
+      .then(res=>{
+        this.emit('token',res.token)
+        this.emit('auth')
+        this.__authed = true
+        return res
+      })
+  }
   req(method,path,body={}){
     let opts = { 
       method,
@@ -251,9 +260,17 @@ class RawAPI extends EventEmitter {
       opts.headers['content-type'] = 'application/json'
       opts.body = JSON.stringify(body)
     }
-    console.log(url,path)
     return fetch(url,opts)
       .then(res=>{
+        if(res.status == 401){
+          if(this.__authed){
+            this.__authed = false
+            return this.auth(this.opts.email,this.opts.password)
+              .then(()=>this.req(method,path,body))
+          }else{
+            return Promise.reject(new Error('Not Authorized'))
+          }
+        }
         let token = res.headers.get('x-token')
         if(token){
           this.emit('token',token)
@@ -273,7 +290,7 @@ class RawAPI extends EventEmitter {
             res.data = inflate(res.data)
         }
         return res
-      })
+      })      
   }
   gz(data) {
     let buf = new Buffer(data.slice(3), 'base64')

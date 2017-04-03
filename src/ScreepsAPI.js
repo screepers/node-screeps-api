@@ -28,14 +28,6 @@ class ScreepsAPI extends RawAPI {
     if((this.opts.username || this.opts.email) && this.opts.password)
       this.auth(this.opts.username || this.opts.email,this.opts.password)
   }
-  auth(email,password){
-    return this.raw.auth.signin(email,password)
-      .then(res=>{
-        this.emit('token',res.token)
-        this.emit('auth')
-        return res
-      })
-  }
   me(){
     return this.raw.auth.me().then(user=>{
       this.user = user
