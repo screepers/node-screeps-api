@@ -1,1 +1,1 @@
-module.exports = require('./dist/screepsAPI')
+module.exports = require('./build/')
