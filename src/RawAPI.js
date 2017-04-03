@@ -13,6 +13,11 @@ class RawAPI extends EventEmitter {
       version(){
         return self.req('GET','/api/version')
       },
+      authmod(){
+        if(this.opts.url.match(/screeps\.com/))
+          return Promise.resolve({ name: 'official' })
+        return self.req('GET','/authmod')
+      },
       history(room,tick){
         tick = Math.round(tick/20)*20
         return self.req('GET','/room-history/${room}/${tick}.json')
@@ -37,6 +42,9 @@ class RawAPI extends EventEmitter {
         },
         setUsername(username){ 
           return self.req('POST','/api/register/check-username', { username })
+        },
+        submit(username,email,password,modules){
+          return self.req('POST','/api/register/submit', { username, email, password, modules })
         }
       },
       userMessages: {
