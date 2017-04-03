@@ -236,6 +236,9 @@ class RawAPI extends EventEmitter {
     }
   }
   auth(email,password){
+    if(!this.opts.email && !this.opts.password){
+      Object.assign(this.opts,{ email, password })
+    }
     return this.raw.auth.signin(email,password)
       .then(res=>{
         this.emit('token',res.token)
