@@ -2,7 +2,7 @@ const URL = require('url')
 const querystring = require('querystring')
 const { EventEmitter } = require('events')
 const zlib = require('zlib')
-const fetch = require('fetch-ponyfill')
+const { fetch } = require('fetch-ponyfill')()
 
 class RawAPI extends EventEmitter {
   constructor(opts={}){
@@ -121,18 +121,7 @@ class RawAPI extends EventEmitter {
         },
         roomOverview(room,interval=8){
           return self.req('GET','/api/game/room-overview', { room, interval })
-        },
-        leaderboard: {
-          list(){
-            return self.req('GET','/api/game/leaderboard/list')
-          },
-          find(season){
-            return self.req('GET','/api/game/leaderboard/find', { season })
-          },
-          seasons(){
-            return self.req('GET','/api/game/leaderboard/seasons')
-          }
-        },
+        },        
         market: {
           ordersIndex(){
             return self.req('GET','/api/game/market/orders-index')
@@ -147,6 +136,17 @@ class RawAPI extends EventEmitter {
             return self.req('GET','/api/game/market/stats', { resourceType })
           }
         },
+      },
+      leaderboard: {
+        list(){
+          return self.req('GET','/api/leaderboard/list')
+        },
+        find(username,mode='world',season=''){
+          return self.req('GET','/api/leaderboard/find', { season, mode, username })
+        },
+        seasons(){
+          return self.req('GET','/api/leaderboard/seasons')
+        }
       },
       user:{
         badge(badge){

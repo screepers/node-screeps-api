@@ -75,7 +75,6 @@ class Socket extends EventEmitter {
         if(data.status == 'ok'){
           this.authed = true
           this.emit('token',data.token)
-          console.log(this.__subQueue)
           while(this.__subQueue.length)
             this.send(this.__subQueue.shift())
           resolve()
@@ -91,10 +90,11 @@ class Socket extends EventEmitter {
     if(!path) return Promise.resolve()
     if (!path.match(/^([a-z]+):(.+?)$/))
       path = `user:${this.api.user._id}/${path}`
-    if(this.authed)
+    if(this.authed){
       this.send(`subscribe ${path}`)
-    else
+    }else{
       this.__subQueue.push(`subscribe ${path}`)
+    }
     this.emit('subscribe',path)
     if(cb) this.on(path,cb)
     return Promise.resolve()
