@@ -36,11 +36,14 @@ class Socket extends EventEmitter {
     })
   }
   handleMessage(msg){
+    msg = msg.data || msg // Handle ws/browser difference
+    // console.log(msg)
     if(msg.slice(0, 3) == 'gz:')
       msg = inflate(msg)
     if(msg[0] == '['){
       msg = JSON.parse(msg)
-      let [,type,id,channel] = msg[0].match(/^(.+):(.+?)\/(.+)$/)
+      let [,type,id,channel] = msg[0].match(/^(.+):(.+?)(?:\/(.+))?$/)
+      channel = channel || type
       let event = { channel, id, type, data: msg[1] }
       this.emit(msg[0],event)
       this.emit(event.channel,event)
