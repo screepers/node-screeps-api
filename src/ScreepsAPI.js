@@ -1,8 +1,7 @@
-const zlib = require('zlib')
-const url = require('url')
-const { EventEmitter } = require('events')
-const Socket = require('./Socket')
-const RawAPI = require('./RawAPI')
+import format from 'url'
+import { EventEmitter } from 'events'
+import { Socket } from './Socket'
+import { RawAPI } from './RawAPI'
 
 const DEFAULTS = {
   protocol: 'https',
@@ -11,12 +10,12 @@ const DEFAULTS = {
   path: '/'
 }
 
-class ScreepsAPI extends RawAPI {
+export class ScreepsAPI extends RawAPI {
   constructor(opts){
     opts = Object.assign({},DEFAULTS,opts)
     if(!opts.url){
       opts.pathname = opts.pathname || opts.path
-      opts.url = url.format(opts)
+      opts.url = format(opts)
     }
     super(opts)
     this.opts = opts
@@ -46,7 +45,5 @@ class ScreepsAPI extends RawAPI {
   get segment(){      return this.raw.user.memory.segment }
   get console(){      return this.raw.user.console }
 }
-
-module.exports = ScreepsAPI
 
 function noop () {}

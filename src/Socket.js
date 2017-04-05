@@ -1,8 +1,8 @@
-const WebSocket = require('ws')
-const url = require('url')
-const { EventEmitter } = require('events')
+import WebSocket from 'ws'
+import url from 'url'
+import { EventEmitter } from 'events'
 
-class Socket extends EventEmitter {
+export class Socket extends EventEmitter {
   constructor(ScreepsAPI){
     super()
     this.api = ScreepsAPI
@@ -117,4 +117,3 @@ class Socket extends EventEmitter {
   }
 }
 
-module.exports = Socket

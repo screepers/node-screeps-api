@@ -15,6 +15,7 @@
     "bufferutil": "^3.0.0",
     "colors": "^1.1.2",
     "fetch-ponyfill": "^4.0.0",
+    "node-fetch": "2.0",
     "utf-8-validate": "^3.0.1",
     "ws": "^1.1.1"
   },
@@ -25,10 +26,12 @@
     "gulp-babel": "^6.1.2",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^2.1.2",
+    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-resolve": "^3.0.0",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
-  "browser":{
-    "ws":"./src/ws-browser.js"
+  "browser": {
+    "ws": "./src/ws-browser.js"
   }
 }

@@ -1,10 +1,12 @@
-const URL = require('url')
-const querystring = require('querystring')
-const { EventEmitter } = require('events')
-const zlib = require('zlib')
-const { fetch } = require('fetch-ponyfill')()
+import URL from 'url'
+import querystring from 'querystring'
+import { EventEmitter } from 'events'
+import zlib from 'zlib'
+// import fetchpf from 'fetch-ponyfill'
+// const fetch = fetchpf()
+import { fetch } from 'node-fetch'
 
-class RawAPI extends EventEmitter {
+export class RawAPI extends EventEmitter {
   constructor(opts={}){
     super()
     this.opts = opts
@@ -306,5 +308,3 @@ class RawAPI extends EventEmitter {
     return JSON.parse(ret)
   }
 }
-
-module.exports = RawAPI
