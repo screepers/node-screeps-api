@@ -16,6 +16,7 @@ api.on('message', (msg) => {
   }
 })
 
+// Upload your code to trigger this.
 api.on('code', (msg)=>{
   let [user, data] = msg
   fs.mkdirSync(data.branch)
