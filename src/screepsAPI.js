@@ -14,7 +14,9 @@ class ScreepsAPI extends EventEmitter {
     opts = opts || {}
     // if (!opts.email || !opts.password) throw new Error('Email and password REQUIRED')
     this.opts = opts
-    this.prefix = opts.ptr ? 'https://screeps.com/ptr' : 'https://screeps.com'
+    // TODO: validate serverUrl. (eg. starts with http(s):// )
+    this.prefix = opts.serverUrl || 'https://screeps.com';
+    if (opts.ptr) this.prefix += '/ptr';
   }
   request (...args) {
     return new Promise((resolve, reject) => {
