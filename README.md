@@ -4,14 +4,24 @@
 This is a nodejs API for the game Screeps
 
 ## Basic usage
+
+As of 1.0, all functions return Promises
+
 ```javascript
 const ScreepsAPI = require('screeps-api');
 const fs = require('fs');
 
+// All options are optional
 const api = new ScreepsAPI({
   email: 'screeps@email.com',
-  password: 'notMyPass'
+  password: 'notMyPass',
+  protocol: 'https',
+  host: 'screeps.com',
+  port: 443,
+  path: '/' // Do no include '/api', it will be added automatically
 });
+
+api.auth('screeps@email.com','notMyPass')
 
 // Dump Memory
 api.memory.get()
