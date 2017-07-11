@@ -2,14 +2,22 @@ import WebSocket from 'ws'
 import url from 'url'
 import { EventEmitter } from 'events'
 
+const DEFAULTS = {
+  reconnect: true,
+  resubscribe: true
+}
+
 export class Socket extends EventEmitter {
   constructor(ScreepsAPI){
     super()
     this.api = ScreepsAPI
     this.__queue = []
     this.__subQueue = []
+    this.__subs = {}
+    this.opts = Object.assign({},DEFAULTS)
   }
-  async connect(){
+  async connect(opts={}){
+    Object.assign(this.opts,opts)
     return new Promise((resolve,reject)=>{
       if(!this.api.token){
         reject(new Error('No token! Call api.auth() before connecting the socket!'))
@@ -19,6 +27,8 @@ export class Socket extends EventEmitter {
       this.ws = new WebSocket(wsurl)
       this.ws.on('open',async ()=>{
         this.connected = true
+        if(this.opts.resubscribe)
+          this._subQueue.push(...Object.keys(this.__subs))
         await resolve(this.auth(this.api.token))
         this.emit('connected')
         while(this.__queue.length)
@@ -28,10 +38,17 @@ export class Socket extends EventEmitter {
         this.authed = false
         this.connected = false
         this.emit('disconnected')
-        this.removeAllListeners()
+        if(this.opts.reconnect)
+          this.connect()
+        else
+          this.removeAllListeners()
       })
       this.ws.on('message',(data)=>this.handleMessage(data))
     })
+  }
+  reconnect(){
+    Object.keys(this.__subs).forEach(sub=>this.subscribe(sub))    
+    return this.connect(opts)
   }
   handleMessage(msg){
     msg = msg.data || msg // Handle ws/browser difference
@@ -95,6 +112,8 @@ export class Socket extends EventEmitter {
       this.__subQueue.push(`subscribe ${path}`)
     }
     this.emit('subscribe',path)
+    this.__subs[path] = this.__subs[path] || 0
+    this.__subs[path]++
     if(cb) this.on(path,cb)
   }
   async unsubscribe(path){
@@ -105,6 +124,7 @@ export class Socket extends EventEmitter {
       path = `user:${this.api.user._id}/${path}`
     this.send(`unsubscribe ${path}`)
     this.emit('unsubscribe',path)
+    if(this.__subs[path]) this.__subs[path]--
   }
   async reconnect(){
     return this.connect()

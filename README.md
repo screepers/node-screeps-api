@@ -8,7 +8,7 @@ This is a nodejs API for the game Screeps
 As of 1.0, all functions return Promises
 
 ```javascript
-const ScreepsAPI = require('screeps-api');
+const { ScreepsAPI } = require('screeps-api');
 const fs = require('fs');
 
 // All options are optional
