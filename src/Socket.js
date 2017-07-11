@@ -4,7 +4,8 @@ import { EventEmitter } from 'events'
 
 const DEFAULTS = {
   reconnect: true,
-  resubscribe: true
+  resubscribe: true,
+  keepAlive: true
 }
 
 export class Socket extends EventEmitter {
@@ -15,6 +16,7 @@ export class Socket extends EventEmitter {
     this.__subQueue = []
     this.__subs = {}
     this.opts = Object.assign({},DEFAULTS)
+    this.keepAliveInter = 0
   }
   async connect(opts={}){
     Object.assign(this.opts,opts)
@@ -33,8 +35,12 @@ export class Socket extends EventEmitter {
         this.emit('connected')
         while(this.__queue.length)
           this.emit(this.__queue.shift())
+        clearInterval(this.keepAliveInter)
+        if(this.opts.keepAlive) 
+          this.keepAliveInter = setInterval(()=>this.ws && this.ws.ping(1),10000)
       })
       this.ws.on('close',()=>{
+        clearInterval(this.keepAliveInter)
         this.authed = false
         this.connected = false
         this.emit('disconnected')
