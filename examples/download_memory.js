@@ -1,12 +1,12 @@
 'use strict'
-const ScreepsAPI = require('../src/screepsAPI.js')
+const { ScreepsAPI } = require('../')
 const auth = require('../auth')
 const fs = require('fs')
 
-let api = new ScreepsAPI(auth)
+let api = new ScreepsAPI()
 
 Promise.resolve()
-  .then(()=>api.connect())
+  .then(()=>api.auth(auth.email,auth.password))
   .then(()=>api.memory.get())
   .then(memory=>{
     fs.writeFileSync('memory.json',JSON.stringify(memory))

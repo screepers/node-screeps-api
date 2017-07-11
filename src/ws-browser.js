@@ -1,4 +1,4 @@
-module.exports = window.WebSocket || require('ws')
+export import WebSocket from 'ws'
 
 WebSocket.prototype.on = function (event, callback) {
   this.addEventListener(event, callback);

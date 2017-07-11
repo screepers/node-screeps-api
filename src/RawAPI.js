@@ -1,10 +1,11 @@
+import Promise from 'bluebird'
 import URL from 'url'
 import querystring from 'querystring'
 import { EventEmitter } from 'events'
 import zlib from 'zlib'
-// import fetchpf from 'fetch-ponyfill'
-// const fetch = fetchpf()
-import { fetch } from 'node-fetch'
+
+Promise.promisifyAll(zlib)
+import fetch from 'node-fetch'
 
 export class RawAPI extends EventEmitter {
   constructor(opts={}){
@@ -43,7 +44,7 @@ export class RawAPI extends EventEmitter {
           return self.req('GET','/api/register/check-username', { username })
         },
         setUsername(username){ 
-          return self.req('POST','/api/register/check-username', { username })
+          return self.req('POST','/api/register/set-username', { username })
         },
         submit(username,email,password,modules){
           return self.req('POST','/api/register/submit', { username, email, password, modules })
@@ -237,19 +238,17 @@ export class RawAPI extends EventEmitter {
       }
     }
   }
-  auth(email,password){
+  async auth(email,password){
     if(!this.opts.email && !this.opts.password){
       Object.assign(this.opts,{ email, password })
     }
-    return this.raw.auth.signin(email,password)
-      .then(res=>{
-        this.emit('token',res.token)
-        this.emit('auth')
-        this.__authed = true
-        return res
-      })
+    let res = await this.raw.auth.signin(email,password)
+    this.emit('token',res.token)
+    this.emit('auth')
+    this.__authed = true
+    return res
   }
-  req(method,path,body={}){
+  async req(method,path,body={}) {
     let opts = { 
       method,
       headers: {
@@ -258,53 +257,47 @@ export class RawAPI extends EventEmitter {
       },
     }
     let url = URL.resolve(this.opts.url,path)
-    if(method == 'GET'){
+    if(method == 'GET') {
       url += '?' + querystring.stringify(body)
     }
     if(method == 'POST'){
       opts.headers['content-type'] = 'application/json'
       opts.body = JSON.stringify(body)
     }
-    return fetch(url,opts)
-      .then(res=>{
-        if(res.status == 401){
-          if(this.__authed){
-            this.__authed = false
-            return this.auth(this.opts.email,this.opts.password)
-              .then(()=>this.req(method,path,body))
-          }else{
-            return Promise.reject(new Error('Not Authorized'))
-          }
-        }
-        let token = res.headers.get('x-token')
-        if(token){
-          this.emit('token',token)
-        }
-        this.emit('response',res)
-        if(!res.ok)
-          return res.text().then(d=>Promise.reject(d))
-        return res
-      })
-      .then(res=>res.json())
-      .then(res=>{
-        if(typeof res.data == 'string' && res.data.slice(0,3) == 'gz:')
-        {
-          if(this.opts.url.match(/screeps\.com/))
-            res.data = gz(res.data)
-          else
-            res.data = inflate(res.data)
-        }
-        return res
-      })      
+    let res = await fetch(url,opts)
+    if(res.status == 401){
+      if(this.__authed){
+        this.__authed = false
+        await this.auth(this.opts.email,this.opts.password)
+      }else{
+        throw new Error('Not Authorized')
+      }
+    }
+    let token = res.headers.get('x-token')
+    if(token){
+      this.emit('token',token)
+    }
+    this.emit('response',res)
+    if (!res.ok){
+      throw new Error(await res.text())
+    }
+    res = await res.json()
+    if (typeof res.data == 'string' && res.data.slice(0,3) == 'gz:') {
+      if(this.opts.url.match(/screeps\.com/))
+        res.data = await this.gz(res.data)
+      else
+        res.data = await this.inflate(res.data)
+    }
+    return res
   }
-  gz(data) {
+  async gz(data) {
     let buf = new Buffer(data.slice(3), 'base64')
-    let ret = zlib.gunzipSync(buf).toString()
-    return JSON.parse(ret)
+    let ret = await zlib.gunzipAsync(buf)
+    return JSON.parse(ret.toString())
   }
-  inflate(data) {
+  async inflate(data) {
     let buf = new Buffer(data.slice(3), 'base64')
-    let ret = zlib.inflateSync(buf).toString()
-    return JSON.parse(ret)
+    let ret = await zlib.inflateAsync(buf)
+    return JSON.parse(ret.toString())
   }
 }

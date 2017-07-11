@@ -2,4 +2,4 @@
 node_modules
 auth.js
 dist
-build
+npm-debug.log

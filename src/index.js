@@ -1,1 +1,1 @@
-module.exports = require('./ScreepsAPI.js')
+export * from './ScreepsAPI.js'

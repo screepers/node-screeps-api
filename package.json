@@ -3,16 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "repository": "screepers/node-screeps-api",
-  "main": "index.js",
-  "module":"src/node.js",
+  "main": "dist/ScreepsAPI.cjs.js",
+  "module": "dist/ScreepsAPI.es.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "gulp",
+    "build": "rollup -c",
     "prepublish": "npm run build"
   },
   "author": "Adam Shumann",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.5.0",
     "bufferutil": "^3.0.0",
     "colors": "^1.1.2",
     "fetch-ponyfill": "^4.0.0",
@@ -21,13 +22,18 @@
     "ws": "^1.1.1"
   },
   "devDependencies": {
-    "babel-preset-es2015": "^6.14.0",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-es2015": "^6.24.1",
     "browserify": "^14.1.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^2.1.2",
+    "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-commonjs": "^8.0.2",
+    "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-resolve": "^3.0.0",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"

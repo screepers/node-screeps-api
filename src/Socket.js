@@ -9,19 +9,17 @@ export class Socket extends EventEmitter {
     this.__queue = []
     this.__subQueue = []
   }
-  connect(){
+  async connect(){
     return new Promise((resolve,reject)=>{
       if(!this.api.token){
         reject(new Error('No token! Call api.auth() before connecting the socket!'))
       }
       let baseURL = this.api.opts.url.replace('http','ws')
       let wsurl = url.resolve(baseURL,'socket/websocket')
-      // console.log(baseURL,wsurl)
       this.ws = new WebSocket(wsurl)
-      this.ws.on('open',()=>{
-        resolve()
+      this.ws.on('open',async ()=>{
         this.connected = true
-        this.auth(this.api.token)        
+        await resolve(this.auth(this.api.token))
         this.emit('connected')
         while(this.__queue.length)
           this.emit(this.__queue.shift())
@@ -37,7 +35,6 @@ export class Socket extends EventEmitter {
   }
   handleMessage(msg){
     msg = msg.data || msg // Handle ws/browser difference
-    // console.log(msg)
     if(msg.slice(0, 3) == 'gz:')
       msg = inflate(msg)
     if(msg[0] == '['){
@@ -59,16 +56,15 @@ export class Socket extends EventEmitter {
       this.emit('message', event)
     }
   }
-  gzip(bool){
+  async gzip(bool){
     this.send(`gzip ${bool?'on':'off'}`)
-    return Promise.resolve()
   }
-  send(data){
+  async send(data){
     if(!this.connected){
       this.__queue.push(data)
-      return Promise.resolve()
+    }else{
+      this.ws.send(data)      
     }
-    return this.ws.send(data)
   }
   auth(token){
     return new Promise((resolve,reject)=>{
@@ -87,10 +83,10 @@ export class Socket extends EventEmitter {
       })
     })
   }
-  subscribe(path,cb){
-    if(!this.api.user)
-      return this.api.me().then(()=>this.subscribe(path,cb))
-    if(!path) return Promise.resolve()
+  async subscribe(path,cb){
+    if (!path) return
+    if (!this.api.user)
+      await this.api.me()
     if (!path.match(/^([a-z]+):(.+?)$/))
       path = `user:${this.api.user._id}/${path}`
     if(this.authed){
@@ -100,19 +96,17 @@ export class Socket extends EventEmitter {
     }
     this.emit('subscribe',path)
     if(cb) this.on(path,cb)
-    return Promise.resolve()
   }
-  unsubscribe(path){
-    if(!this.api.user)
-      return this.api.me().then(()=>this.unsubscribe(path))
-    if(!path) return Promise.resolve()
+  async unsubscribe(path){
+    if (!path) return
+    if (!this.api.user)
+      await this.api.me()
     if (!path.match(/^([a-z]+):(.+?)$/))
       path = `user:${this.api.user._id}/${path}`
     this.send(`unsubscribe ${path}`)
     this.emit('unsubscribe',path)
-    return Promise.resolve()
   }
-  reconnect(){
+  async reconnect(){
     return this.connect()
   }
 }

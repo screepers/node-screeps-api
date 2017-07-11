@@ -1,4 +1,4 @@
-import format from 'url'
+import { format } from 'url'
 import { EventEmitter } from 'events'
 import { Socket } from './Socket'
 import { RawAPI } from './RawAPI'
@@ -27,11 +27,9 @@ export class ScreepsAPI extends RawAPI {
     if((this.opts.username || this.opts.email) && this.opts.password)
       this.auth(this.opts.username || this.opts.email,this.opts.password)
   }
-  me(){
-    return this.raw.auth.me().then(user=>{
-      this.user = user
-      return user
-    })
+  async me(){
+    this.user = await this.raw.auth.me()
+    return this.user
   }
   get history(){      return this.raw.history     }
   get authmod(){      return this.raw.authmod     }

@@ -1,5 +1,5 @@
 'use strict'
-const ScreepsAPI = require('../src/API')
+const { ScreepsAPI } = require('../')
 const auth = require('../auth')
 const WebSocket = require('ws')
 
@@ -7,7 +7,6 @@ let api = new ScreepsAPI()
 
 Promise.resolve()
   .then(()=>api.auth(auth.email,auth.password))
-  .then(()=>api.me())
   .then(()=>api.socket.connect())
   .then(()=>{
     api.socket.subscribe('console')
