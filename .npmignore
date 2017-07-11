@@ -1,4 +1,5 @@
-src
+*.sublime-*
 node_modules
 auth.js
-*.sublime-*
+src
+dist
