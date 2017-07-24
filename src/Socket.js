@@ -17,44 +17,52 @@ export class Socket extends EventEmitter {
     this.__subs = {}
     this.opts = Object.assign({},DEFAULTS)
     this.keepAliveInter = 0
+    this.on('auth', ev => {
+      if (ev.data.status === 'ok') {
+        while (this.__queue.length){
+          this.emit(this.__queue.shift())
+        }
+        clearInterval(this.keepAliveInter)
+        if (this.opts.keepAlive){
+          this.keepAliveInter = setInterval(() => this.ws && this.ws.ping(1), 10000)
+        }
+      }
+    })
   }
-  async connect(opts={}){
-    Object.assign(this.opts,opts)
-    return new Promise((resolve,reject)=>{
-      if(!this.api.token){
+  async connect(opts = {}) {
+    Object.assign(this.opts, opts)
+    return new Promise((resolve, reject) => {
+      if (!this.api.token) {
         reject(new Error('No token! Call api.auth() before connecting the socket!'))
       }
-      let baseURL = this.api.opts.url.replace('http','ws')
-      let wsurl = url.resolve(baseURL,'socket/websocket')
+      let baseURL = this.api.opts.url.replace('http', 'ws')
+      let wsurl = url.resolve(baseURL, 'socket/websocket')
       this.ws = new WebSocket(wsurl)
-      this.ws.on('open',async ()=>{
+      this.ws.on('open', () => {
         this.connected = true
-        if(this.opts.resubscribe)
-          this._subQueue.push(...Object.keys(this.__subs))
-        await resolve(this.auth(this.api.token))
+        if (this.opts.resubscribe) {
+          this.__subQueue.push(...Object.keys(this.__subs))
+        }
         this.emit('connected')
-        while(this.__queue.length)
-          this.emit(this.__queue.shift())
-        clearInterval(this.keepAliveInter)
-        if(this.opts.keepAlive) 
-          this.keepAliveInter = setInterval(()=>this.ws && this.ws.ping(1),10000)
+        resolve(this.auth(this.api.token))
       })
-      this.ws.on('close',()=>{
+      this.ws.on('close', () => {
         clearInterval(this.keepAliveInter)
         this.authed = false
         this.connected = false
         this.emit('disconnected')
-        if(this.opts.reconnect)
+        if (this.opts.reconnect) {
           this.connect()
-        else
+        } else {
           this.removeAllListeners()
+        }
       })
-      this.ws.on('message',(data)=>this.handleMessage(data))
+      this.ws.on('message', (data) => this.handleMessage(data))
     })
   }
-  reconnect(){
-    Object.keys(this.__subs).forEach(sub=>this.subscribe(sub))    
-    return this.connect(opts)
+  reconnect () {
+    Object.keys(this.__subs).forEach(sub => this.subscribe(sub))
+    return this.connect()
   }
   handleMessage(msg){
     msg = msg.data || msg // Handle ws/browser difference
@@ -89,19 +97,21 @@ export class Socket extends EventEmitter {
       this.ws.send(data)      
     }
   }
-  auth(token){
-    return new Promise((resolve,reject)=>{
+  auth (token) {
+    return new Promise((resolve, reject) => {
       this.send(`auth ${token}`)
-      this.once('auth',(ev)=>{
+      this.once('auth', (ev) => {
         let { data } = ev
-        if(data.status == 'ok'){
+        if (data.status === 'ok') {
           this.authed = true
-          this.emit('token',data.token)
-          while(this.__subQueue.length)
+          this.emit('token', data.token)
+          this.emit('authed')
+          while (this.__subQueue.length) {
             this.send(this.__subQueue.shift())
+          }
           resolve()
-        }else{
-          reject('socket auth failed')
+        } else {
+          reject(new Error('socket auth failed'))
         }
       })
     })
