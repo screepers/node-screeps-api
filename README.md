@@ -48,20 +48,20 @@ api.socket.connect()
 // {
 //   channel: 'room',
 //   id: 'E3N3', // Only on certain events
-//   data: { ... }	
+//   data: { ... }
 // }
 api.socket.on('connected',()=>{
 	// Do stuff after conntected
 })
 api.socket.on('auth',(event)=>{
-	event.data.status contains either 'ok' or 'failed'	
+	event.data.status contains either 'ok' or 'failed'
 	// Do stuff after auth
 })
 
 // Events: (Not a complete list)
 // connected disconnected message auth time protocol package subscribe unsubscribe console
 
-// Subscribtions can be queued even before the socket connects or auths, 
+// Subscribtions can be queued even before the socket connects or auths,
 // although you may want to subscribe from the connected or auth callback to better handle reconnects
 
 api.socket.subscribe('console')
@@ -88,3 +88,10 @@ api.socket.subscribe('memory/rooms.E0N0',(event)=>{
 	console.log('E0N0 Memory',event.data)
 })
 ```
+
+## Endpoint documentation
+
+Server endpoints are listed in the `docs` folder:
+ * [Endpoints.md](/blob/master/docs/Endpoints.md) for direct access
+ * [Websocket_endpoints.md](/blob/master/docs/Websocket_endpoints.md) for web socket endpoints
+Those lists are currently not exhaustive.
