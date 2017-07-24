@@ -92,6 +92,6 @@ api.socket.subscribe('memory/rooms.E0N0',(event)=>{
 ## Endpoint documentation
 
 Server endpoints are listed in the `docs` folder:
- * [Endpoints.md](/blob/master/docs/Endpoints.md) for direct access
- * [Websocket_endpoints.md](/blob/master/docs/Websocket_endpoints.md) for web socket endpoints
+ * [Endpoints.md](/docs/Endpoints.md) for direct access
+ * [Websocket_endpoints.md](/docs/Websocket_endpoints.md) for web socket endpoints
 Those lists are currently not exhaustive.
