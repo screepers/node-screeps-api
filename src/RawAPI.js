@@ -1,3 +1,4 @@
+import { format } from 'url'
 import Promise from 'bluebird'
 import URL from 'url'
 import querystring from 'querystring'
@@ -10,7 +11,7 @@ import fetch from 'node-fetch'
 export class RawAPI extends EventEmitter {
   constructor(opts={}){
     super()
-    this.opts = opts
+    this.setServer(opts)
     let self = this
     this.raw = {
       version(){
@@ -37,13 +38,13 @@ export class RawAPI extends EventEmitter {
         },
       },
       register: {
-        checkEmail(email){ 
+        checkEmail(email){
           return self.req('GET','/api/register/check-email', { email })
         },
-        checkUsername(username){ 
+        checkUsername(username){
           return self.req('GET','/api/register/check-username', { username })
         },
-        setUsername(username){ 
+        setUsername(username){
           return self.req('POST','/api/register/set-username', { username })
         },
         submit(username,email,password,modules){
@@ -98,7 +99,7 @@ export class RawAPI extends EventEmitter {
         addObjectIntent(room,name,intent){
           return self.req('POST','/api/game/add-object-intent', { room, name, intent })
         },
-        createConstruction(room,x,y,structureType,name){ 
+        createConstruction(room,x,y,structureType,name){
           return self.req('POST','/api/game/create-construction', { room, x, y, structureType, name })
         },
         setNotifyWhenAttacked(_id, enabled=true){
@@ -120,11 +121,11 @@ export class RawAPI extends EventEmitter {
           return self.req('GET','/api/game/room-terrain', { room, encoded })
         },
         roomStatus(room){
-          return self.req('GET','/api/game/room-status', { room })      
+          return self.req('GET','/api/game/room-status', { room })
         },
         roomOverview(room,interval=8){
           return self.req('GET','/api/game/room-overview', { room, interval })
-        },        
+        },
         market: {
           ordersIndex(){
             return self.req('GET','/api/game/market/orders-index')
@@ -155,7 +156,7 @@ export class RawAPI extends EventEmitter {
         badge(badge){
           return self.req('POST','/api/user/badge', { badge })
         },
-        respawn(){ 
+        respawn(){
           return self.req('POST','/api/user/respawn')
         },
         setActiveBranch(branch,activeName){
@@ -214,10 +215,10 @@ export class RawAPI extends EventEmitter {
             },
           }
         },
-        find(username){          
+        find(username){
           return self.req('GET','/api/user/find', { username })
         },
-        findById(id){          
+        findById(id){
           return self.req('GET','/api/user/find', { id })
         },
         stats(interval){
@@ -238,8 +239,19 @@ export class RawAPI extends EventEmitter {
       }
     }
   }
-  async auth(email,password){
-    if(!this.opts.email && !this.opts.password){
+  setServer(opts){
+    if(!this.opts) {
+      this.opts = {}
+    }
+    Object.assign(this.opts,opts)
+    if(!opts.url){
+      this.opts.pathname = this.opts.pathname || this.opts.path
+      this.opts.url = format(this.opts)
+    }
+  }
+  async auth(email,password,opts={}){
+    this.setServer(opts)
+    if(email && password){
       Object.assign(this.opts,{ email, password })
     }
     let res = await this.raw.auth.signin(email,password)
@@ -249,7 +261,7 @@ export class RawAPI extends EventEmitter {
     return res
   }
   async req(method,path,body={}) {
-    let opts = { 
+    let opts = {
       method,
       headers: {
         'X-Token':this.token,

@@ -1,11 +1,9 @@
-import { format } from 'url'
-import { EventEmitter } from 'events'
 import { Socket } from './Socket'
 import { RawAPI } from './RawAPI'
 
 const DEFAULTS = {
   protocol: 'https',
-  host: 'screeps.com',
+  hostname: 'screeps.com',
   port: 443,
   path: '/'
 }
@@ -13,12 +11,7 @@ const DEFAULTS = {
 export class ScreepsAPI extends RawAPI {
   constructor(opts){
     opts = Object.assign({},DEFAULTS,opts)
-    if(!opts.url){
-      opts.pathname = opts.pathname || opts.path
-      opts.url = format(opts)
-    }
     super(opts)
-    this.opts = opts
     this.on('token',(token)=>{
       this.token = token
       this.raw.token = token
