@@ -16,12 +16,18 @@ const api = new ScreepsAPI({
   email: 'screeps@email.com',
   password: 'notMyPass',
   protocol: 'https',
-  host: 'screeps.com',
+  hostname: 'screeps.com',
   port: 443,
   path: '/' // Do no include '/api', it will be added automatically
 });
 
-api.auth('screeps@email.com','notMyPass')
+// You can overwrite parameters if needed
+api.auth('screeps@email.com','notMyPass',{
+  protocol: 'https',
+  hostname: 'screeps.com',
+  port: 443,
+  path: '/' // Do no include '/api', it will be added automatically
+})
 
 // Dump Memory
 api.memory.get()
