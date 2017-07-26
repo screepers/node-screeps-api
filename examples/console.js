@@ -3,7 +3,6 @@ const { ScreepsAPI } = require('../')
 // const auth = require('../auth')
 const readline = require('readline')
 const util = require('util')
-const colors = require('colors')
 
 const rl = readline.createInterface({
   input: process.stdin,
