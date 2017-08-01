@@ -18,6 +18,7 @@ const api = new ScreepsAPI({
   protocol: 'https',
   hostname: 'screeps.com',
   port: 443,
+  ptr: false,
   path: '/' // Do no include '/api', it will be added automatically
 });
 
@@ -26,6 +27,7 @@ api.auth('screeps@email.com','notMyPass',{
   protocol: 'https',
   hostname: 'screeps.com',
   port: 443,
+  ptr: false,
   path: '/' // Do no include '/api', it will be added automatically
 })
 
