@@ -189,7 +189,7 @@ export class RawAPI extends EventEmitter {
         },
         code: {
           get(branch){
-            return self.req('GET',`${self.opts.apiPath}/api/user/code`, { branch })
+            return self.req('GET',`${self.opts.apiPath}/user/code`, { branch })
           },
           set(branch,modules,_hash){
             if(!_hash) _hash = Date.now()
