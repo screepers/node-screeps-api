@@ -18,7 +18,7 @@ export class RawAPI extends EventEmitter {
         return self.req('GET','/api/version')
       },
       authmod(){
-        if(this.opts.url.match(/screeps\.com/))
+        if(self.opts.url.match(/screeps\.com/))
           return Promise.resolve({ name: 'official' })
         return self.req('GET','/authmod')
       },
