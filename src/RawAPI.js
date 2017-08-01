@@ -193,7 +193,7 @@ export class RawAPI extends EventEmitter {
           },
           set(branch,modules,_hash){
             if(!_hash) _hash = Date.now()
-            else return self.req('POST',`${self.opts.apiPath}/user/code`, { branch, modules, _hash })
+            return self.req('POST',`${self.opts.apiPath}/user/code`, { branch, modules, _hash })
           }
         },
         respawnProhibitedRooms(){
