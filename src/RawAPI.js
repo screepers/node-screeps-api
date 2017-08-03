@@ -204,18 +204,18 @@ export class RawAPI extends EventEmitter {
           return self.req('GET', '/api/user/respawn-prohibited-rooms')
         },
         memory: {
-          get (path) {
-            return self.req('GET', '/api/user/memory', { path })
+          get (path, shard = DEFAULT_SHARD) {
+            return self.req('GET', '/api/user/memory', { path, shard })
           },
-          set (path, value) {
-            return self.req('POST', '/api/user/memory', { path, value })
+          set (path, value, shard = DEFAULT_SHARD) {
+            return self.req('POST', '/api/user/memory', { path, value, shard })
           },
           segment: {
-            get (segment) {
-              return self.req('GET', '/api/user/memory-segment', { segment })
+            get (segment, shard = DEFAULT_SHARD) {
+              return self.req('GET', '/api/user/memory-segment', { segment, shard })
             },
-            set (segment, data) {
-              return self.req('POST', '/api/user/memory-segment', { segment, data })
+            set (segment, data, shard = DEFAULT_SHARD) {
+              return self.req('POST', '/api/user/memory-segment', { segment, data, shard })
             }
           }
         },
