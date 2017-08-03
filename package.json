@@ -1,6 +1,6 @@
 {
   "name": "screeps-api",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "repository": "screepers/node-screeps-api",
   "main": "dist/ScreepsAPI.cjs.js",
@@ -22,16 +22,16 @@
     "ws": "^3.0.0"
   },
   "devDependencies": {
-    "publish": "^0.6.0",
-    "standard": "*",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-async-to-generator": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "babel-preset-es2015": "^6.24.1",
+    "publish": "^0.6.0",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-resolve": "^3.0.0"
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "standard": "*"
   },
   "browser": {
     "ws": "./src/ws-browser.js"
