@@ -9,27 +9,27 @@ const DEFAULTS = {
 }
 
 export class Socket extends EventEmitter {
-  constructor(ScreepsAPI){
+  constructor (ScreepsAPI) {
     super()
     this.api = ScreepsAPI
     this.__queue = []
     this.__subQueue = []
     this.__subs = {}
-    this.opts = Object.assign({},DEFAULTS)
+    this.opts = Object.assign({}, DEFAULTS)
     this.keepAliveInter = 0
     this.on('auth', ev => {
       if (ev.data.status === 'ok') {
-        while (this.__queue.length){
+        while (this.__queue.length) {
           this.emit(this.__queue.shift())
         }
         clearInterval(this.keepAliveInter)
-        if (this.opts.keepAlive){
+        if (this.opts.keepAlive) {
           this.keepAliveInter = setInterval(() => this.ws && this.ws.ping(1), 10000)
         }
       }
     })
   }
-  async connect(opts = {}) {
+  async connect (opts = {}) {
     Object.assign(this.opts, opts)
     return new Promise((resolve, reject) => {
       if (!this.api.token) {
@@ -64,37 +64,34 @@ export class Socket extends EventEmitter {
     Object.keys(this.__subs).forEach(sub => this.subscribe(sub))
     return this.connect()
   }
-  handleMessage(msg){
+  handleMessage (msg) {
     msg = msg.data || msg // Handle ws/browser difference
-    if(msg.slice(0, 3) == 'gz:')
-      msg = inflate(msg)
-    if(msg[0] == '['){
+    if (msg.slice(0, 3) === 'gz:') { msg = this.api.inflate(msg) }
+    if (msg[0] === '[') {
       msg = JSON.parse(msg)
-      let [,type,id,channel] = msg[0].match(/^(.+):(.+?)(?:\/(.+))?$/)
+      let [, type, id, channel] = msg[0].match(/^(.+):(.+?)(?:\/(.+))?$/)
       channel = channel || type
       let event = { channel, id, type, data: msg[1] }
-      this.emit(msg[0],event)
-      this.emit(event.channel,event)
+      this.emit(msg[0], event)
+      this.emit(event.channel, event)
       this.emit('message', event)
-    }else{
-      let [channel,...data] = msg.split(' ')
+    } else {
+      let [channel, ...data] = msg.split(' ')
       let event = { type: 'server', channel, data }
-      if(channel == 'auth')
-        event.data = { status: data[0], token: data[1] }
-      if(['protocol','time','package'].includes(channel))
-        event.data = { [channel]: data[0] }
+      if (channel === 'auth') { event.data = { status: data[0], token: data[1] } }
+      if (['protocol', 'time', 'package'].includes(channel)) { event.data = { [channel]: data[0] } }
       this.emit(channel, event)
       this.emit('message', event)
     }
   }
-  async gzip(bool){
-    this.send(`gzip ${bool?'on':'off'}`)
+  async gzip (bool) {
+    this.send(`gzip ${bool ? 'on' : 'off'}`)
   }
-  async send(data){
-    if(!this.connected){
+  async send (data) {
+    if (!this.connected) {
       this.__queue.push(data)
-    }else{
-      this.ws.send(data)      
+    } else {
+      this.ws.send(data)
     }
   }
   auth (token) {
@@ -116,34 +113,26 @@ export class Socket extends EventEmitter {
       })
     })
   }
-  async subscribe(path,cb){
+  async subscribe (path, cb) {
     if (!path) return
-    if (!this.api.user)
-      await this.api.me()
-    if (!path.match(/^([a-z]+):(.+?)$/))
-      path = `user:${this.api.user._id}/${path}`
-    if(this.authed){
+    if (!this.api.user) { await this.api.me() }
+    if (!path.match(/^([a-z]+):(.+?)$/)) { path = `user:${this.api.user._id}/${path}` }
+    if (this.authed) {
       this.send(`subscribe ${path}`)
-    }else{
+    } else {
       this.__subQueue.push(`subscribe ${path}`)
     }
-    this.emit('subscribe',path)
+    this.emit('subscribe', path)
     this.__subs[path] = this.__subs[path] || 0
     this.__subs[path]++
-    if(cb) this.on(path,cb)
+    if (cb) this.on(path, cb)
   }
-  async unsubscribe(path){
+  async unsubscribe (path) {
     if (!path) return
-    if (!this.api.user)
-      await this.api.me()
-    if (!path.match(/^([a-z]+):(.+?)$/))
-      path = `user:${this.api.user._id}/${path}`
+    if (!this.api.user) { await this.api.me() }
+    if (!path.match(/^([a-z]+):(.+?)$/)) { path = `user:${this.api.user._id}/${path}` }
     this.send(`unsubscribe ${path}`)
-    this.emit('unsubscribe',path)
-    if(this.__subs[path]) this.__subs[path]--
-  }
-  async reconnect(){
-    return this.connect()
+    this.emit('unsubscribe', path)
+    if (this.__subs[path]) this.__subs[path]--
   }
 }
-

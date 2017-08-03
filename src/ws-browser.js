@@ -1,17 +1,17 @@
-export import WebSocket from 'ws'
+let WebSocket = module.exports = window.WebSocket || require('ws')
 
 WebSocket.prototype.on = function (event, callback) {
-  this.addEventListener(event, callback);
-};
+  this.addEventListener(event, callback)
+}
 
 WebSocket.prototype.off = function (event, callback) {
-  this.removeEventListener(event, callback);
-};
+  this.removeEventListener(event, callback)
+}
 
 WebSocket.prototype.once = function (event, callback) {
-  var self = this;
-  this.addEventListener(event, function handler() {
-    callback.apply(callback, arguments);
-    self.removeEventListener(event, handler);
-  });
-};
+  var self = this
+  this.addEventListener(event, function handler () {
+    callback.apply(callback, arguments)
+    self.removeEventListener(event, handler)
+  })
+}

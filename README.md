@@ -1,7 +1,12 @@
 # Screeps API
+
+## This is a nodejs API for the game Screeps
+
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![CircleCI](https://circleci.com/gh/screepers/node-screeps-api/tree/master.svg?style=shield)](https://circleci.com/gh/screepers/node-screeps-api/tree/master)
+
 ![npm](https://nodei.co/npm/screeps-api.png "NPM")
 
-This is a nodejs API for the game Screeps
 
 ## Basic usage
 

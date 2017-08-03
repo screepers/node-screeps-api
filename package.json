@@ -6,9 +6,10 @@
   "main": "dist/ScreepsAPI.cjs.js",
   "module": "dist/ScreepsAPI.es.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "standard",
+    "2npm": "publish"
   },
   "author": "Adam Shumann",
   "license": "ISC",
@@ -21,6 +22,8 @@
     "ws": "^3.0.0"
   },
   "devDependencies": {
+    "publish": "^0.6.0",
+    "standard": "*",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-async-to-generator": "^6.24.1",
     "babel-preset-env": "^1.6.0",

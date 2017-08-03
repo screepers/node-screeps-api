@@ -4,6 +4,10 @@ Currently known endpoints are listed below.
  * This list is clearly not exhaustive and comes from empirical observations.
  * If you want to add more data, feel free to make a pull request.
 
+## Shards
+
+Any subscription taking a room name is different on servers with shards,
+the room name should be prefixed with the shard name ex `shard0/E0N0`
 
 ## Subscribing to web sockets endpoints
 
