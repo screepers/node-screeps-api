@@ -12,7 +12,6 @@ const DEFAULTS = {
 export class Socket extends EventEmitter {
   constructor (ScreepsAPI) {
     super()
-    this.tries = 0
     this.api = ScreepsAPI
     this.__queue = []
     this.__subQueue = []
@@ -75,18 +74,29 @@ export class Socket extends EventEmitter {
   }
   async reconnect () {
     Object.keys(this.__subs).forEach(sub => this.subscribe(sub))
-    this.tries++
-    try {
-      await this.connect()
-      this.tries = 0
-    } catch (err) {
-      if (this.tries >= this.opts.maxTries) {
-        let err = new Error(`Too many connection failures ${this.tries}`)
-        this.emit('error', err)
-        throw err
+    let retries = 0
+    let retry
+    do {
+      let time = Math.pow(2, retries++) * 100
+      await this.sleep(time)
+      try {
+        await this.connect()
+        retry = false
+      } catch (err) {
+        retry = true
       }
-      return this.reconnect()
+      retries++
+    } while (retry && retries < this.maxRetries)
+    if (retry) {
+      let err = new Error(`Too many connection failures ${this.maxRetries}`)
+      this.emit('error', err)
+      throw err
     }
+  }
+  sleep (time) {
+    return new Promise((resolve,reject) => {
+      setTimeout(resolve, time)
+    })
   }
   handleMessage (msg) {
     msg = msg.data || msg // Handle ws/browser difference
