@@ -77,7 +77,7 @@ export class Socket extends EventEmitter {
     let retries = 0
     let retry
     do {
-      let time = Math.pow(2, retries++) * 100
+      let time = Math.pow(2, retries) * 100
       await this.sleep(time)
       try {
         await this.connect()
@@ -94,7 +94,7 @@ export class Socket extends EventEmitter {
     }
   }
   sleep (time) {
-    return new Promise((resolve,reject) => {
+    return new Promise((resolve, reject) => {
       setTimeout(resolve, time)
     })
   }
