@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rollup -c",
     "prepublish": "npm run build",
-    "test": "standard",
+    "test": "standard src",
     "2npm": "publish"
   },
   "author": "Adam Shumann",

@@ -61,10 +61,14 @@ export class Socket extends EventEmitter {
       })
       this.ws.on('error', (headers, res) => {
         this.ws.terminate()
-        reject(new Error(`WS Error: ${res.statusSode} ${res.statusMessage}`))
+        let err = new Error(`WS Error: ${res.statusSode} ${res.statusMessage}`)
+        this.emit('error', err)
+        reject(err)
       })
       this.ws.on('unexpected-response', (req, res) => {
-        reject(new Error(`WS Unexpected Response: ${res.statusSode} ${res.statusMessage}`))
+        let err = new Error(`WS Unexpected Response: ${res.statusSode} ${res.statusMessage}`)
+        this.emit('error', err)
+        reject(err)
       })
       this.ws.on('message', (data) => this.handleMessage(data))
     })
@@ -77,7 +81,9 @@ export class Socket extends EventEmitter {
       this.tries = 0
     } catch (err) {
       if (this.tries >= this.opts.maxTries) {
-        throw new Error(`Too many connection failures ${this.tries}`)
+        let err = new Error(`Too many connection failures ${this.tries}`)
+        this.emit('error', err)
+        throw err
       }
       return this.reconnect()
     }
