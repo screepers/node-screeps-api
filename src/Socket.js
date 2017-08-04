@@ -5,12 +5,14 @@ import { EventEmitter } from 'events'
 const DEFAULTS = {
   reconnect: true,
   resubscribe: true,
-  keepAlive: true
+  keepAlive: true,
+  maxTries: 5
 }
 
 export class Socket extends EventEmitter {
   constructor (ScreepsAPI) {
     super()
+    this.tries = 0
     this.api = ScreepsAPI
     this.__queue = []
     this.__subQueue = []
@@ -57,12 +59,28 @@ export class Socket extends EventEmitter {
           this.removeAllListeners()
         }
       })
+      this.ws.on('error', (headers, res) => {
+        this.ws.terminate()
+        reject(new Error(`WS Error: ${res.statusSode} ${res.statusMessage}`))
+      })
+      this.ws.on('unexpected-response', (req, res) => {
+        reject(new Error(`WS Unexpected Response: ${res.statusSode} ${res.statusMessage}`))
+      })
       this.ws.on('message', (data) => this.handleMessage(data))
     })
   }
-  reconnect () {
+  async reconnect () {
     Object.keys(this.__subs).forEach(sub => this.subscribe(sub))
-    return this.connect()
+    this.tries++
+    try {
+      await this.connect()
+      this.tries = 0
+    } catch (err) {
+      if (this.tries >= this.opts.maxTries) {
+        throw new Error(`Too many connection failures ${this.tries}`)
+      }
+      return this.reconnect()
+    }
   }
   handleMessage (msg) {
     msg = msg.data || msg // Handle ws/browser difference
