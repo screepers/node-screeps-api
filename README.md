@@ -3,6 +3,9 @@
 ## This is a nodejs API for the game Screeps
 
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![License](https://img.shields.io/npm/l/screeps-api.svg)](https://npmjs.com/package/screeps-api)
+[![Version](https://img.shields.io/npm/v/screeps-api.svg)](https://npmjs.com/package/screeps-api)
+[![Downloads](https://img.shields.io/npm/dw/screeps-api.svg)](https://npmjs.com/package/screeps-api)
 [![CircleCI](https://circleci.com/gh/screepers/node-screeps-api/tree/master.svg?style=shield)](https://circleci.com/gh/screepers/node-screeps-api/tree/master)
 
 ![npm](https://nodei.co/npm/screeps-api.png "NPM")
