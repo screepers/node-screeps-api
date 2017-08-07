@@ -53,7 +53,7 @@ export class Socket extends EventEmitter {
         this.connected = false
         this.emit('disconnected')
         if (this.opts.reconnect) {
-          this.connect()
+          this.reconnect()
         } else {
           this.removeAllListeners()
         }
