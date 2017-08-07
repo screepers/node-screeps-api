@@ -32,10 +32,10 @@ export class Socket extends EventEmitter {
   }
   async connect (opts = {}) {
     Object.assign(this.opts, opts)
+    if (!this.api.token) {
+      throw new Error('No token! Call api.auth() before connecting the socket!')
+    }
     return new Promise((resolve, reject) => {
-      if (!this.api.token) {
-        reject(new Error('No token! Call api.auth() before connecting the socket!'))
-      }
       let baseURL = this.api.opts.url.replace('http', 'ws')
       let wsurl = url.resolve(baseURL, 'socket/websocket')
       this.ws = new WebSocket(wsurl)
@@ -60,12 +60,14 @@ export class Socket extends EventEmitter {
       })
       this.ws.on('error', (headers, res) => {
         this.ws.terminate()
-        let err = new Error(`WS Error: ${res.statusSode} ${res.statusMessage}`)
+        let err = new Error(`WS Error: ${res.statusCode} ${res.statusMessage}`)
         this.emit('error', err)
-        reject(err)
+        if (!this.connected) {
+          reject(err)
+        }
       })
       this.ws.on('unexpected-response', (req, res) => {
-        let err = new Error(`WS Unexpected Response: ${res.statusSode} ${res.statusMessage}`)
+        let err = new Error(`WS Unexpected Response: ${res.statusCode} ${res.statusMessage}`)
         this.emit('error', err)
         reject(err)
       })
