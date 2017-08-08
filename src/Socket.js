@@ -18,6 +18,7 @@ export class Socket extends EventEmitter {
     this.__subs = {}
     this.opts = Object.assign({}, DEFAULTS)
     this.keepAliveInter = 0
+    this.on('error', () => {}) // catch to prevent unhandled-exception errors
     this.on('auth', ev => {
       if (ev.data.status === 'ok') {
         while (this.__queue.length) {
@@ -58,9 +59,8 @@ export class Socket extends EventEmitter {
           this.removeAllListeners()
         }
       })
-      this.ws.on('error', (headers, res) => {
+      this.ws.on('error', (err) => {
         this.ws.terminate()
-        let err = new Error(`WS Error: ${res.statusCode} ${res.statusMessage}`)
         this.emit('error', err)
         if (!this.connected) {
           reject(err)
