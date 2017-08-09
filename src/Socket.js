@@ -54,10 +54,7 @@ export class Socket extends EventEmitter {
         this.connected = false
         this.emit('disconnected')
         if (this.opts.reconnect) {
-          this.reconnect().catch(() => {
-            let err = new Error(`Auto-reconnect failed after ${this.maxRetries} retries`)
-            this.emit('error', err)
-          });
+          this.reconnect().catch(() => { /* error emitted in reconnect() */ });
         } else {
           this.removeAllListeners()
         }
@@ -93,7 +90,7 @@ export class Socket extends EventEmitter {
       retries++
     } while (retry && retries < this.maxRetries)
     if (retry) {
-      let err = new Error(`Too many connection failures ${this.maxRetries}`)
+      let err = new Error(`Reconnection failed after ${this.maxRetries} retries`)
       this.emit('error', err)
       throw err
     }
