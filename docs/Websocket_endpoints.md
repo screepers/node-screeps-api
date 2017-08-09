@@ -159,7 +159,7 @@ visual   | Object | Room visuals (contents currently unknown #FIXME)
 
 ```javascript
 // Subscription
-api.socket.subscribe('room:W7N7', event => console.log(JSON.stringify(event.data)));
+api.socket.subscribe('room:shard0/W7N7', event => console.log(JSON.stringify(event.data)));
 ```
 ```javascript
 // First event results:
