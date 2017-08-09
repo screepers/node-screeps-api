@@ -6,7 +6,7 @@ const DEFAULTS = {
   reconnect: true,
   resubscribe: true,
   keepAlive: true,
-  maxTries: 5
+  maxRetries: 5
 }
 
 export class Socket extends EventEmitter {
