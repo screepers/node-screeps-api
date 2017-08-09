@@ -7,7 +7,9 @@ Currently known endpoints are listed below.
 ## Shards
 
 Any subscription taking a room name is different on servers with shards,
-the room name should be prefixed with the shard name ex `shard0/E0N0`
+the room name should be prefixed with the shard name ex `shard0/E0N0`.
+
+Note that adding a shard to a server not expecting it may cause an error.
 
 ## Subscribing to web sockets endpoints
 
@@ -159,7 +161,8 @@ visual   | Object | Room visuals (contents currently unknown #FIXME)
 
 ```javascript
 // Subscription
-api.socket.subscribe('room:shard0/W7N7', event => console.log(JSON.stringify(event.data)));
+api.socket.subscribe('room:W7N7', event => console.log(JSON.stringify(event.data))); // For non-sharded servers
+api.socket.subscribe('room:shard0/W7N7', event => console.log(JSON.stringify(event.data))); // For sharded servers
 ```
 ```javascript
 // First event results:
