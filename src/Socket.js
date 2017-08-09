@@ -54,7 +54,10 @@ export class Socket extends EventEmitter {
         this.connected = false
         this.emit('disconnected')
         if (this.opts.reconnect) {
-          this.reconnect()
+          this.reconnect().catch(() => {
+            let err = new Error(`Auto-reconnect failed after ${this.maxRetries} retries`)
+            this.emit('error', err)
+          });
         } else {
           this.removeAllListeners()
         }
