@@ -6,7 +6,7 @@ const DEFAULTS = {
   reconnect: true,
   resubscribe: true,
   keepAlive: true,
-  maxTries: 5
+  maxRetries: 5
 }
 
 export class Socket extends EventEmitter {
@@ -54,7 +54,7 @@ export class Socket extends EventEmitter {
         this.connected = false
         this.emit('disconnected')
         if (this.opts.reconnect) {
-          this.reconnect()
+          this.reconnect().catch(() => { /* error emitted in reconnect() */ });
         } else {
           this.removeAllListeners()
         }
@@ -90,7 +90,7 @@ export class Socket extends EventEmitter {
       retries++
     } while (retry && retries < this.maxRetries)
     if (retry) {
-      let err = new Error(`Too many connection failures ${this.maxRetries}`)
+      let err = new Error(`Reconnection failed after ${this.maxRetries} retries`)
       this.emit('error', err)
       throw err
     }
