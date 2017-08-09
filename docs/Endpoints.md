@@ -22,7 +22,7 @@ You can access the PTR by changing `screeps.com` to `screeps.com/ptr` in all URL
 When an endpoint takes `interval` or `statName` as an argument, the valid values
 are the ones listed below.
 
-- interval: 8, 180, 1440
+- interval: 8, 180, 1440 (8 for 1h, 180 for 24h and 1440 for 7 days)
 - statName: creepsLost, creepsProduced, energyConstruction, energyControl, energyCreeps, energyHarvested
 
 # Authentication
