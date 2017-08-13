@@ -49,6 +49,7 @@ export class Socket extends EventEmitter {
       this.ws = new WebSocket(wsurl)
       this.ws.on('open', () => {
         this.connected = true
+        this.reconnecting = false
         if (this.opts.resubscribe) {
           this.__subQueue.push(...Object.keys(this.__subs))
         }
