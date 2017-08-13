@@ -13,12 +13,9 @@ export class Socket extends EventEmitter {
   constructor (ScreepsAPI) {
     super()
     this.api = ScreepsAPI
-    this.__queue = []
-    this.__subQueue = []
-    this.__subs = {}
     this.opts = Object.assign({}, DEFAULTS)
-    this.keepAliveInter = 0
     this.on('error', () => {}) // catch to prevent unhandled-exception errors
+    this.reset()
     this.on('auth', ev => {
       if (ev.data.status === 'ok') {
         while (this.__queue.length) {
@@ -30,6 +27,16 @@ export class Socket extends EventEmitter {
         }
       }
     })
+  }
+  reset() {
+    this.authed = false
+    this.connected = false
+    this.reconnecting = false
+    this.keepAliveInter = 0
+    clearInterval(this.keepAliveInter)
+    this.__queue = []    // pending messages  (to send once authenticated)
+    this.__subQueue = [] // pending subscriptions (to request once authenticated)
+    this.__subs = {}     // number of callbacks for each subscription
   }
   async connect (opts = {}) {
     Object.assign(this.opts, opts)
@@ -81,6 +88,7 @@ export class Socket extends EventEmitter {
     do {
       let time = Math.pow(2, retries) * 100
       await this.sleep(time)
+      if (!this.reconnecting) return; // reset() called in-between
       try {
         await this.connect()
         retry = false
@@ -94,6 +102,13 @@ export class Socket extends EventEmitter {
       this.emit('error', err)
       throw err
     }
+  }
+  disconnect () {
+    clearInterval(this.keepAliveInter)
+    this.ws.removeAllListeners() // remove listeners first or we may trigger reconnection & Co.
+    this.ws.terminate()
+    this.reset()
+    this.emit('disconnected')
   }
   sleep (time) {
     return new Promise((resolve, reject) => {
