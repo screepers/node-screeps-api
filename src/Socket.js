@@ -32,8 +32,8 @@ export class Socket extends EventEmitter {
     this.authed = false
     this.connected = false
     this.reconnecting = false
-    this.keepAliveInter = 0
     clearInterval(this.keepAliveInter)
+    this.keepAliveInter = 0
     this.__queue = []    // pending messages  (to send once authenticated)
     this.__subQueue = [] // pending subscriptions (to request once authenticated)
     this.__subs = {}     // number of callbacks for each subscription
@@ -83,6 +83,7 @@ export class Socket extends EventEmitter {
   }
   async reconnect () {
     Object.keys(this.__subs).forEach(sub => this.subscribe(sub))
+    this.reconnecting = true
     let retries = 0
     let retry
     do {
