@@ -88,9 +88,9 @@ export class Socket extends EventEmitter {
         retry = true
       }
       retries++
-    } while (retry && retries < this.maxRetries)
+    } while (retry && retries < this.opts.maxRetries)
     if (retry) {
-      let err = new Error(`Reconnection failed after ${this.maxRetries} retries`)
+      let err = new Error(`Reconnection failed after ${this.opts.maxRetries} retries`)
       this.emit('error', err)
       throw err
     }
