@@ -101,6 +101,7 @@ export class Socket extends EventEmitter {
     } while (retry && retries < this.opts.maxRetries)
     if (retry) {
       let err = new Error(`Reconnection failed after ${this.opts.maxRetries} retries`)
+      this.reconnecting = false
       this.emit('error', err)
       throw err
     }
