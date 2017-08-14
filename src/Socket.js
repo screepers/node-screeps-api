@@ -63,8 +63,6 @@ export class Socket extends EventEmitter {
         this.emit('disconnected')
         if (this.opts.reconnect) {
           this.reconnect().catch(() => { /* error emitted in reconnect() */ });
-        } else {
-          this.removeAllListeners()
         }
       })
       this.ws.on('error', (err) => {
