@@ -6,7 +6,8 @@ const DEFAULTS = {
   reconnect: true,
   resubscribe: true,
   keepAlive: true,
-  maxRetries: 5
+  maxRetries: 10,
+  maxRetryDelay: 60 * 1000 // in milli-seconds
 }
 
 export class Socket extends EventEmitter {
@@ -87,6 +88,7 @@ export class Socket extends EventEmitter {
     let retry
     do {
       let time = Math.pow(2, retries) * 100
+      if(time > this.opts.maxRetryDelay) time = this.opts.maxRetryDelay
       await this.sleep(time)
       if (!this.reconnecting) return; // reset() called in-between
       try {
