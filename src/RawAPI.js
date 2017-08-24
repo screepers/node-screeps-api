@@ -261,8 +261,10 @@ export class RawAPI extends EventEmitter {
       this.opts = {}
     }
     Object.assign(this.opts, opts)
+    if (opts.path && !opts.pathname) {
+      this.opts.pathname = this.opts.path
+    }
     if (!opts.url) {
-      this.opts.pathname = this.opts.pathname || this.opts.path
       this.opts.url = format(this.opts)
     }
   }
