@@ -1,7 +1,7 @@
 const assert = require('assert');
 const _ = require('lodash');
 const { ScreepsAPI } = require('../');
-const auth = require('../auth')
+const auth = require('../credentials')
 
 describe('api.raw.leaderboard', function() {
 
