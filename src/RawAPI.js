@@ -24,7 +24,7 @@ export class RawAPI extends EventEmitter {
         if (self.opts.url.match(/screeps\.com/)) {
           return Promise.resolve({ name: 'official' })
         }
-        return self.req('GET', '/authmod')
+        return self.req('GET', '/api/authmod')
       },
       history (room, tick) {
         tick = Math.round(tick / 20) * 20
@@ -143,6 +143,11 @@ export class RawAPI extends EventEmitter {
           stats (resourceType, shard = DEFAULT_SHARD) {
             return self.req('GET', '/api/game/market/stats', { resourceType, shard })
           }
+        },
+        shards: {
+          info () {
+            return self.req('GET', '/api/game/shards/info')
+          }
         }
       },
       leaderboard: {
@@ -239,11 +244,6 @@ export class RawAPI extends EventEmitter {
         },
         console (expression, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/user/console', { expression, shard })
-        }
-      },
-      shards: {
-        info () {
-          return self.req('GET', '/api/shards/info')
         }
       }
     }
