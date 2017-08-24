@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/repo
     docker:
-      - image: circleci/node:6.11.1
+      - image: circleci/node:8
     steps:
       - checkout
       - restore_cache:
@@ -15,6 +15,9 @@ jobs:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
+      - run:
+          name: lint
+          command: yarn lint
       - run:
           name: test
           command: yarn test

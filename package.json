@@ -8,7 +8,8 @@
   "scripts": {
     "build": "rollup -c",
     "prepublish": "npm run build",
-    "test": "standard src",
+    "lint": "standard src",
+    "test": "mocha",
     "2npm": "publish"
   },
   "author": "Adam Shumann",
@@ -26,6 +27,8 @@
     "babel-plugin-transform-async-to-generator": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "babel-preset-es2015": "^6.24.1",
+    "lodash": "^4.17.4",
+    "mocha": "^3.5.0",
     "publish": "^0.6.0",
     "rollup": "^0.45.2",
     "rollup-plugin-babel": "^2.7.1",
