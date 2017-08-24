@@ -271,7 +271,7 @@ export class RawAPI extends EventEmitter {
     if (email && password) {
       Object.assign(this.opts, { email, password })
     }
-    let res = await this.raw.auth.signin(email, password)
+    let res = await this.raw.auth.signin(this.opts.email, this.opts.password)
     this.emit('token', res.token)
     this.emit('auth')
     this.__authed = true
