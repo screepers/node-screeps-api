@@ -57,19 +57,19 @@ export class RawAPI extends EventEmitter {
       },
       userMessages: {
         list (respondent) {
-          return self.req('GET', '/api/user-messages/list', { respondent })
+          return self.req('GET', '/api/user/messages/list', { respondent })
         },
         index () {
-          return self.req('GET', '/api/user-messages/index')
+          return self.req('GET', '/api/user/messages/index')
         },
         unreadCount () {
-          return self.req('GET', '/api/user-messages/unread-count')
+          return self.req('GET', '/api/user/messages/unread-count')
         },
         send (respondent, text) {
-          return self.req('POST', '/api/user-messages/send', { respondent, text })
+          return self.req('POST', '/api/user/messages/send', { respondent, text })
         },
         markRead (id) {
-          return self.req('POST', '/api/user-messages/mark-read', { id })
+          return self.req('POST', '/api/user/messages/mark-read', { id })
         }
       },
       game: {
