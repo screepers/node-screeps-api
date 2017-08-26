@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rollup -c",
     "prepublish": "npm run build",
-    "lint": "standard src",
+    "lint": "standard src test",
     "test": "mocha",
     "2npm": "publish"
   },

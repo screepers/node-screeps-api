@@ -9,7 +9,7 @@ describe('api.raw', function() {
 
   describe('.version()', function() {
     it('should call /api/version endpoint and return version information', async function() {
-      let opts = _.omit(auth, ['email', 'password'])
+      let opts = _.omit(auth, ['username', 'password'])
       let api = new ScreepsAPI(opts)
       let res = await api.raw.version()
       assert.equal(res.ok, 1, 'incorrect server response: ok should be 1')
@@ -24,7 +24,7 @@ describe('api.raw', function() {
 
   describe('.authmod()', function() {
     it('should return server name from /authmod for private servers with authmod', async function() {
-      let opts = _.omit(auth, ['email', 'password'])
+      let opts = _.omit(auth, ['username', 'password'])
       let api = new ScreepsAPI(opts)
       let res = await api.raw.authmod()
       if (api.opts.hostname === 'screeps.com') {
@@ -40,9 +40,9 @@ describe('api.raw', function() {
   // This API is broken in node-screeps-api
   describe.skip('.history(room, tick)', function() {
     it('should return room history as a json file', async function() {
-      let opts = _.omit(auth, ['email', 'password'])
+      let opts = _.omit(auth, ['username', 'password'])
       let api = new ScreepsAPI(opts)
-      await api.auth(auth.email, auth.password)
+      await api.auth(auth.username, auth.password)
       let res = await api.raw.history('W1N1',  858839)
       console.log(res)
     })
