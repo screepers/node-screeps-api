@@ -96,7 +96,26 @@ describe('api.raw.user', function() {
   })
 
   describe('.notifyPrefs (prefs)', function() {
-    it('should do untested things (for now)')
+    it('should send a request to /api/user/notify-prefs which sets user preferences',  async function() {
+      let opts = _.omit(auth, ['email', 'password'])
+      let api = new ScreepsAPI(opts)
+      await api.auth(auth.email, auth.password)
+      let defaults = { disabled: false, disabledOnMessages: false, sendOnline: true, interval: 5, errorsInterval: 30 }
+      // Save previous prefs
+      let res = await api.me()
+      let initialPrefs = _.merge(defaults, res.notifyPrefs)
+      // Set new preferences
+      let newPrefs = { disabled: true, disabledOnMessages: true, sendOnline: false, interval: 60, errorsInterval: 60 }
+      res = await api.raw.user.notifyPrefs(newPrefs)
+      assert.equal(res.ok, 1, 'incorrect server response: ok should be 1')
+      // Check that preferences were indeed changed
+      res = await api.me()
+      _.each(res.notifyPrefs, (value, key) => {
+        assert.equal(value, newPrefs[key], `preference ${key} is incorrect`)
+      })
+      // Reset preferences
+      res = await api.raw.user.notifyPrefs(initialPrefs)
+    })
   })
 
   describe('.tutorialDone ()', function() {
@@ -112,10 +131,6 @@ describe('api.raw.user', function() {
   })
 
   describe('.worldStatus ()', function() {
-    it('should do untested things (for now)')
-  })
-
-  describe('.branches ()', function() {
     it('should do untested things (for now)')
   })
 
