@@ -33,6 +33,17 @@ describe('api.raw.user', function() {
     it('should do untested things (for now)')
   })
 
+  describe('.branches ()', function() {
+    it('should send a request to /api/user/branches and return branches list',  async function() {
+      let opts = _.omit(auth, ['email', 'password'])
+      let api = new ScreepsAPI(opts)
+      await api.auth(auth.email, auth.password)
+      let res = await api.raw.user.branches()
+      assert.equal(res.ok, 1, 'incorrect server response: ok should be 1')
+      assert(res.list.length > 0, 'no branch found')
+    })
+  })
+
   describe('.cloneBranch (branch, newName, defaultModules)', function() {
     it('should send a request to /api/user/clone-branch in order to clone @branch into @newName',  async function() {
       let opts = _.omit(auth, ['email', 'password'])
@@ -45,17 +56,6 @@ describe('api.raw.user', function() {
       res = await api.raw.user.branches()
       let found = _.find(res.list, { branch: 'screeps-api-testing' })
       assert(found != null, 'branch was not cloned')
-    })
-  })
-
-  describe('.branches ()', function() {
-    it('should send a request to /api/user/branches and return branches list',  async function() {
-      let opts = _.omit(auth, ['email', 'password'])
-      let api = new ScreepsAPI(opts)
-      await api.auth(auth.email, auth.password)
-      let res = await api.raw.user.branches()
-      assert.equal(res.ok, 1, 'incorrect server response: ok should be 1')
-      assert(res.list.length > 0, 'no branch found')
     })
   })
 
