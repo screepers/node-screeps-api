@@ -8,7 +8,25 @@ describe('api.raw.user', function() {
   this.slow(2000);
 
   describe('.badge (badge)', function() {
-    it('should do untested things (for now)')
+    it('should send a request to /api/user/badge which sets user badge',  async function() {
+      let opts = _.omit(auth, ['email', 'password'])
+      let api = new ScreepsAPI(opts)
+      await api.auth(auth.email, auth.password)
+      // Save previous badge
+      let res = await api.me()
+      let initialBadge = res.badge
+      // Set new badge
+      let newBadge = { type: 16, color1: '#000000', color2: '#000000', color3:'#000000', param: 100, flip: false }
+      res = await api.raw.user.badge(newBadge)
+      assert.equal(res.ok, 1, 'incorrect server response: ok should be 1')
+      // Check that badge was effectively changed
+      res = await api.me()
+      _.each(res.badge, (value, key) => {
+        assert.equal(value, newBadge[key], `badge ${key} is incorrect`)
+      })
+      // Reset badge
+      res = await api.raw.user.badge(initialBadge)
+    })
   })
 
   describe('.respawn ()', function() {
