@@ -99,7 +99,8 @@ describe('api.raw.userMessages', function() {
     it('should do untested things (for now)')
   })
 
-  describe('.shards.info ()', function() {
+  // This endpoint is not implemented on S+
+  describe.skip('.shards.info ()', function() {
     it('should send a request to /api/shards/info and return shards informations', async function() {
       let opts = _.omit(auth, ['email', 'password'])
       let api = new ScreepsAPI(opts)

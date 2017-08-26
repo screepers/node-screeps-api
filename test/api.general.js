@@ -34,12 +34,12 @@ describe('ScreepsAPI', function() {
 
   describe('.me()', function() {
     it('should return user informations from `/api/auth/me` endpoint', async function() {
-      let opts = _.omit(auth, ['email', 'password'])
+      let opts = _.omit(auth, ['username', 'password'])
       let api = new ScreepsAPI(opts)
-      await api.auth(auth.email, auth.password)
+      await api.auth(auth.username, auth.password)
       let infos = await api.me()
       assert.equal(infos.ok, 1, 'incorrect server answer: ok should be 1')
-      assert.equal(infos.email, auth.email, 'invalid email in answer')
+      assert(_.has(infos, 'email'), 'answer has no email field')
       assert(_.has(infos, 'badge'), 'answer has no badge field')
       assert(_.has(infos, 'username'), 'answer has no username field')
     })
@@ -102,10 +102,10 @@ describe('ScreepsAPI', function() {
     })
     it('should authenticate and get token', async function() {
       let event = false;
-      let opts = _.omit(auth, ['email', 'password'])
+      let opts = _.omit(auth, ['username', 'password'])
       let api = new ScreepsAPI(opts)
       api.on('token', () => event = true)
-      await api.auth(auth.email, auth.password)
+      await api.auth(auth.username, auth.password)
       assert(event, 'token event was not emited')
       assert(_.has(api, 'token'), 'token was not saved')
       assert.equal(api.__authed, true, 'internal state has not changed (api.__authed)')
@@ -113,7 +113,7 @@ describe('ScreepsAPI', function() {
     it('should reject promise in case of error', async function() {
       try {
         let api = new ScreepsAPI()
-        await api.auth(auth.email, 'bad password')
+        await api.auth(auth.username, 'bad password')
       } catch (err) {
         assert(err.message.match(/Not authorized/i), 'wrong error message')
       }

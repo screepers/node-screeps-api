@@ -9,9 +9,9 @@ describe('api.raw.user', function() {
 
   describe('.badge (badge)', function() {
     it('should send a request to /api/user/badge which sets user badge',  async function() {
-      let opts = _.omit(auth, ['email', 'password'])
+      let opts = _.omit(auth, ['username', 'password'])
       let api = new ScreepsAPI(opts)
-      await api.auth(auth.email, auth.password)
+      await api.auth(auth.username, auth.password)
       // Save previous badge
       let res = await api.me()
       let initialBadge = res.badge
@@ -35,9 +35,9 @@ describe('api.raw.user', function() {
 
   describe('.branches ()', function() {
     it('should send a request to /api/user/branches and return branches list',  async function() {
-      let opts = _.omit(auth, ['email', 'password'])
+      let opts = _.omit(auth, ['username', 'password'])
       let api = new ScreepsAPI(opts)
-      await api.auth(auth.email, auth.password)
+      await api.auth(auth.username, auth.password)
       let res = await api.raw.user.branches()
       assert.equal(res.ok, 1, 'incorrect server response: ok should be 1')
       assert(res.list.length > 0, 'no branch found')
@@ -46,9 +46,9 @@ describe('api.raw.user', function() {
 
   describe('.cloneBranch (branch, newName, defaultModules)', function() {
     it('should send a request to /api/user/clone-branch in order to clone @branch into @newName',  async function() {
-      let opts = _.omit(auth, ['email', 'password'])
+      let opts = _.omit(auth, ['username', 'password'])
       let api = new ScreepsAPI(opts)
-      await api.auth(auth.email, auth.password)
+      await api.auth(auth.username, auth.password)
       // Create a new branch
       let res = await api.raw.user.cloneBranch('default', 'screeps-api-testing')
       assert.equal(res.ok, 1, 'incorrect server response: ok should be 1')
@@ -61,9 +61,9 @@ describe('api.raw.user', function() {
 
   describe('.setActiveBranch (branch, activeName)', function() {
     it('should send a request to /api/user/set-active-branch in order to define @branch as active',  async function() {
-      let opts = _.omit(auth, ['email', 'password'])
+      let opts = _.omit(auth, ['username', 'password'])
       let api = new ScreepsAPI(opts)
-      await api.auth(auth.email, auth.password)
+      await api.auth(auth.username, auth.password)
       // Find current active branch for simulator
       let res = await api.raw.user.branches()
       let initialBranch = _.find(res.list, { activeSim: true })
@@ -82,9 +82,9 @@ describe('api.raw.user', function() {
 
   describe('.deleteBranch (branch)', function() {
     it('should send a request to /api/user/delete-branch in order to delete @branch',  async function() {
-      let opts = _.omit(auth, ['email', 'password'])
+      let opts = _.omit(auth, ['username', 'password'])
       let api = new ScreepsAPI(opts)
-      await api.auth(auth.email, auth.password)
+      await api.auth(auth.username, auth.password)
       // Delete 'screeps-api-testing' branch
       let res = await api.raw.user.deleteBranch('screeps-api-testing')
       assert.equal(res.ok, 1, 'incorrect server response: ok should be 1')
@@ -97,9 +97,9 @@ describe('api.raw.user', function() {
 
   describe('.notifyPrefs (prefs)', function() {
     it('should send a request to /api/user/notify-prefs which sets user preferences',  async function() {
-      let opts = _.omit(auth, ['email', 'password'])
+      let opts = _.omit(auth, ['username', 'password'])
       let api = new ScreepsAPI(opts)
-      await api.auth(auth.email, auth.password)
+      await api.auth(auth.username, auth.password)
       let defaults = { disabled: false, disabledOnMessages: false, sendOnline: true, interval: 5, errorsInterval: 30 }
       // Save previous prefs
       let res = await api.me()
