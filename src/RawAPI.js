@@ -10,6 +10,8 @@ const { format } = URL
 Promise.promisifyAll(zlib)
 
 const DEFAULT_SHARD = 'shard0'
+const OFFICIAL_HISTORY_INTERVAL = 100
+const PRIVATE_HISTORY_INTERVAL = 20
 
 export class RawAPI extends EventEmitter {
   constructor (opts = {}) {
@@ -21,14 +23,19 @@ export class RawAPI extends EventEmitter {
         return self.req('GET', '/api/version')
       },
       authmod () {
-        if (self.opts.url.match(/screeps\.com/)) {
+        if (self.isOfficialServer()) {
           return Promise.resolve({ name: 'official' })
         }
         return self.req('GET', '/api/authmod')
       },
-      history (room, tick) {
-        tick = Math.round(tick / 20) * 20
-        return self.req('GET', `/room-history/${room}/${tick}.json`)
+      history (room, tick, shard = DEFAULT_SHARD) {
+        if (self.isOfficialServer()) {
+          tick -= tick % OFFICIAL_HISTORY_INTERVAL
+          return self.req('GET', `/room-history/${shard}/${room}/${tick}.json`)
+        } else {
+          tick -= tick % PRIVATE_HISTORY_INTERVAL
+          return self.req('GET', `/room-history?room=${room}&tick=${tick}.json`)
+        }
       },
       auth: {
         signin (email, password) {
@@ -247,6 +254,9 @@ export class RawAPI extends EventEmitter {
         }
       }
     }
+  }
+  isOfficialServer () {
+    return this.opts.url.match(/screeps\.com/) !== null
   }
   mapToShard (res) {
     if (!res.shards) {
