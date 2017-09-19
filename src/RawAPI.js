@@ -324,7 +324,7 @@ export class RawAPI extends EventEmitter {
     }
     res = await res.json()
     if (typeof res.data === 'string' && res.data.slice(0, 3) === 'gz:') {
-      if (this.opts.url.match(/screeps\.com/)) { res.data = await this.gz(res.data) } else { res.data = await this.inflate(res.data) }
+      res.data = await this.gz(res.data)
     }
     return res
   }

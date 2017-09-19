@@ -12,15 +12,15 @@ export default {
     ws: 'WebSocket',
     'node-fetch': 'fetch'
   },
-  external: ['ws','node-fetch'],
+  external: ['ws', 'node-fetch'],
   moduleName: 'ScreepsAPI',
-  targets:[
+  targets: [
     { dest: 'dist/ScreepsAPI.iife.js', format: 'iife' },
     { dest: 'dist/ScreepsAPI.umd.js', format: 'umd' },
     { dest: 'dist/ScreepsAPI.cjs.js', format: 'cjs' },
-    { dest: 'dist/ScreepsAPI.es.js', format: 'es' },
+    { dest: 'dist/ScreepsAPI.es.js', format: 'es' }
   ],
-  plugins:[
+  plugins: [
     builtins(),
     commonjs(),
     resolve({
