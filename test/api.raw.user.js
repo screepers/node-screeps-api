@@ -136,6 +136,16 @@ describe('api.raw.user', function() {
 
   describe('.code.get (branch)', function() {
     it('should do untested things (for now)')
+    it('should send a GET request to /api/user/code and return user code from specified branch.', async function() {
+      let opts = _.omit(auth, ['username', 'password'])
+      let api = new ScreepsAPI(opts)
+      await api.auth(auth.username, auth.password)
+      let res = await api.raw.user.code.get('default')
+      assert.equal(res.ok, 1, 'incorrect server response: ok should be 1')
+      assert(_.has(res, 'modules'), 'response has no modules field')
+      assert(_.has(res, 'branch'), 'response has no branch field')
+      assert.equal(res.branch, 'default', 'branch is incorrect')
+    })
   })
 
   describe('.code.set (branch, modules, _hash)', function() {
