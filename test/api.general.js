@@ -125,6 +125,26 @@ describe('ScreepsAPI', function() {
     it('can send GET and POST requests')
     it('should throw an error in case of 401 and if not authenticated')
     it('should read, save and emit authentication token if any')
+    it('should use opts.path correctly (ie: for PTR)', async function() {
+      // This test must be run against official server (the only one to use PTR)
+      let opts = {
+        protocol: 'https',
+        hostname: 'screeps.com',
+        port:     443,
+      }
+      // Get official server time
+      let api1 = new ScreepsAPI(opts)
+      let res1 = await api1.raw.game.time()
+      let time1 = res1.time
+      // Get PTR time
+      opts.path = '/ptr'
+      let api2 = new ScreepsAPI(opts)
+      let res2 = await api2.raw.game.time()
+      let time2 = res2.time
+      // Compare them
+      console.log(time1, time2)
+      assert.notEqual(time1, time2, 'time for official and PTR should be different')
+    })
     it('should throw an error if response.ok !== 1')
   })
 
