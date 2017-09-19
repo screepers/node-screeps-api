@@ -276,6 +276,7 @@ export class RawAPI extends EventEmitter {
     }
     if (!opts.url) {
       this.opts.url = format(this.opts)
+      if (!this.opts.url.endsWith('/')) this.opts.url += '/'
     }
   }
   async auth (email, password, opts = {}) {
@@ -297,6 +298,7 @@ export class RawAPI extends EventEmitter {
         'X-Username': this.token
       }
     }
+    if (path.startsWith('/')) path = path.substring(1)
     let url = URL.resolve(this.opts.url, path)
     if (method === 'GET') {
       url += '?' + querystring.stringify(body)
@@ -305,7 +307,7 @@ export class RawAPI extends EventEmitter {
       opts.headers['content-type'] = 'application/json'
       opts.body = JSON.stringify(body)
     }
-    let res = await fetch(url, opts)
+    let res = await fetch(url.toString(), opts)
     if (res.status === 401) {
       if (this.__authed) {
         this.__authed = false
