@@ -307,7 +307,7 @@ export class RawAPI extends EventEmitter {
       opts.headers['content-type'] = 'application/json'
       opts.body = JSON.stringify(body)
     }
-    let res = await fetch(url.toString(), opts)
+    let res = await fetch(url, opts)
     if (res.status === 401) {
       if (this.__authed) {
         this.__authed = false
