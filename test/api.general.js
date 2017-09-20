@@ -142,7 +142,6 @@ describe('ScreepsAPI', function() {
       let res2 = await api2.raw.game.time()
       let time2 = res2.time
       // Compare them
-      console.log(time1, time2)
       assert.notEqual(time1, time2, 'time for official and PTR should be different')
     })
     it('should throw an error if response.ok !== 1')
