@@ -6,6 +6,7 @@ const auth = require('./credentials')
 describe('api.raw.register', function() {
 
   this.slow(2000);
+  this.timeout(5000);
 
   describe('.checkEmail (email)', function() {
     it('should do untested things (for now)')

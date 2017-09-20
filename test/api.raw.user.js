@@ -6,6 +6,7 @@ const auth = require('./credentials')
 describe('api.raw.user', function() {
 
   this.slow(3000);
+  this.timeout(5000);
 
   describe('.badge (badge)', function() {
     it('should send a request to /api/user/badge which sets user badge',  async function() {

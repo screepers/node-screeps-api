@@ -6,6 +6,7 @@ const auth = require('./credentials')
 describe('api.raw', function() {
 
   this.slow(2000);
+  this.timeout(5000);
 
   describe('.version()', function() {
     it('should call /api/version endpoint and return version information', async function() {
