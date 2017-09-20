@@ -6,6 +6,7 @@ const auth = require('./credentials')
 describe('api.raw.auth', function() {
 
   this.slow(2000);
+  this.timeout(5000);
 
   describe('.signin (email, password)', function() {
     it('should send a POST request to /api/auth/signin and authenticate', async function() {

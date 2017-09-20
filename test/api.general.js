@@ -6,6 +6,7 @@ const auth = require('./credentials')
 describe('ScreepsAPI', function() {
 
   this.slow(2000);
+  this.timeout(5000);
 
   describe('.constructor()', function() {
     it('should save passed options', function() {

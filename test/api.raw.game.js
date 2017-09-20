@@ -6,6 +6,7 @@ const auth = require('./credentials')
 describe('api.raw.userMessages', function() {
 
   this.slow(2000);
+  this.timeout(5000);
 
   describe('.mapStats (rooms, statName, shard = DEFAULT_SHARD)', function() {
     it('should do untested things (for now)')
