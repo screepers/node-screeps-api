@@ -158,8 +158,10 @@ export class RawAPI extends EventEmitter {
         }
       },
       leaderboard: {
-        list () {
-          return self.req('GET', '/api/leaderboard/list')
+        list (limit = 10, mode = 'world', offset = 0, season) {
+          if (mode !== 'world' && mode !== 'power') throw new Error('incorrect mode parameter')
+          if (!season) season = self.currentSeason()
+          return self.req('GET', '/api/leaderboard/list', { limit, mode, offset, season })
         },
         find (username, mode = 'world', season = '') {
           return self.req('GET', '/api/leaderboard/find', { season, mode, username })
@@ -254,6 +256,13 @@ export class RawAPI extends EventEmitter {
         }
       }
     }
+  }
+  currentSeason () {
+      let now = new Date()
+      let year = now.getFullYear()
+      let month = (now.getUTCMonth() + 1).toString()
+      if (month.length === 1) month = `0${month}`
+      return `${year}-${month}`
   }
   isOfficialServer () {
     return this.opts.url.match(/screeps\.com/) !== null
