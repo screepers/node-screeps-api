@@ -37,7 +37,7 @@ api.auth('screeps@email.com','notMyPass',{
   path: '/' // Do no include '/api', it will be added automatically
 })
 
-// If you wan to point to the screeps PTR (Public Test Realm),
+// If you want to point to the screeps PTR (Public Test Realm),
 // you can set the 'path' option to '/ptr' and it will work fine.
 
 // Dump Memory
