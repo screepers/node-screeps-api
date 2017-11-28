@@ -34,7 +34,7 @@ export class RawAPI extends EventEmitter {
           return self.req('GET', `/room-history/${shard}/${room}/${tick}.json`)
         } else {
           tick -= tick % PRIVATE_HISTORY_INTERVAL
-          return self.req('GET', `/room-history?room=${room}&tick=${tick}.json`)
+          return self.req('GET', `/room-history?room=${room}&tick=${tick}`)
         }
       },
       auth: {
@@ -258,11 +258,11 @@ export class RawAPI extends EventEmitter {
     }
   }
   currentSeason () {
-      let now = new Date()
-      let year = now.getFullYear()
-      let month = (now.getUTCMonth() + 1).toString()
-      if (month.length === 1) month = `0${month}`
-      return `${year}-${month}`
+    let now = new Date()
+    let year = now.getFullYear()
+    let month = (now.getUTCMonth() + 1).toString()
+    if (month.length === 1) month = `0${month}`
+    return `${year}-${month}`
   }
   isOfficialServer () {
     return this.opts.url.match(/screeps\.com/) !== null
