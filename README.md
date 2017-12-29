@@ -10,6 +10,11 @@
 
 ![npm](https://nodei.co/npm/screeps-api.png "NPM")
 
+## Notice on authentication
+
+As of 12/29/2017 Screeps now uses auth tokens obtained via your screeps account settings. 
+User/pass auth will stop working February 1, 2018!
+[http://blog.screeps.com/2017/12/auth-tokens/](Screeps Announcement)
 
 ## Basic usage
 
@@ -21,8 +26,7 @@ const fs = require('fs');
 
 // All options are optional
 const api = new ScreepsAPI({
-  email: 'screeps@email.com',
-  password: 'notMyPass',
+  token: 'Your Token from Account/Auth Tokens'
   protocol: 'https',
   hostname: 'screeps.com',
   port: 443,

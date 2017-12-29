@@ -34,7 +34,7 @@ export class RawAPI extends EventEmitter {
           return self.req('GET', `/room-history/${shard}/${room}/${tick}.json`)
         } else {
           tick -= tick % PRIVATE_HISTORY_INTERVAL
-          return self.req('GET', `/room-history?room=${room}&tick=${tick}`)
+          return self.req('GET', `/room-history?room=${room}&time=${tick}`)
         }
       },
       auth: {
