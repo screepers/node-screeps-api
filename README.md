@@ -14,7 +14,7 @@
 
 As of 12/29/2017 Screeps now uses auth tokens obtained via your screeps account settings. 
 User/pass auth will stop working February 1, 2018!
-[http://blog.screeps.com/2017/12/auth-tokens/](Screeps Announcement)
+[Screeps Announcement](http://blog.screeps.com/2017/12/auth-tokens/)
 
 ## Basic usage
 
