@@ -287,6 +287,9 @@ export class RawAPI extends EventEmitter {
       this.opts.url = format(this.opts)
       if (!this.opts.url.endsWith('/')) this.opts.url += '/'
     }
+    if (opts.token) {
+      this.token = opts.token;
+    }
   }
   async auth (email, password, opts = {}) {
     this.setServer(opts)
