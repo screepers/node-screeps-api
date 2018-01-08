@@ -16,7 +16,6 @@ export class ScreepsAPI extends RawAPI {
       this.token = token
       this.raw.token = token
     })
-    if (opts.token) this.token = opts.token
     this.socket = new Socket(this)
     if ((this.opts.username || this.opts.email) && this.opts.password) { this.auth(this.opts.username || this.opts.email, this.opts.password) }
   }
