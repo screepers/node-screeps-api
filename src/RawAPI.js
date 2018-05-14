@@ -254,6 +254,14 @@ export class RawAPI extends EventEmitter {
         console (expression, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/user/console', { expression, shard })
         }
+      },
+      experimental: {
+        pvp (interval = 100) {
+          return self.req('GET', '/api/experimental/pvp', { interval }).then(self.mapToShard)
+        },
+        nukes () {
+          return self.req('GET', '/api/experimental/nukes').then(self.mapToShard)
+        }
       }
     }
   }
