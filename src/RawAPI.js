@@ -142,7 +142,7 @@ export class RawAPI extends EventEmitter {
             return self.req('GET', '/api/game/market/orders-index', { shard })
           },
           myOrders () {
-            return self.req('GET', '/api/game/market/my-orders').then(this.mapToShard)
+            return self.req('GET', '/api/game/market/my-orders').then(self.mapToShard)
           },
           orders (resourceType, shard = DEFAULT_SHARD) {
             return self.req('GET', '/api/game/market/orders', { resourceType, shard })
@@ -243,7 +243,7 @@ export class RawAPI extends EventEmitter {
           return self.req('GET', '/api/user/stats', { interval })
         },
         rooms (id) {
-          return self.req('GET', '/api/user/rooms', { id }).then(this.mapToShard)
+          return self.req('GET', '/api/user/rooms', { id }).then(self.mapToShard)
         },
         overview (interval, statName) {
           return self.req('GET', '/api/user/overview', { interval, statName })
@@ -270,7 +270,7 @@ export class RawAPI extends EventEmitter {
   mapToShard (res) {
     if (!res.shards) {
       res.shards = {
-        [DEFAULT_SHARD]: res.list || res.rooms
+        privSrv: res.list || res.rooms
       }
     }
     return res
@@ -288,7 +288,7 @@ export class RawAPI extends EventEmitter {
       if (!this.opts.url.endsWith('/')) this.opts.url += '/'
     }
     if (opts.token) {
-      this.token = opts.token;
+      this.token = opts.token
     }
   }
   async auth (email, password, opts = {}) {
