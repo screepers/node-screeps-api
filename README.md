@@ -24,6 +24,13 @@ As of 1.0, all functions return Promises
 const { ScreepsAPI } = require('screeps-api');
 const fs = require('fs');
 
+// Supports @tedivm's [Unified Credentials File format](https://github.com/screepers/screepers-standards/blob/34bd4e6e5c8250fa0794d915d9f78d3c45326076/SS3-Unified_Credentials_File.md) (Pending [screepers-standard PR #8](https://github.com/screepers/screepers-standards/pull/8))
+const api = ScreepsAPI.fromConfig('main', 'appName')
+// This loads the server config 'main' and the configs section 'appName' if it exists
+// config section can be accessed like this:
+// If making a CLI app, its suggested to have a `--server` argument for selection
+console.log(api.appConfig.myConfigVar)
+
 // All options are optional
 const api = new ScreepsAPI({
   token: 'Your Token from Account/Auth Tokens'

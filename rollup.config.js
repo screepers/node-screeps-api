@@ -12,7 +12,7 @@ export default {
     ws: 'WebSocket',
     'node-fetch': 'fetch'
   },
-  external: ['ws', 'node-fetch'],
+  external: ['ws', 'fs', 'node-fetch'],
   moduleName: 'ScreepsAPI',
   targets: [
     { dest: 'dist/ScreepsAPI.iife.js', format: 'iife' },
