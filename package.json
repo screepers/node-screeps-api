@@ -14,7 +14,11 @@
   },
   "author": "Adam Shumann",
   "license": "ISC",
+  "bin": {
+    "screeps-api": "bin/screeps-api"
+  },
   "dependencies": {
+    "commander": "^2.15.1",
     "bluebird": "^3.5.0",
     "fetch-ponyfill": "^6.0.2",
     "node-fetch": "^2.1.2",
