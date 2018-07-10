@@ -18,11 +18,12 @@ User/pass auth will stop working February 1, 2018!
 
 ## CLI Usage
 
-As of 1.7.0, a small CLI program is included. 
+As of 1.7.0, a small CLI program (`screeps-api`) is included. 
 
 Server config is specified via a `.screeps.yml` file conforming to the [Unified Credentials File format](https://github.com/screepers/screepers-standards/blob/34bd4e6e5c8250fa0794d915d9f78d3c45326076/SS3-Unified_Credentials_File.md) (Pending [screepers-standard PR #8](https://github.com/screepers/screepers-standards/pull/8))
 
 ```
+screeps-api
 
   Usage:  [options] [command]
 
