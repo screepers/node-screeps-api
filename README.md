@@ -16,7 +16,34 @@ As of 12/29/2017 Screeps now uses auth tokens obtained via your screeps account 
 User/pass auth will stop working February 1, 2018!
 [Screeps Announcement](http://blog.screeps.com/2017/12/auth-tokens/)
 
-## Basic usage
+## CLI Usage
+
+As of 1.7.0, a small CLI program is included. 
+
+Server config is specified via a `.screeps.yml` file conforming to the [Unified Credentials File format](https://github.com/screepers/screepers-standards/blob/34bd4e6e5c8250fa0794d915d9f78d3c45326076/SS3-Unified_Credentials_File.md) (Pending [screepers-standard PR #8](https://github.com/screepers/screepers-standards/pull/8))
+
+```
+
+  Usage:  [options] [command]
+
+  Options:
+
+    -V, --version                output the version number
+    --server <server>            Server config to use (default: main)
+    -h, --help                   output usage information
+
+  Commands:
+
+    raw <cmd> [args...]          Execute raw API call
+    memory [options] [path]      Get Memory contents
+    segment [options] <segment>  Get segment contents. Use 'all' to get all)
+    download [options]           Download code
+    upload [options] <files...>  Upload code
+
+```
+
+
+## API Usage
 
 As of 1.0, all functions return Promises
 
