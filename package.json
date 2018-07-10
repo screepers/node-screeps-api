@@ -15,7 +15,7 @@
   "author": "Adam Shumann",
   "license": "ISC",
   "bin": {
-    "screeps-api": "bin/screeps-api"
+    "screeps-api": "bin/screeps-api.js"
   },
   "dependencies": {
     "commander": "^2.15.1",
