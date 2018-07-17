@@ -151,22 +151,22 @@ async function run () {
     .action(async function (files, opts) {
       try {
         const api = await init(opts)
-        const files = {}
+        const modules = {}
         const ps = []
-        for (const file in opts.files) {
-          ps.push(async (file) => {
+        for (const file of files) {
+          ps.push((async (file) => {
             const { name, ext } = path.parse(file)
             const data = await readFile(file)
             if (ext === '.js') {
-              files[name] = data.toString('utf8')
+              modules[name] = data.toString('utf8')
             }
             if (ext === '.wasm') {
-              files[name] = { binary: data.toString('base64') }
+              modules[name] = { binary: data.toString('base64') }
             }
-          })
+          })(file))
         }
         await Promise.all(ps)
-        out(api.code.set(opts.branch, files))
+        out(api.code.set(opts.branch, modules))
       } catch (e) {
         console.error(e)
       }
