@@ -29,15 +29,15 @@ export class Socket extends EventEmitter {
       }
     })
   }
-  reset() {
+  reset () {
     this.authed = false
     this.connected = false
     this.reconnecting = false
     clearInterval(this.keepAliveInter)
     this.keepAliveInter = 0
-    this.__queue = []    // pending messages  (to send once authenticated)
+    this.__queue = [] // pending messages  (to send once authenticated)
     this.__subQueue = [] // pending subscriptions (to request once authenticated)
-    this.__subs = {}     // number of callbacks for each subscription
+    this.__subs = {} // number of callbacks for each subscription
   }
   async connect (opts = {}) {
     Object.assign(this.opts, opts)
@@ -63,7 +63,7 @@ export class Socket extends EventEmitter {
         this.connected = false
         this.emit('disconnected')
         if (this.opts.reconnect) {
-          this.reconnect().catch(() => { /* error emitted in reconnect() */ });
+          this.reconnect().catch(() => { /* error emitted in reconnect() */ })
         }
       })
       this.ws.on('error', (err) => {
@@ -88,9 +88,9 @@ export class Socket extends EventEmitter {
     let retry
     do {
       let time = Math.pow(2, retries) * 100
-      if(time > this.opts.maxRetryDelay) time = this.opts.maxRetryDelay
+      if (time > this.opts.maxRetryDelay) time = this.opts.maxRetryDelay
       await this.sleep(time)
-      if (!this.reconnecting) return; // reset() called in-between
+      if (!this.reconnecting) return // reset() called in-between
       try {
         await this.connect()
         retry = false
@@ -170,7 +170,7 @@ export class Socket extends EventEmitter {
   async subscribe (path, cb) {
     if (!path) return
     if (!this.api.user) { await this.api.me() }
-    if (!path.match(/^([a-z]+):(.+?)$/)) { path = `user:${this.api.user._id}/${path}` }
+    if (!path.match(/^(\w+):(.+?)$/)) { path = `user:${this.api.user._id}/${path}` }
     if (this.authed) {
       this.send(`subscribe ${path}`)
     } else {
@@ -184,7 +184,7 @@ export class Socket extends EventEmitter {
   async unsubscribe (path) {
     if (!path) return
     if (!this.api.user) { await this.api.me() }
-    if (!path.match(/^([a-z]+):(.+?)$/)) { path = `user:${this.api.user._id}/${path}` }
+    if (!path.match(/^(\w+):(.+?)$/)) { path = `user:${this.api.user._id}/${path}` }
     this.send(`unsubscribe ${path}`)
     this.emit('unsubscribe', path)
     if (this.__subs[path]) this.__subs[path]--

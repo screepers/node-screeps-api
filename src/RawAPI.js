@@ -1,9 +1,8 @@
 import Promise from 'bluebird'
 import URL from 'url'
-import querystring from 'querystring'
 import { EventEmitter } from 'events'
 import zlib from 'zlib'
-import fetch from 'node-fetch'
+import axios from 'axios'
 
 const { format } = URL
 
@@ -17,7 +16,7 @@ export class RawAPI extends EventEmitter {
   constructor (opts = {}) {
     super()
     this.setServer(opts)
-    let self = this
+    const self = this
     this.raw = {
       version () {
         return self.req('GET', '/api/version')
@@ -34,7 +33,7 @@ export class RawAPI extends EventEmitter {
           return self.req('GET', `/room-history/${shard}/${room}/${tick}.json`)
         } else {
           tick -= tick % PRIVATE_HISTORY_INTERVAL
-          return self.req('GET', `/room-history?room=${room}&time=${tick}`)
+          return self.req('GET', `/room-history`, { room, time: tick })
         }
       },
       auth: {
@@ -266,8 +265,8 @@ export class RawAPI extends EventEmitter {
     }
   }
   currentSeason () {
-    let now = new Date()
-    let year = now.getFullYear()
+    const now = new Date()
+    const year = now.getFullYear()
     let month = (now.getUTCMonth() + 1).toString()
     if (month.length === 1) month = `0${month}`
     return `${year}-${month}`
@@ -298,66 +297,71 @@ export class RawAPI extends EventEmitter {
     if (opts.token) {
       this.token = opts.token
     }
+    this.http = axios.create({
+      baseURL: this.opts.url
+    })
   }
   async auth (email, password, opts = {}) {
     this.setServer(opts)
     if (email && password) {
       Object.assign(this.opts, { email, password })
     }
-    let res = await this.raw.auth.signin(this.opts.email, this.opts.password)
+    const res = await this.raw.auth.signin(this.opts.email, this.opts.password)
     this.emit('token', res.token)
     this.emit('auth')
     this.__authed = true
     return res
   }
   async req (method, path, body = {}) {
-    let opts = {
+    const opts = {
       method,
-      headers: {
+      url: path,
+      headers: {}
+    }
+    if (this.token) {
+      Object.assign(opts.headers, {
         'X-Token': this.token,
         'X-Username': this.token
-      }
+      })
     }
-    if (path.startsWith('/')) path = path.substring(1)
-    let url = URL.resolve(this.opts.url, path)
     if (method === 'GET') {
-      url += '?' + querystring.stringify(body)
+      opts.params = body
+    } else {
+      opts.data = body
     }
-    if (method === 'POST') {
-      opts.headers['content-type'] = 'application/json'
-      opts.body = JSON.stringify(body)
-    }
-    let res = await fetch(url, opts)
-    if (res.status === 401) {
-      if (this.__authed) {
-        this.__authed = false
-        await this.auth(this.opts.email, this.opts.password)
-      } else {
-        throw new Error('Not Authorized')
+    try {
+      const res = await this.http(opts)
+      const token = res.headers['x-token']
+      if (token) {
+        this.emit('token', token)
       }
+      if (typeof res.data === 'string' && res.data.slice(0, 3) === 'gz:') {
+        res.data = await this.gz(res.data)
+      }
+      this.emit('response', res)
+      return res.data
+    } catch (err) {
+      const res = err.response || {}
+      if (res.status === 401) {
+        if (this.__authed && this.opts.email && this.opts.password) {
+          this.__authed = false
+          await this.auth(this.opts.email, this.opts.password)
+          return this.req(method, path, body)
+        } else {
+          throw new Error('Not Authorized')
+        }
+      }
+      throw new Error(res.data)
     }
-    let token = res.headers.get('x-token')
-    if (token) {
-      this.emit('token', token)
-    }
-    this.emit('response', res)
-    if (!res.ok) {
-      throw new Error(await res.text())
-    }
-    res = await res.json()
-    if (typeof res.data === 'string' && res.data.slice(0, 3) === 'gz:') {
-      res.data = await this.gz(res.data)
-    }
-    return res
   }
   async gz (data) {
-    let buf = Buffer.from(data.slice(3), 'base64')
-    let ret = await zlib.gunzipAsync(buf)
+    const buf = Buffer.from(data.slice(3), 'base64')
+    const ret = await zlib.gunzipAsync(buf)
     return JSON.parse(ret.toString())
   }
   async inflate (data) { // es
-    let buf = Buffer.from(data.slice(3), 'base64')
-    let ret = await zlib.inflateAsync(buf)
+    const buf = Buffer.from(data.slice(3), 'base64')
+    const ret = await zlib.inflateAsync(buf)
     return JSON.parse(ret.toString())
   }
 }
