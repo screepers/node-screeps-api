@@ -36,6 +36,11 @@ export class RawAPI extends EventEmitter {
           return self.req('GET', `/room-history`, { room, time: tick })
         }
       },
+      servers: {
+        list () {
+          return self.req('POST', '/api/servers.list', {})
+        }
+      },
       auth: {
         signin (email, password) {
           return self.req('POST', '/api/auth/signin', { email, password })
