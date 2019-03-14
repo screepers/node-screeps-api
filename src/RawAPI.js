@@ -3,6 +3,10 @@ import URL from 'url'
 import { EventEmitter } from 'events'
 import zlib from 'zlib'
 import axios from 'axios'
+import Debug from 'debug'
+
+const debugHttp = Debug('screepsapi:http')
+const debugRateLimit = Debug('screepsapi:ratelimit')
 
 const { format } = URL
 
@@ -323,6 +327,7 @@ export class RawAPI extends EventEmitter {
       url: path,
       headers: {}
     }
+    debugHttp(`${method} ${path} ${JSON.stringify(body)}`)
     if (this.token) {
       Object.assign(opts.headers, {
         'X-Token': this.token,
@@ -340,6 +345,9 @@ export class RawAPI extends EventEmitter {
       if (token) {
         this.emit('token', token)
       }
+      const rateLimit = this.buildRateLimit(method, path, res)
+      this.emit('rateLimit', rateLimit)
+      debugRateLimit(`${method} ${path} ${rateLimit.remaining}/${rateLimit.limit} ${rateLimit.toReset}s`)
       if (typeof res.data === 'string' && res.data.slice(0, 3) === 'gz:') {
         res.data = await this.gz(res.data)
       }
@@ -347,6 +355,9 @@ export class RawAPI extends EventEmitter {
       return res.data
     } catch (err) {
       const res = err.response || {}
+      const rateLimit = this.buildRateLimit(method, path, res)
+      this.emit('rateLimit', rateLimit)
+      debugRateLimit(`${method} ${path} ${rateLimit.remaining}/${rateLimit.limit} ${rateLimit.toReset}s`)
       if (res.status === 401) {
         if (this.__authed && this.opts.email && this.opts.password) {
           this.__authed = false
@@ -368,5 +379,22 @@ export class RawAPI extends EventEmitter {
     const buf = Buffer.from(data.slice(3), 'base64')
     const ret = await zlib.inflateAsync(buf)
     return JSON.parse(ret.toString())
+  }
+  buildRateLimit(method, path, res) {
+    const {
+      headers: {
+        'x-ratelimit-limit': limit,
+        'x-ratelimit-remaining': remaining,
+        'x-ratelimit-reset': reset,
+      } = {}
+    } = res
+    return {
+      method,
+      path,
+      limit: +limit, 
+      remaining:+remaining, 
+      reset: +reset,
+      toReset: reset - Math.floor(Date.now() / 1000)
+    }
   }
 }

@@ -6,7 +6,7 @@ export default {
   globals: {
     ws: 'WebSocket'
   },
-  external: ['ws', 'fs', 'axios', 'bluebird', 'yamljs', 'url', 'events', 'zlib', 'path'],
+  external: ['ws', 'fs', 'axios', 'bluebird', 'yamljs', 'url', 'events', 'zlib', 'path','debug'],
   moduleName: 'ScreepsAPI',
   dest: 'dist/ScreepsAPI.js',
   format: 'cjs'
