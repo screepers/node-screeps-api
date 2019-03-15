@@ -1,6 +1,9 @@
 import WebSocket from 'ws'
 import url from 'url'
 import { EventEmitter } from 'events'
+import Debug from 'debug'
+
+const debug = Debug('screepsapi:socket')
 
 const DEFAULTS = {
   reconnect: true,
@@ -54,6 +57,7 @@ export class Socket extends EventEmitter {
         if (this.opts.resubscribe) {
           this.__subQueue.push(...Object.keys(this.__subs))
         }
+        debug('connected')
         this.emit('connected')
         resolve(this.auth(this.api.token))
       })
@@ -61,6 +65,7 @@ export class Socket extends EventEmitter {
         clearInterval(this.keepAliveInter)
         this.authed = false
         this.connected = false
+        debug('disconnected')
         this.emit('disconnected')
         if (this.opts.reconnect) {
           this.reconnect().catch(() => { /* error emitted in reconnect() */ })
@@ -69,6 +74,7 @@ export class Socket extends EventEmitter {
       this.ws.on('error', (err) => {
         this.ws.terminate()
         this.emit('error', err)
+        debug(`error ${err}`)
         if (!this.connected) {
           reject(err)
         }
@@ -98,15 +104,18 @@ export class Socket extends EventEmitter {
         retry = true
       }
       retries++
+      debug(`reconnect ${retries}/${this.opts.maxRetries}`)
     } while (retry && retries < this.opts.maxRetries)
     if (retry) {
       let err = new Error(`Reconnection failed after ${this.opts.maxRetries} retries`)
       this.reconnecting = false
+      debug('reconnect failed')
       this.emit('error', err)
       throw err
     }
   }
   disconnect () {
+    debug('disconnect')
     clearInterval(this.keepAliveInter)
     this.ws.removeAllListeners() // remove listeners first or we may trigger reconnection & Co.
     this.ws.terminate()
@@ -121,6 +130,7 @@ export class Socket extends EventEmitter {
   handleMessage (msg) {
     msg = msg.data || msg // Handle ws/browser difference
     if (msg.slice(0, 3) === 'gz:') { msg = this.api.inflate(msg) }
+    debug(`message ${msg}`)
     if (msg[0] === '[') {
       msg = JSON.parse(msg)
       let [, type, id, channel] = msg[0].match(/^(.+):(.+?)(?:\/(.+))?$/)
