@@ -380,19 +380,19 @@ export class RawAPI extends EventEmitter {
     const ret = await zlib.inflateAsync(buf)
     return JSON.parse(ret.toString())
   }
-  buildRateLimit(method, path, res) {
+  buildRateLimit (method, path, res) {
     const {
       headers: {
         'x-ratelimit-limit': limit,
         'x-ratelimit-remaining': remaining,
-        'x-ratelimit-reset': reset,
+        'x-ratelimit-reset': reset
       } = {}
     } = res
     return {
       method,
       path,
-      limit: +limit, 
-      remaining:+remaining, 
+      limit: +limit,
+      remaining: +remaining,
       reset: +reset,
       toReset: reset - Math.floor(Date.now() / 1000)
     }

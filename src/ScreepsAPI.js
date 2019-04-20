@@ -70,7 +70,7 @@ export class ScreepsAPI extends RawAPI {
         '/api/game/market/orders': defaultLimit(60, 'hour'),
         '/api/game/market/my-orders': defaultLimit(60, 'hour'),
         '/api/game/market/stats': defaultLimit(60, 'hour'),
-        '/api/game/user/money-history': defaultLimit(60, 'hour'),
+        '/api/game/user/money-history': defaultLimit(60, 'hour')
       },
       POST: {
         '/api/user/console': defaultLimit(360, 'hour'),
@@ -78,7 +78,7 @@ export class ScreepsAPI extends RawAPI {
         '/api/user/code': defaultLimit(240, 'day'),
         '/api/user/set-active-branch': defaultLimit(240, 'day'),
         '/api/user/memory': defaultLimit(240, 'day'),
-        '/api/user/memory-segment': defaultLimit(60, 'hour'),
+        '/api/user/memory-segment': defaultLimit(60, 'hour')
       }
     }
     this.on('rateLimit', limits => {
@@ -90,11 +90,11 @@ export class ScreepsAPI extends RawAPI {
     })
     this.socket = new Socket(this)
   }
-  getRateLimit(method, path) {
+  getRateLimit (method, path) {
     return this.rateLimits[method][path] || this.rateLimits.global
   }
-  get rateLimitResetUrl() {
-    return `https://screeps.com/a/#!/account/auth-tokens/noratelimit?token=${this.token.slice(0,8)}`
+  get rateLimitResetUrl () {
+    return `https://screeps.com/a/#!/account/auth-tokens/noratelimit?token=${this.token.slice(0, 8)}`
   }
   async me () {
     this.user = await this.raw.auth.me()
