@@ -91,7 +91,7 @@ export class ScreepsAPI extends RawAPI {
     this.socket = new Socket(this)
   }
   getRateLimit(method, path) {
-    return this.rateLimits[limits.method][limits.path] || this.rateLimits.global
+    return this.rateLimits[method][path] || this.rateLimits.global
   }
   get rateLimitResetUrl() {
     return `https://screeps.com/a/#!/account/auth-tokens/noratelimit?token=${this.token.slice(0,8)}`
