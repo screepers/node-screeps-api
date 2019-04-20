@@ -16,21 +16,34 @@ const DEFAULTS = {
 
 export class ScreepsAPI extends RawAPI {
   static async fromConfig (server = 'main', config = false, opts = {}) {
-    const paths = [
-      join(__dirname, '.screeps.yaml'),
-      join(__dirname, '.screeps.yml'),
-      './.screeps.yaml',
-      './.screeps.yml'
-    ]
-    if (process.env.HOME) {
-      paths.push(join(process.env.HOME, '.screeps.yaml'))
-      paths.push(join(process.env.HOME, '.screeps.yml'))
+    const paths = []
+    if (process.env.SCREEPS_CONFIG) {
+      paths.push(process.env.SCREEPS_CONFIG)
+    }
+    paths.push(join(__dirname, '.screeps.yaml'))
+    paths.push(join(__dirname, '.screeps.yml'))
+    paths.push('./.screeps.yaml')
+    paths.push('./.screeps.yml')
+    if (process.platform === 'win32') {
+      paths.push(join(process.env.APPDATA, 'screeps/config.yaml'))
+      paths.push(join(process.env.APPDATA, 'screeps/config.yml'))
+    } else {
+      if (process.env.XDG_CONFIG_PATH) {
+        paths.push(join(process.env.XDG_CONFIG_HOME, 'screeps/config.yaml'))
+        paths.push(join(process.env.XDG_CONFIG_HOME, 'screeps/config.yml'))
+      }
+      if (process.env.HOME) {
+        paths.push(join(process.env.HOME, '.config/screeps/config.yaml'))
+        paths.push(join(process.env.HOME, '.config/screeps/config.yml'))
+        paths.push(join(process.env.HOME, '.screeps.yaml'))
+        paths.push(join(process.env.HOME, '.screeps.yml'))
+      }
     }
     for (const path of paths) {
       const data = await loadConfig(path)
       if (data) {
         if (!data.servers) {
-          throw new Error(`Invalid .screeps.yml: servers doesn't exist in ${path}`)
+          throw new Error(`Invalid config: 'servers' object does not exist in '${path}'`)
         }
         if (!data.servers[server]) {
           throw new Error(`Server '${server}' does not exist in '${path}'`)
@@ -49,7 +62,7 @@ export class ScreepsAPI extends RawAPI {
         return api
       }
     }
-    throw new Error('No valid .screeps.yaml found')
+    throw new Error('No valid config found')
   }
   constructor (opts) {
     opts = Object.assign({}, DEFAULTS, opts)
