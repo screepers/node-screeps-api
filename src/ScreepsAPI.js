@@ -110,8 +110,32 @@ export class ScreepsAPI extends RawAPI {
     return `https://screeps.com/a/#!/account/auth-tokens/noratelimit?token=${this.token.slice(0, 8)}`
   }
   async me () {
-    this.user = await this.raw.auth.me()
-    return this.user
+    if (this._user) return this._user
+    const tokenInfo = await this.tokenInfo()
+    if (tokenInfo.full) {
+      this._user = await this.raw.auth.me()
+    } else {
+      const { username } = await this.raw.user.name()
+      const { user } = await this.raw.user.find(username)
+      this._user = user
+    }
+    return this._user
+  }
+  async tokenInfo () {
+    if (this._tokenInfo) {
+      return this._tokenInfo
+    }
+    if (this.opts.token) {
+      const { token } = await this.raw.auth.queryToken(this.token)
+      this._tokenInfo = token
+    } else {
+      this._tokenInfo = { full: true }
+    }
+    return this._tokenInfo
+  }
+  async userID () {
+    const user = await this.me()
+    return user._id
   }
   get history () { return this.raw.history }
   get authmod () { return this.raw.authmod }

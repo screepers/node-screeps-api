@@ -54,6 +54,9 @@ export class RawAPI extends EventEmitter {
         },
         me () {
           return self.req('GET', '/api/auth/me')
+        },
+        queryToken (token) {
+          return self.req('GET', '/api/auth/query-token', { token })
         }
       },
       register: {
@@ -261,6 +264,9 @@ export class RawAPI extends EventEmitter {
         },
         console (expression, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/user/console', { expression, shard })
+        },
+        name () {
+          return self.req('GET', '/api/user/name')
         }
       },
       experimental: {

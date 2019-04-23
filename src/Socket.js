@@ -179,8 +179,8 @@ export class Socket extends EventEmitter {
   }
   async subscribe (path, cb) {
     if (!path) return
-    if (!this.api.user) { await this.api.me() }
-    if (!path.match(/^(\w+):(.+?)$/)) { path = `user:${this.api.user._id}/${path}` }
+    const userID = await this.api.userID()
+    if (!path.match(/^(\w+):(.+?)$/)) { path = `user:${userID}/${path}` }
     if (this.authed) {
       this.send(`subscribe ${path}`)
     } else {
@@ -193,8 +193,8 @@ export class Socket extends EventEmitter {
   }
   async unsubscribe (path) {
     if (!path) return
-    if (!this.api.user) { await this.api.me() }
-    if (!path.match(/^(\w+):(.+?)$/)) { path = `user:${this.api.user._id}/${path}` }
+    const userID = await this.api.userID()
+    if (!path.match(/^(\w+):(.+?)$/)) { path = `user:${userID}/${path}` }
     this.send(`unsubscribe ${path}`)
     this.emit('unsubscribe', path)
     if (this.__subs[path]) this.__subs[path]--
