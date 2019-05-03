@@ -107,7 +107,7 @@ api.socket.connect()
 //   data: { ... }
 // }
 api.socket.on('connected',()=>{
-	// Do stuff after conntected
+	// Do stuff after connected
 })
 api.socket.on('auth',(event)=>{
 	event.data.status contains either 'ok' or 'failed'
