@@ -354,8 +354,8 @@ export class RawAPI extends EventEmitter {
       const rateLimit = this.buildRateLimit(method, path, res)
       this.emit('rateLimit', rateLimit)
       debugRateLimit(`${method} ${path} ${rateLimit.remaining}/${rateLimit.limit} ${rateLimit.toReset}s`)
-      if (typeof res.data === 'string' && res.data.slice(0, 3) === 'gz:') {
-        res.data = await this.gz(res.data)
+      if (typeof res.data.data === 'string' && res.data.data.slice(0, 3) === 'gz:') {
+        res.data.data = await this.gz(res.data.data)
       }
       this.emit('response', res)
       return res.data
