@@ -16,6 +16,8 @@ const DEFAULT_SHARD = 'shard0'
 const OFFICIAL_HISTORY_INTERVAL = 100
 const PRIVATE_HISTORY_INTERVAL = 20
 
+const sleep = ms => new Promise(resolve => setInterval(resolve, ms))
+
 export class RawAPI extends EventEmitter {
   constructor (opts = {}) {
     super()
@@ -372,6 +374,10 @@ export class RawAPI extends EventEmitter {
         } else {
           throw new Error('Not Authorized')
         }
+      }
+      if (res.status === 429 && !res.headers['x-ratelimit-limit'] && this.opts.experimentalRetry429) {
+        await sleep(Math.floor(Math.random() * 500) + 200)
+        return this.req(method, path, body)
       }
       throw new Error(res.data)
     }
