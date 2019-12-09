@@ -109,8 +109,8 @@ export class ScreepsAPI extends RawAPI {
   get rateLimitResetUrl () {
     return `https://screeps.com/a/#!/account/auth-tokens/noratelimit?token=${this.token.slice(0, 8)}`
   }
-  async me () {
-    if (this._user) return this._user
+  async me (flush_cache = false) {
+    if (!flush_cache && this._user) return this._user
     const tokenInfo = await this.tokenInfo()
     if (tokenInfo.full) {
       this._user = await this.raw.auth.me()
