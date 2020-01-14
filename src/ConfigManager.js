@@ -13,7 +13,6 @@ export class ConfigManager {
 
   async getServers () {
     const conf = await this.getConfig()
-    console.log(conf)
     return Object.keys(conf.servers)
   }
 
