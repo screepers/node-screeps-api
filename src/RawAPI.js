@@ -39,7 +39,7 @@ export class RawAPI extends EventEmitter {
           return self.req('GET', `/room-history/${shard}/${room}/${tick}.json`)
         } else {
           tick -= tick % PRIVATE_HISTORY_INTERVAL
-          return self.req('GET', `/room-history`, { room, time: tick })
+          return self.req('GET', '/room-history', { room, time: tick })
         }
       },
       servers: {
@@ -281,6 +281,7 @@ export class RawAPI extends EventEmitter {
       }
     }
   }
+
   currentSeason () {
     const now = new Date()
     const year = now.getFullYear()
@@ -288,9 +289,11 @@ export class RawAPI extends EventEmitter {
     if (month.length === 1) month = `0${month}`
     return `${year}-${month}`
   }
+
   isOfficialServer () {
     return this.opts.url.match(/screeps\.com/) !== null
   }
+
   mapToShard (res) {
     if (!res.shards) {
       res.shards = {
@@ -299,6 +302,7 @@ export class RawAPI extends EventEmitter {
     }
     return res
   }
+
   setServer (opts) {
     if (!this.opts) {
       this.opts = {}
@@ -318,6 +322,7 @@ export class RawAPI extends EventEmitter {
       baseURL: this.opts.url
     })
   }
+
   async auth (email, password, opts = {}) {
     this.setServer(opts)
     if (email && password) {
@@ -329,6 +334,7 @@ export class RawAPI extends EventEmitter {
     this.__authed = true
     return res
   }
+
   async req (method, path, body = {}) {
     const opts = {
       method,
@@ -382,16 +388,19 @@ export class RawAPI extends EventEmitter {
       throw new Error(res.data)
     }
   }
+
   async gz (data) {
     const buf = Buffer.from(data.slice(3), 'base64')
     const ret = await zlib.gunzipAsync(buf)
     return JSON.parse(ret.toString())
   }
+
   async inflate (data) { // es
     const buf = Buffer.from(data.slice(3), 'base64')
     const ret = await zlib.inflateAsync(buf)
     return JSON.parse(ret.toString())
   }
+
   buildRateLimit (method, path, res) {
     const {
       headers: {

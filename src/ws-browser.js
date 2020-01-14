@@ -1,4 +1,4 @@
-let WebSocket = module.exports = window.WebSocket || require('ws')
+const WebSocket = module.exports = window.WebSocket || require('ws')
 
 WebSocket.prototype.on = function (event, callback) {
   this.addEventListener(event, callback)
