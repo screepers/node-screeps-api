@@ -1,5 +1,5 @@
 import WebSocket from 'ws'
-import url from 'url'
+import { URL } from 'url'
 import { EventEmitter } from 'events'
 import Debug from 'debug'
 
@@ -51,7 +51,7 @@ export class Socket extends EventEmitter {
     }
     return new Promise((resolve, reject) => {
       const baseURL = this.api.opts.url.replace('http', 'ws')
-      const wsurl = url.resolve(baseURL, 'socket/websocket')
+      const wsurl = new URL('socket/websocket', baseURL)
       this.ws = new WebSocket(wsurl)
       this.ws.on('open', () => {
         this.connected = true

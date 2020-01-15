@@ -1,16 +1,17 @@
-import Promise from 'bluebird'
 import URL from 'url'
 import { EventEmitter } from 'events'
 import zlib from 'zlib'
 import axios from 'axios'
 import Debug from 'debug'
+import util from 'util'
 
 const debugHttp = Debug('screepsapi:http')
 const debugRateLimit = Debug('screepsapi:ratelimit')
 
 const { format } = URL
 
-Promise.promisifyAll(zlib)
+const gunzipAsync = util.promisify(zlib.gunzip)
+const inflateAsync = util.promisify(zlib.inflate)
 
 const DEFAULT_SHARD = 'shard0'
 const OFFICIAL_HISTORY_INTERVAL = 100
@@ -391,13 +392,13 @@ export class RawAPI extends EventEmitter {
 
   async gz (data) {
     const buf = Buffer.from(data.slice(3), 'base64')
-    const ret = await zlib.gunzipAsync(buf)
+    const ret = await gunzipAsync(buf)
     return JSON.parse(ret.toString())
   }
 
   async inflate (data) { // es
     const buf = Buffer.from(data.slice(3), 'base64')
-    const ret = await zlib.inflateAsync(buf)
+    const ret = await inflateAsync(buf)
     return JSON.parse(ret.toString())
   }
 
