@@ -27,7 +27,8 @@ export class ScreepsAPI extends RawAPI {
             hostname: conf.host,
             port: conf.port,
             protocol: conf.secure ? 'https' : 'http',
-            token: conf.token
+            token: conf.token,
+            path: conf.ptr === true ? '/ptr' : '/'
           },
           opts
         )
