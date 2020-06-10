@@ -48,6 +48,7 @@ export class ScreepsAPI extends RawAPI {
   constructor (opts) {
     opts = Object.assign({}, DEFAULTS, opts)
     super(opts)
+    const pre = (opts.ptr === true ? '/ptr' : '')
     this.on('token', token => {
       this.token = token
       this.raw.token = token
@@ -62,23 +63,23 @@ export class ScreepsAPI extends RawAPI {
     this.rateLimits = {
       global: defaultLimit(120, 'minute'),
       GET: {
-        '/api/game/room-terrain': defaultLimit(360, 'hour'),
-        '/api/user/code': defaultLimit(60, 'hour'),
-        '/api/user/memory': defaultLimit(1440, 'day'),
-        '/api/user/memory-segment': defaultLimit(360, 'hour'),
-        '/api/game/market/orders-index': defaultLimit(60, 'hour'),
-        '/api/game/market/orders': defaultLimit(60, 'hour'),
-        '/api/game/market/my-orders': defaultLimit(60, 'hour'),
-        '/api/game/market/stats': defaultLimit(60, 'hour'),
-        '/api/game/user/money-history': defaultLimit(60, 'hour')
+        [pre+'/api/game/room-terrain']: defaultLimit(360, 'hour'),
+        [pre+'/api/user/code']: defaultLimit(60, 'hour'),
+        [pre+'/api/user/memory']: defaultLimit(1440, 'day'),
+        [pre+'/api/user/memory-segment']: defaultLimit(360, 'hour'),
+        [pre+'/api/game/market/orders-index']: defaultLimit(60, 'hour'),
+        [pre+'/api/game/market/orders']: defaultLimit(60, 'hour'),
+        [pre+'/api/game/market/my-orders']: defaultLimit(60, 'hour'),
+        [pre+'/api/game/market/stats']: defaultLimit(60, 'hour'),
+        [pre+'/api/game/user/money-history']: defaultLimit(60, 'hour')
       },
       POST: {
-        '/api/user/console': defaultLimit(360, 'hour'),
-        '/api/game/map-stats': defaultLimit(60, 'hour'),
-        '/api/user/code': defaultLimit(240, 'day'),
-        '/api/user/set-active-branch': defaultLimit(240, 'day'),
-        '/api/user/memory': defaultLimit(240, 'day'),
-        '/api/user/memory-segment': defaultLimit(60, 'hour')
+        [pre+'/api/user/console']: defaultLimit(360, 'hour'),
+        [pre+'/api/game/map-stats']: defaultLimit(60, 'hour'),
+        [pre+'/api/user/code']: defaultLimit(240, 'day'),
+        [pre+'/api/user/set-active-branch']: defaultLimit(240, 'day'),
+        [pre+'/api/user/memory']: defaultLimit(240, 'day'),
+        [pre+'/api/user/memory-segment']: defaultLimit(60, 'hour')
       }
     }
     this.on('rateLimit', limits => {

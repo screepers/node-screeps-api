@@ -23,16 +23,17 @@ export class RawAPI extends EventEmitter {
   constructor (opts = {}) {
     super()
     this.setServer(opts)
+    const pre = (opts.ptr === true ? '/ptr' : '')
     const self = this
     this.raw = {
       version () {
-        return self.req('GET', '/api/version')
+        return self.req('GET', pre+'/api/version')
       },
       authmod () {
         if (self.isOfficialServer()) {
           return Promise.resolve({ name: 'official' })
         }
-        return self.req('GET', '/api/authmod')
+        return self.req('GET', pre+'/api/authmod')
       },
       history (room, tick, shard = DEFAULT_SHARD) {
         if (self.isOfficialServer()) {
@@ -45,129 +46,129 @@ export class RawAPI extends EventEmitter {
       },
       servers: {
         list () {
-          return self.req('POST', '/api/servers.list', {})
+          return self.req('POST', pre+'/api/servers.list', {})
         }
       },
       auth: {
         signin (email, password) {
-          return self.req('POST', '/api/auth/signin', { email, password })
+          return self.req('POST', pre+'/api/auth/signin', { email, password })
         },
         steamTicket (ticket, useNativeAuth = false) {
-          return self.req('POST', '/api/auth/steam-ticket', { ticket, useNativeAuth })
+          return self.req('POST', pre+'/api/auth/steam-ticket', { ticket, useNativeAuth })
         },
         me () {
-          return self.req('GET', '/api/auth/me')
+          return self.req('GET', pre+'/api/auth/me')
         },
         queryToken (token) {
-          return self.req('GET', '/api/auth/query-token', { token })
+          return self.req('GET', pre+'/api/auth/query-token', { token })
         }
       },
       register: {
         checkEmail (email) {
-          return self.req('GET', '/api/register/check-email', { email })
+          return self.req('GET', pre+'/api/register/check-email', { email })
         },
         checkUsername (username) {
-          return self.req('GET', '/api/register/check-username', { username })
+          return self.req('GET', pre+'/api/register/check-username', { username })
         },
         setUsername (username) {
-          return self.req('POST', '/api/register/set-username', { username })
+          return self.req('POST', pre+'/api/register/set-username', { username })
         },
         submit (username, email, password, modules) {
-          return self.req('POST', '/api/register/submit', { username, email, password, modules })
+          return self.req('POST', pre+'/api/register/submit', { username, email, password, modules })
         }
       },
       userMessages: {
         list (respondent) {
-          return self.req('GET', '/api/user/messages/list', { respondent })
+          return self.req('GET', pre+'/api/user/messages/list', { respondent })
         },
         index () {
-          return self.req('GET', '/api/user/messages/index')
+          return self.req('GET', pre+'/api/user/messages/index')
         },
         unreadCount () {
-          return self.req('GET', '/api/user/messages/unread-count')
+          return self.req('GET', pre+'/api/user/messages/unread-count')
         },
         send (respondent, text) {
-          return self.req('POST', '/api/user/messages/send', { respondent, text })
+          return self.req('POST', pre+'/api/user/messages/send', { respondent, text })
         },
         markRead (id) {
-          return self.req('POST', '/api/user/messages/mark-read', { id })
+          return self.req('POST', pre+'/api/user/messages/mark-read', { id })
         }
       },
       game: {
         mapStats (rooms, statName, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/map-stats', { rooms, statName, shard })
+          return self.req('POST', pre+'/api/game/map-stats', { rooms, statName, shard })
         },
         genUniqueObjectName (type, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/gen-unique-object-name', { type, shard })
+          return self.req('POST', pre+'/api/game/gen-unique-object-name', { type, shard })
         },
         checkUniqueObjectName (type, name, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/check-unique-object-name', { type, name, shard })
+          return self.req('POST', pre+'/api/game/check-unique-object-name', { type, name, shard })
         },
         placeSpawn (room, x, y, name, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/place-spawn', { name, room, x, y, shard })
+          return self.req('POST', pre+'/api/game/place-spawn', { name, room, x, y, shard })
         },
         createFlag (room, x, y, name, color = 1, secondaryColor = 1, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/create-flag', { name, room, x, y, color, secondaryColor, shard })
+          return self.req('POST', pre+'/api/game/create-flag', { name, room, x, y, color, secondaryColor, shard })
         },
         genUniqueFlagName (shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/gen-unique-flag-name', { shard })
+          return self.req('POST', pre+'/api/game/gen-unique-flag-name', { shard })
         },
         checkUniqueFlagName (name, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/check-unique-flag-name', { name, shard })
+          return self.req('POST', pre+'/api/game/check-unique-flag-name', { name, shard })
         },
         changeFlagColor (color = 1, secondaryColor = 1, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/change-flag-color', { color, secondaryColor, shard })
+          return self.req('POST', pre+'/api/game/change-flag-color', { color, secondaryColor, shard })
         },
         removeFlag (room, name, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/remove-flag', { name, room, shard })
+          return self.req('POST', pre+'/api/game/remove-flag', { name, room, shard })
         },
         addObjectIntent (room, name, intent, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/add-object-intent', { room, name, intent, shard })
+          return self.req('POST', pre+'/api/game/add-object-intent', { room, name, intent, shard })
         },
         createConstruction (room, x, y, structureType, name, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/create-construction', { room, x, y, structureType, name, shard })
+          return self.req('POST', pre+'/api/game/create-construction', { room, x, y, structureType, name, shard })
         },
         setNotifyWhenAttacked (_id, enabled = true, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/set-notify-when-attacked', { _id, enabled, shard })
+          return self.req('POST', pre+'/api/game/set-notify-when-attacked', { _id, enabled, shard })
         },
         createInvader (room, x, y, size, type, boosted = false, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/create-invader', { room, x, y, size, type, boosted, shard })
+          return self.req('POST', pre+'/api/game/create-invader', { room, x, y, size, type, boosted, shard })
         },
         removeInvader (_id, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/game/remove-invader', { _id, shard })
+          return self.req('POST', pre+'/api/game/remove-invader', { _id, shard })
         },
         time (shard = DEFAULT_SHARD) {
-          return self.req('GET', '/api/game/time', { shard })
+          return self.req('GET', pre+'/api/game/time', { shard })
         },
         worldSize (shard = DEFAULT_SHARD) {
-          return self.req('GET', '/api/game/world-size', { shard })
+          return self.req('GET', pre+'/api/game/world-size', { shard })
         },
         roomTerrain (room, encoded = 1, shard = DEFAULT_SHARD) {
-          return self.req('GET', '/api/game/room-terrain', { room, encoded, shard })
+          return self.req('GET', pre+'/api/game/room-terrain', { room, encoded, shard })
         },
         roomStatus (room, shard = DEFAULT_SHARD) {
-          return self.req('GET', '/api/game/room-status', { room, shard })
+          return self.req('GET', pre+'/api/game/room-status', { room, shard })
         },
         roomOverview (room, interval = 8, shard = DEFAULT_SHARD) {
-          return self.req('GET', '/api/game/room-overview', { room, interval, shard })
+          return self.req('GET', pre+'/api/game/room-overview', { room, interval, shard })
         },
         market: {
           ordersIndex (shard = DEFAULT_SHARD) {
-            return self.req('GET', '/api/game/market/orders-index', { shard })
+            return self.req('GET', pre+'/api/game/market/orders-index', { shard })
           },
           myOrders () {
-            return self.req('GET', '/api/game/market/my-orders').then(self.mapToShard)
+            return self.req('GET', pre+'/api/game/market/my-orders').then(self.mapToShard)
           },
           orders (resourceType, shard = DEFAULT_SHARD) {
-            return self.req('GET', '/api/game/market/orders', { resourceType, shard })
+            return self.req('GET', pre+'/api/game/market/orders', { resourceType, shard })
           },
           stats (resourceType, shard = DEFAULT_SHARD) {
-            return self.req('GET', '/api/game/market/stats', { resourceType, shard })
+            return self.req('GET', pre+'/api/game/market/stats', { resourceType, shard })
           }
         },
         shards: {
           info () {
-            return self.req('GET', '/api/game/shards/info')
+            return self.req('GET', pre+'/api/game/shards/info')
           }
         }
       },
@@ -175,109 +176,109 @@ export class RawAPI extends EventEmitter {
         list (limit = 10, mode = 'world', offset = 0, season) {
           if (mode !== 'world' && mode !== 'power') throw new Error('incorrect mode parameter')
           if (!season) season = self.currentSeason()
-          return self.req('GET', '/api/leaderboard/list', { limit, mode, offset, season })
+          return self.req('GET', pre+'/api/leaderboard/list', { limit, mode, offset, season })
         },
         find (username, mode = 'world', season = '') {
-          return self.req('GET', '/api/leaderboard/find', { season, mode, username })
+          return self.req('GET', pre+'/api/leaderboard/find', { season, mode, username })
         },
         seasons () {
-          return self.req('GET', '/api/leaderboard/seasons')
+          return self.req('GET', pre+'/api/leaderboard/seasons')
         }
       },
       user: {
         badge (badge) {
-          return self.req('POST', '/api/user/badge', { badge })
+          return self.req('POST', pre+'/api/user/badge', { badge })
         },
         respawn () {
-          return self.req('POST', '/api/user/respawn')
+          return self.req('POST', pre+'/api/user/respawn')
         },
         setActiveBranch (branch, activeName) {
-          return self.req('POST', '/api/user/set-active-branch', { branch, activeName })
+          return self.req('POST', pre+'/api/user/set-active-branch', { branch, activeName })
         },
         cloneBranch (branch, newName, defaultModules) {
-          return self.req('POST', '/api/user/clone-branch', { branch, newName, defaultModules })
+          return self.req('POST', pre+'/api/user/clone-branch', { branch, newName, defaultModules })
         },
         deleteBranch (branch) {
-          return self.req('POST', '/api/user/delete-branch', { branch })
+          return self.req('POST', pre+'/api/user/delete-branch', { branch })
         },
         notifyPrefs (prefs) {
           // disabled,disabledOnMessages,sendOnline,interval,errorsInterval
-          return self.req('POST', '/api/user/notify-prefs', prefs)
+          return self.req('POST', pre+'/api/user/notify-prefs', prefs)
         },
         tutorialDone () {
-          return self.req('POST', '/api/user/tutorial-done')
+          return self.req('POST', pre+'/api/user/tutorial-done')
         },
         email (email) {
-          return self.req('POST', '/api/user/email', { email })
+          return self.req('POST', pre+'/api/user/email', { email })
         },
         worldStartRoom (shard) {
-          return self.req('GET', '/api/user/world-start-room', { shard })
+          return self.req('GET', pre+'/api/user/world-start-room', { shard })
         },
         worldStatus () {
-          return self.req('GET', '/api/user/world-status')
+          return self.req('GET', pre+'/api/user/world-status')
         },
         branches () {
-          return self.req('GET', '/api/user/branches')
+          return self.req('GET', pre+'/api/user/branches')
         },
         code: {
           get (branch) {
-            return self.req('GET', '/api/user/code', { branch })
+            return self.req('GET', pre+'/api/user/code', { branch })
           },
           set (branch, modules, _hash) {
             if (!_hash) _hash = Date.now()
-            return self.req('POST', '/api/user/code', { branch, modules, _hash })
+            return self.req('POST', pre+'/api/user/code', { branch, modules, _hash })
           }
         },
         respawnProhibitedRooms () {
-          return self.req('GET', '/api/user/respawn-prohibited-rooms')
+          return self.req('GET', pre+'/api/user/respawn-prohibited-rooms')
         },
         memory: {
           get (path, shard = DEFAULT_SHARD) {
-            return self.req('GET', '/api/user/memory', { path, shard })
+            return self.req('GET', pre+'/api/user/memory', { path, shard })
           },
           set (path, value, shard = DEFAULT_SHARD) {
-            return self.req('POST', '/api/user/memory', { path, value, shard })
+            return self.req('POST', pre+'/api/user/memory', { path, value, shard })
           },
           segment: {
             get (segment, shard = DEFAULT_SHARD) {
-              return self.req('GET', '/api/user/memory-segment', { segment, shard })
+              return self.req('GET', pre+'/api/user/memory-segment', { segment, shard })
             },
             set (segment, data, shard = DEFAULT_SHARD) {
-              return self.req('POST', '/api/user/memory-segment', { segment, data, shard })
+              return self.req('POST', pre+'/api/user/memory-segment', { segment, data, shard })
             }
           }
         },
         find (username) {
-          return self.req('GET', '/api/user/find', { username })
+          return self.req('GET', pre+'/api/user/find', { username })
         },
         findById (id) {
-          return self.req('GET', '/api/user/find', { id })
+          return self.req('GET', pre+'/api/user/find', { id })
         },
         stats (interval) {
-          return self.req('GET', '/api/user/stats', { interval })
+          return self.req('GET', pre+'/api/user/stats', { interval })
         },
         rooms (id) {
-          return self.req('GET', '/api/user/rooms', { id }).then(self.mapToShard)
+          return self.req('GET', pre+'/api/user/rooms', { id }).then(self.mapToShard)
         },
         overview (interval, statName) {
-          return self.req('GET', '/api/user/overview', { interval, statName })
+          return self.req('GET', pre+'/api/user/overview', { interval, statName })
         },
         moneyHistory (page = 0) {
-          return self.req('GET', '/api/user/money-history', { page })
+          return self.req('GET', pre+'/api/user/money-history', { page })
         },
         console (expression, shard = DEFAULT_SHARD) {
-          return self.req('POST', '/api/user/console', { expression, shard })
+          return self.req('POST', pre+'/api/user/console', { expression, shard })
         },
         name () {
-          return self.req('GET', '/api/user/name')
+          return self.req('GET', pre+'/api/user/name')
         }
       },
       experimental: {
         pvp (interval = 100) {
-          return self.req('GET', '/api/experimental/pvp', { interval }).then(self.mapToShard)
+          return self.req('GET', pre+'/api/experimental/pvp', { interval }).then(self.mapToShard)
         },
         nukes () {
-          return self.req('GET', '/api/experimental/nukes').then(self.mapToShard)
+          return self.req('GET', pre+'/api/experimental/nukes').then(self.mapToShard)
         }
       }
     }
