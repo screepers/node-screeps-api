@@ -145,6 +145,9 @@ export class RawAPI extends EventEmitter {
         roomDecorations (room, shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/room-decorations', { room, shard })
         },
+        roomObjects (room, shard = DEFAULT_SHARD) {
+          return self.req('GET', '/api/game/room-objects', { room, shard })
+        },
         roomTerrain (room, encoded = 1, shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/room-terrain', { room, encoded, shard })
         },
