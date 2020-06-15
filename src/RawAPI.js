@@ -279,6 +279,11 @@ export class RawAPI extends EventEmitter {
         nukes () {
           return self.req('GET', '/api/experimental/nukes').then(self.mapToShard)
         }
+      },
+      warpath: {
+        battles (interval = 100) {
+          return self.req('GET', '/api/warpath/battles', { interval })
+        }
       }
     }
   }
