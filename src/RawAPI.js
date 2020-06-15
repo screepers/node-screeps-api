@@ -231,6 +231,26 @@ export class RawAPI extends EventEmitter {
             return self.req('POST', '/api/user/code', { branch, modules, _hash })
           }
         },
+        decorations: {
+          inventory () {
+            return self.req('GET', '/api/user/decorations/inventory')
+          },
+          themes () {
+            return self.req('GET', '/api/user/decorations/inventory')
+          },
+          convert (decorations) {
+            return self.req('POST', '/api/user/decorations/convert', { decorations }) // decorations is a string array of ids
+          },
+          pixelize (count, theme = '') {
+            return self.req('POST', '/api/user/decorations/pixelize', { count, theme })
+          },
+          activate (_id, active) {
+            return self.req('POST', '/api/user/decorations/activate', { _id, active })
+          },
+          deactivate (decorations) {
+            return self.req('POST', '/api/user/decorations/deactivate', { decorations }) // decorations is a string array of ids
+          }
+        },
         respawnProhibitedRooms () {
           return self.req('GET', '/api/user/respawn-prohibited-rooms')
         },
