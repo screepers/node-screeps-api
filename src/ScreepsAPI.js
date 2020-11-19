@@ -21,6 +21,8 @@ export class ScreepsAPI extends RawAPI {
       }
 
       const conf = data.servers[server]
+      if (conf.ptr) conf.path = '/ptr'
+      if (conf.season) conf.path = '/season'
       const api = new ScreepsAPI(
         Object.assign(
           {
@@ -28,7 +30,7 @@ export class ScreepsAPI extends RawAPI {
             port: conf.port,
             protocol: conf.secure ? 'https' : 'http',
             token: conf.token,
-            path: conf.ptr === true ? '/ptr' : '/'
+            path: conf.path || '/'
           },
           opts
         )
