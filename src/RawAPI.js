@@ -310,6 +310,11 @@ export class RawAPI extends EventEmitter {
         battles (interval = 100) {
           return self.req('GET', '/api/warpath/battles', { interval })
         }
+      },
+      scoreboard: {
+        list (limit = 20, offset = 0) {
+          return self.req('GET', '/api/scoreboard/list', { limit, offset })
+        }
       }
     }
   }
