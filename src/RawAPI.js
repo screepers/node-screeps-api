@@ -55,6 +55,24 @@ export class RawAPI extends EventEmitter {
         steamTicket (ticket, useNativeAuth = false) {
           return self.req('POST', '/api/auth/steam-ticket', { ticket, useNativeAuth })
         },
+        /**
+         * @returns {{
+         *  ok: any;
+         *  _id: any;
+         *  email: string;
+         *  username: string;
+         *  cpu: number;
+         *  badge: Badge;
+         *  password: string;
+         *  notifyPrefs: { sendOnline: any; errorsInterval: any; disabledOnMessages: any; disabled: any; interval: any };
+         *  gcl: number;
+         *  credits: number;
+         *  lastChargeTime: any;
+         *  lastTweetTime: any;
+         *  github: { id: any; username: any };
+         *  twitter: { username: string; followers_count: number };
+         *}}
+         */
         me () {
           return self.req('GET', '/api/auth/me')
         },
@@ -94,6 +112,24 @@ export class RawAPI extends EventEmitter {
         }
       },
       game: {
+        /**
+         * @typedef {"creepsLost"|"creepsProduced"|"energyConstruction"|"energyControl"|"energyCreeps"|"energyHarvested"} stat
+         * @param {string[]} rooms An array of room names
+         * @param {"owner0"|"claim0"|stat} statName
+         * @param {string} shard
+         * @returns {{
+         *  ok:number,
+         *  stats: {
+         *    [roomName:string]: {
+         *      status,
+         *      novice,
+         *      own: { user, level },
+         *      <stat>: [ { user, value }]
+         *    }
+         *  }
+         * , users: { [userId:string]: { _id, username, badge: Badge } } }}
+         * The return type is not mapped correctly
+         */
         mapStats (rooms, statName, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/map-stats', { rooms, statName, shard })
         },
@@ -103,6 +139,13 @@ export class RawAPI extends EventEmitter {
         checkUniqueObjectName (type, name, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/check-unique-object-name', { type, name, shard })
         },
+        /**
+         * @param {string} room
+         * @param {number} x
+         * @param {number} y
+         * @param {string} name
+         * @param {string?} shard
+         */
         placeSpawn (room, x, y, name, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/place-spawn', { name, room, x, y, shard })
         },
@@ -191,6 +234,10 @@ export class RawAPI extends EventEmitter {
         }
       },
       user: {
+        /**
+         * @param {Badge} badge
+         * @returns {{ ok?:number,error?:string}}
+         */
         badge (badge) {
           return self.req('POST', '/api/user/badge', { badge })
         },
@@ -219,6 +266,12 @@ export class RawAPI extends EventEmitter {
         worldStartRoom (shard) {
           return self.req('GET', '/api/user/world-start-room', { shard })
         },
+        /**
+         * returns a world status
+         * - 'normal'
+         * - 'lost' when you loose all your spawns
+         * - 'empty' when you have respawned and not placed your spawn yet 
+         * @returns {{ ok: number; status: "normal" | "lost" | "empty" }} */
         worldStatus () {
           return self.req('GET', '/api/user/world-status')
         },
@@ -456,3 +509,14 @@ export class RawAPI extends EventEmitter {
     }
   }
 }
+
+/**
+ * @typedef {{
+ *   "color1": string;
+ *   "color2": string;
+ *   "color3": string;
+ *   "flip": boolean;
+ *   "param": number;
+ *   "type": number;
+ *}} Badge
+ */
