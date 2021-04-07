@@ -45,7 +45,7 @@ export class RawAPI extends EventEmitter {
       },
       servers: {
         list () {
-          return self.req('POST', '/api/servers.list', {})
+          return self.req('POST', '/api/servers/list', {})
         }
       },
       auth: {
