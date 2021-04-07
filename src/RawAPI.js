@@ -25,6 +25,19 @@ export class RawAPI extends EventEmitter {
     this.setServer(opts)
     const self = this
     this.raw = {
+
+      /**
+       * @returns {{
+       *  ok:1, package:number, protocol: number,
+       *  serverData: {
+       *    customObjectTypes,
+       *    historyChunkSize:number,
+       *    features,
+       *    shards: string[]
+       *  },
+       *  users:number
+       * }}
+       */
       version () {
         return self.req('GET', '/api/version')
       },
@@ -191,9 +204,26 @@ export class RawAPI extends EventEmitter {
         roomObjects (room, shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/room-objects', { room, shard })
         },
+        /**
+         * @param {string} room
+         * @param {*} encoded
+         * @param {string} shard
+         * @returns {{ ok, terrain: [ { room:string, x:number, y:number, type:"wall"|"swamp" } ] }
+         * | { ok, terrain: [ { _id,room:string, terrain:string, type:"wall"|"swamp" } ] }}
+         * terrain is a string of digits, giving the terrain left-to-right and top-to-bottom
+         * 0: plain, 1: wall, 2: swamp, 3: also wall
+         * encoded argument can be anything non-empty
+         */
         roomTerrain (room, encoded = 1, shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/room-terrain', { room, encoded, shard })
         },
+        /**
+         * @param {string} room
+         * @param {string} shard
+         * @returns {{ _id, status, novice }}
+         * status can at least be "normal" or "out of borders"
+         * if the room is in a novice area, novice will contain the Unix timestamp of the end of the protection (otherwise it is absent)
+         */
         roomStatus (room, shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/room-status', { room, shard })
         },
@@ -270,7 +300,7 @@ export class RawAPI extends EventEmitter {
          * returns a world status
          * - 'normal'
          * - 'lost' when you loose all your spawns
-         * - 'empty' when you have respawned and not placed your spawn yet 
+         * - 'empty' when you have respawned and not placed your spawn yet
          * @returns {{ ok: number; status: "normal" | "lost" | "empty" }} */
         worldStatus () {
           return self.req('GET', '/api/user/world-status')
@@ -352,6 +382,14 @@ export class RawAPI extends EventEmitter {
         }
       },
       experimental: {
+        // https://screeps.com/api/experimental/pvp?start=14787157 seems to not be implemented in the api
+        /**
+         * @param {number} interval
+         * @returns {{ ok, time, rooms: [ { _id, lastPvpTime } ] }}
+         * time is the current server tick
+         * _id contains the room name for each room, and lastPvpTime contains the last tick pvp occurred
+         * if neither a valid interval nor a valid start argument is provided, the result of the call is still ok, but with an empty rooms array.
+         */
         pvp (interval = 100) {
           return self.req('GET', '/api/experimental/pvp', { interval }).then(self.mapToShard)
         },
