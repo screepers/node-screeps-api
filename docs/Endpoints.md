@@ -132,7 +132,7 @@ are the ones listed below.
 
 - `https://screeps.com/api/user/world-status`
     - `{ ok, status }`
-    - `status` is usually "normal"; it's unknown what else it can be
+    - `status` can be `"lost"`, `"empty"` or `"normal"`, lost is when you loose all your spawns, empty is when you have respawned and not placed your spawn yet.; 
 
 - `https://screeps.com/api/user/world-start-room`
     - `{ ok, room:  [ <room name> ] }`
