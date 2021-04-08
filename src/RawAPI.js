@@ -198,7 +198,7 @@ export class RawAPI extends EventEmitter {
         },
         /**
          * GET /api/user/messages/unread-count
-         * @returns {{ ok, count:number }} 
+         * @returns {{ ok, count:number }}
          */
         unreadCount () {
           return self.req('GET', '/api/user/messages/unread-count')
@@ -685,8 +685,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
           },
           /**
            * POST /api/user/decorations/activate
-           * @param {string} _id 
-           * @param {*} active 
+           * @param {string} _id
+           * @param {*} active
            * @returns {Object}
            */
           activate (_id, active) {
