@@ -6,7 +6,6 @@
   "main": "dist/ScreepsAPI.js",
   "module": "src/index.js",
   "scripts": {
-    "typings": "tsc dist/ScreepsApi.js --declaration --allowJs --emitDeclarationOnly --outDir dist",
     "build": "rollup -c",
     "prepublishOnly": "npm run build",
     "lint": "standard src/**/*.js",
@@ -32,7 +31,6 @@
     "utf-8-validate": "^5.0.2"
   },
   "devDependencies": {
-    "@rollup/plugin-typescript": "^8.2.1",
     "lodash": "^4.17.11",
     "mocha": "^8.3.2",
     "publish-if-not-published": "^2.0.0",
