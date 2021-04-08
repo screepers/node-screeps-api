@@ -1,13 +1,25 @@
+import typescript from 'rollup-plugin-typescript2'
+
 export default {
-  entry: 'src/index.js',
+  input: {
+    ScreepsAPI: 'src/index.js'
+  },
+  output: {
+    dir: 'dist',
+    format: 'cjs',
+    exports: 'named',
+    preferConst: true,
+    globals: {
+      ws: 'WebSocket'
+    },
+  },
   // external(id){
   //   return !!require('./package.json').dependencies[id];
   // },
-  globals: {
-    ws: 'WebSocket'
-  },
   external: ['ws', 'fs', 'axios', 'bluebird', 'yamljs', 'url', 'events', 'zlib', 'path','debug', 'util'],
-  moduleName: 'ScreepsAPI',
-  dest: 'dist/ScreepsAPI.js',
-  format: 'cjs'
+  plugins: [
+    typescript({
+      useTsconfigDeclarationDir: true
+    })
+  ]
 }

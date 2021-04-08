@@ -9,7 +9,7 @@ WebSocket.prototype.off = function (event, callback) {
 }
 
 WebSocket.prototype.once = function (event, callback) {
-  var self = this
+  const self = this
   this.addEventListener(event, function handler () {
     callback.apply(callback, arguments)
     self.removeEventListener(event, handler)
