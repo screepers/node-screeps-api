@@ -41,6 +41,10 @@ export class RawAPI extends EventEmitter {
       version () {
         return self.req('GET', '/api/version')
       },
+      /**
+       * GET /api/authmod
+       * @returns ?
+       */
       authmod () {
         if (self.isOfficialServer()) {
           return Promise.resolve({ name: 'official' })
@@ -68,6 +72,7 @@ export class RawAPI extends EventEmitter {
       },
       servers: {
         /**
+         * POST /api/servers/list
          * A list of community servers
          * @returns {{
          *  ok:number,
@@ -98,10 +103,17 @@ export class RawAPI extends EventEmitter {
         signin (email, password) {
           return self.req('POST', '/api/auth/signin', { email, password })
         },
+        /**
+         * POST /api/auth/steam-ticket
+         * @param {*} ticket
+         * @param {*} useNativeAuth
+         * @returns {Object}
+         */
         steamTicket (ticket, useNativeAuth = false) {
           return self.req('POST', '/api/auth/steam-ticket', { ticket, useNativeAuth })
         },
         /**
+         * GET /api/auth/me
          * @returns {{
          *  ok: any;
          *  _id: any;
@@ -122,6 +134,11 @@ export class RawAPI extends EventEmitter {
         me () {
           return self.req('GET', '/api/auth/me')
         },
+        /**
+         * GET /api/auth/query-token
+         * @param {*} token
+         * @returns {Object}
+         */
         queryToken (token) {
           return self.req('GET', '/api/auth/query-token', { token })
         }
@@ -143,9 +160,22 @@ export class RawAPI extends EventEmitter {
         checkUsername (username) {
           return self.req('GET', '/api/register/check-username', { username })
         },
+        /**
+         * POST /api/register/set-username
+         * @param {*} username
+         * @returns {Object}
+         */
         setUsername (username) {
           return self.req('POST', '/api/register/set-username', { username })
         },
+        /**
+         * POST /api/register/submit
+         * @param {*} username
+         * @param {*} email
+         * @param {*} password
+         * @param {*} modules
+         * @returns {Object}
+         */
         submit (username, email, password, modules) {
           return self.req('POST', '/api/register/submit', { username, email, password, modules })
         }
@@ -217,6 +247,13 @@ export class RawAPI extends EventEmitter {
         genUniqueObjectName (type, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/gen-unique-object-name', { type, shard })
         },
+        /**
+         * POST /api/game/check-unique-object-name
+         * @param {*} type
+         * @param {*} name
+         * @param {*} shard
+         * @returns {Object}
+         */
         checkUniqueObjectName (type, name, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/check-unique-object-name', { type, name, shard })
         },
@@ -247,9 +284,20 @@ export class RawAPI extends EventEmitter {
         createFlag (room, x, y, name, color = 1, secondaryColor = 1, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/create-flag', { name, room, x, y, color, secondaryColor, shard })
         },
+        /**
+         * POST/api/game/gen-unique-flag-name
+         * @param {*} shard
+         * @returns {Object}
+         */
         genUniqueFlagName (shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/gen-unique-flag-name', { shard })
         },
+        /**
+         * POST /api/game/check-unique-flag-name
+         * @param {*} name
+         * @param {*} shard
+         * @returns {Object}
+         */
         checkUniqueFlagName (name, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/check-unique-flag-name', { name, shard })
         },
@@ -263,6 +311,13 @@ export class RawAPI extends EventEmitter {
         changeFlagColor (color = 1, secondaryColor = 1, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/change-flag-color', { color, secondaryColor, shard })
         },
+        /**
+         * POST /api/game/remove-flag
+         * @param {*} room
+         * @param {*} name
+         * @param {*} shard
+         * @returns {Object}
+         */
         removeFlag (room, name, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/remove-flag', { name, room, shard })
         },
@@ -309,9 +364,26 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         setNotifyWhenAttacked (_id, enabled = true, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/set-notify-when-attacked', { _id, enabled, shard })
         },
+        /**
+         * POST /api/game/create-invader
+         * @param {string} room
+         * @param {number} x
+         * @param {number} y
+         * @param {*} size
+         * @param {*} type
+         * @param {boolean} boosted
+         * @param {*} shard
+         * @returns {Object}
+         */
         createInvader (room, x, y, size, type, boosted = false, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/create-invader', { room, x, y, size, type, boosted, shard })
         },
+        /**
+         * POST /api/game/remove-invader
+         * @param {string} _id
+         * @param {*} shard
+         * @returns {Object}
+         */
         removeInvader (_id, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/remove-invader', { _id, shard })
         },
@@ -323,12 +395,29 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         time (shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/time', { shard })
         },
+        /**
+         * GET /api/game/world-size
+         * @param {string} shard
+         * @returns {Object}
+         */
         worldSize (shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/world-size', { shard })
         },
+        /**
+         * GET /api/game/room-decorations
+         * @param {*} room
+         * @param {*} shard
+         * @returns {Object}
+         */
         roomDecorations (room, shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/room-decorations', { room, shard })
         },
+        /**
+         * GET /api/game/room-objects
+         * @param {*} room
+         * @param {*} shard
+         * @returns {Object}
+         */
         roomObjects (room, shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/room-objects', { room, shard })
         },
@@ -355,6 +444,13 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         roomStatus (room, shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/room-status', { room, shard })
         },
+        /**
+         * GET /api/game/room-overview
+         * @param {*} room
+         * @param {number} interval
+         * @param {*} shard
+         * @returns {Object}
+         */
         roomOverview (room, interval = 8, shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/room-overview', { room, interval, shard })
         },
@@ -387,11 +483,21 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
           orders (resourceType, shard = DEFAULT_SHARD) {
             return self.req('GET', '/api/game/market/orders', { resourceType, shard })
           },
+          /**
+           * GET /api/game/market/stats
+           * @param {*} resourceType
+           * @param {*} shard
+           * @returns {Object}
+           */
           stats (resourceType, shard = DEFAULT_SHARD) {
             return self.req('GET', '/api/game/market/stats', { resourceType, shard })
           }
         },
         shards: {
+          /**
+           * GET /api/game/shards/info
+           * @returns {Object}
+           */
           info () {
             return self.req('GET', '/api/game/shards/info')
           }
@@ -440,28 +546,69 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         badge (badge) {
           return self.req('POST', '/api/user/badge', { badge })
         },
+        /**
+         * POST /api/user/respawn
+         * @returns {Object}
+         */
         respawn () {
           return self.req('POST', '/api/user/respawn')
         },
+        /**
+         * POST /api/user/set-active-branch
+         * @param {*} branch
+         * @param {*} activeName
+         * @returns {Object}
+         */
         setActiveBranch (branch, activeName) {
           return self.req('POST', '/api/user/set-active-branch', { branch, activeName })
         },
+        /**
+         * POST /api/user/clone-branch
+         * @param {*} branch
+         * @param {*} newName
+         * @param {*} defaultModules
+         * @returns {Object}
+         */
         cloneBranch (branch, newName, defaultModules) {
           return self.req('POST', '/api/user/clone-branch', { branch, newName, defaultModules })
         },
+        /**
+         * POST /api/user/delete-branch
+         * @param {*} branch
+         * @returns {Object}
+         */
         deleteBranch (branch) {
           return self.req('POST', '/api/user/delete-branch', { branch })
         },
+        /**
+         * POST /api/user/notify-prefs
+         * @param {*} prefs
+         * @returns {Object}
+         */
         notifyPrefs (prefs) {
           // disabled,disabledOnMessages,sendOnline,interval,errorsInterval
           return self.req('POST', '/api/user/notify-prefs', prefs)
         },
+        /**
+         * POST /api/user/tutorial-done
+         * @returns {Object}
+         */
         tutorialDone () {
           return self.req('POST', '/api/user/tutorial-done')
         },
+        /**
+         * POST /api/user/email
+         * @param {*} email
+         * @returns {Object}
+         */
         email (email) {
           return self.req('POST', '/api/user/email', { email })
         },
+        /**
+         * GET /api/user/world-start-room
+         * @param {*} shard
+         * @returns {Object}
+         */
         worldStartRoom (shard) {
           return self.req('GET', '/api/user/world-start-room', { shard })
         },
@@ -474,6 +621,10 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         worldStatus () {
           return self.req('GET', '/api/user/world-status')
         },
+        /**
+         * GET /api/user/branches
+         * @returns {Object}
+         */
         branches () {
           return self.req('GET', '/api/user/branches')
         },
@@ -493,7 +644,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
            * @param {string} branch
            * @param {*} modules
            * @param {*} _hash
-           * @returns not sure
+           * @returns {Object}
            */
           set (branch, modules, _hash) {
             if (!_hash) _hash = Date.now()
@@ -501,23 +652,53 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
           }
         },
         decorations: {
+          /**
+           * GET /api/user/decorations/inventory
+           * @returns {Object}
+           */
           inventory () {
             return self.req('GET', '/api/user/decorations/inventory')
           },
+          /**
+           * GET /api/user/decorations/themes
+           * @returns {Object}
+           */
           themes () {
-            return self.req('GET', '/api/user/decorations/inventory')
+            return self.req('GET', '/api/user/decorations/themes')
           },
+          /**
+           * POST /api/user/decorations/convert
+           * @param {*} decorations decorations is a string array of ids
+           * @returns {Object}
+           */
           convert (decorations) {
-            return self.req('POST', '/api/user/decorations/convert', { decorations }) // decorations is a string array of ids
+            return self.req('POST', '/api/user/decorations/convert', { decorations })
           },
+          /**
+           * POST /api/user/decorations/pixelize
+           * @param {number} count
+           * @param {*} theme
+           * @returns {Object}
+           */
           pixelize (count, theme = '') {
             return self.req('POST', '/api/user/decorations/pixelize', { count, theme })
           },
+          /**
+           * POST /api/user/decorations/activate
+           * @param {string} _id 
+           * @param {*} active 
+           * @returns {Object}
+           */
           activate (_id, active) {
             return self.req('POST', '/api/user/decorations/activate', { _id, active })
           },
+          /**
+           * POST /api/user/decorations/deactivate
+           * @param {*} decorations decorations is a string array of ids
+           * @returns {Object}
+           */
           deactivate (decorations) {
-            return self.req('POST', '/api/user/decorations/deactivate', { decorations }) // decorations is a string array of ids
+            return self.req('POST', '/api/user/decorations/deactivate', { decorations })
           }
         },
         /**
@@ -586,9 +767,19 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         findById (id) {
           return self.req('GET', '/api/user/find', { id })
         },
+        /**
+         * GET /api/user/stats
+         * @param {number} interval
+         * @returns {Object}
+         */
         stats (interval) {
           return self.req('GET', '/api/user/stats', { interval })
         },
+        /**
+         * GET /api/user/rooms
+         * @param {*} id
+         * @returns {Object}
+         */
         rooms (id) {
           return self.req('GET', '/api/user/rooms', { id }).then(self.mapToShard)
         },
@@ -625,6 +816,10 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         console (expression, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/user/console', { expression, shard })
         },
+        /**
+         * GET /api/user/name
+         * @returns {Object}
+         */
         name () {
           return self.req('GET', '/api/user/name')
         }
@@ -641,16 +836,31 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         pvp (interval = 100) {
           return self.req('GET', '/api/experimental/pvp', { interval }).then(self.mapToShard)
         },
+        /**
+         * GET /api/experimental/nukes
+         * @returns {Object}
+         */
         nukes () {
           return self.req('GET', '/api/experimental/nukes').then(self.mapToShard)
         }
       },
       warpath: {
+        /**
+         * GET /api/warpath/battles
+         * @param {number} interval
+         * @returns {Object}
+         */
         battles (interval = 100) {
           return self.req('GET', '/api/warpath/battles', { interval })
         }
       },
       scoreboard: {
+        /**
+         * GET /api/scoreboard/list
+         * @param {number} limit
+         * @param {number} offset
+         * @returns {Object}
+         */
         list (limit = 20, offset = 0) {
           return self.req('GET', '/api/scoreboard/list', { limit, offset })
         }
