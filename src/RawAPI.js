@@ -623,7 +623,13 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         },
         /**
          * GET /api/user/branches
-         * @returns {Object}
+         * @returns {{ ok: list: [{
+         *   _id: string;
+         *   branch: string;
+         *   activeWorld: boolean;
+         *   activeSim: boolean;
+         * }]}
+         * }
          */
         branches () {
           return self.req('GET', '/api/user/branches')
