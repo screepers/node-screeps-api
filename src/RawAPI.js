@@ -27,6 +27,7 @@ export class RawAPI extends EventEmitter {
     this.raw = {
 
       /**
+       * GET /api/version
        * @returns {{
        *  ok:1, package:number, protocol: number,
        *  serverData: {
@@ -43,7 +44,7 @@ export class RawAPI extends EventEmitter {
       },
       /**
        * GET /api/authmod
-       * @returns ?
+       * @returns {Object}
        */
       authmod () {
         if (self.isOfficialServer()) {
@@ -115,8 +116,8 @@ export class RawAPI extends EventEmitter {
         /**
          * GET /api/auth/me
          * @returns {{
-         *  ok: any;
-         *  _id: any;
+         *  ok: number;
+         *  _id: string;
          *  email: string;
          *  username: string;
          *  cpu: number;
@@ -136,7 +137,7 @@ export class RawAPI extends EventEmitter {
         },
         /**
          * GET /api/auth/query-token
-         * @param {*} token
+         * @param {string} token
          * @returns {Object}
          */
         queryToken (token) {
@@ -162,7 +163,7 @@ export class RawAPI extends EventEmitter {
         },
         /**
          * POST /api/register/set-username
-         * @param {*} username
+         * @param {string} username
          * @returns {Object}
          */
         setUsername (username) {
@@ -170,9 +171,9 @@ export class RawAPI extends EventEmitter {
         },
         /**
          * POST /api/register/submit
-         * @param {*} username
-         * @param {*} email
-         * @param {*} password
+         * @param {string} username
+         * @param {string} email
+         * @param {string} password
          * @param {*} modules
          * @returns {Object}
          */
@@ -212,6 +213,11 @@ export class RawAPI extends EventEmitter {
         send (respondent, text) {
           return self.req('POST', '/api/user/messages/send', { respondent, text })
         },
+        /**
+         * POST /api/user/messages/mark-read
+         * @param {string} id
+         * @returns {Object}
+         */
         markRead (id) {
           return self.req('POST', '/api/user/messages/mark-read', { id })
         }
@@ -249,9 +255,9 @@ export class RawAPI extends EventEmitter {
         },
         /**
          * POST /api/game/check-unique-object-name
-         * @param {*} type
-         * @param {*} name
-         * @param {*} shard
+         * @param {string} type
+         * @param {string} name
+         * @param {string} shard
          * @returns {Object}
          */
         checkUniqueObjectName (type, name, shard = DEFAULT_SHARD) {
@@ -273,8 +279,8 @@ export class RawAPI extends EventEmitter {
          * @param {number} x
          * @param {number} y
          * @param {string} name
-         * @param {*} color
-         * @param {*} secondaryColor
+         * @param {FlagColor} color
+         * @param {FlagColor} secondaryColor
          * @param {string} shard
          * @returns {{ ok, result: { nModified, ok, upserted: [ { index, _id } ], n }, connection: { host, id, port } }}
          * - if the name is new, result.upserted[0]._id is the game id of the created flag
@@ -286,7 +292,7 @@ export class RawAPI extends EventEmitter {
         },
         /**
          * POST/api/game/gen-unique-flag-name
-         * @param {*} shard
+         * @param {string} shard
          * @returns {Object}
          */
         genUniqueFlagName (shard = DEFAULT_SHARD) {
@@ -294,8 +300,8 @@ export class RawAPI extends EventEmitter {
         },
         /**
          * POST /api/game/check-unique-flag-name
-         * @param {*} name
-         * @param {*} shard
+         * @param {string} name
+         * @param {string} shard
          * @returns {Object}
          */
         checkUniqueFlagName (name, shard = DEFAULT_SHARD) {
@@ -303,8 +309,8 @@ export class RawAPI extends EventEmitter {
         },
         /**
          * POST /api/game/change-flag-color
-         * @param {*} color
-         * @param {*} secondaryColor
+         * @param {FlagColor} color
+         * @param {FlagColor} secondaryColor
          * @param {string} shard
          * @returns {{ ok, result: { nModified, ok, n }, connection: { host, id, port } }}
          */
@@ -313,9 +319,9 @@ export class RawAPI extends EventEmitter {
         },
         /**
          * POST /api/game/remove-flag
-         * @param {*} room
-         * @param {*} name
-         * @param {*} shard
+         * @param {string} room
+         * @param {string} name
+         * @param {string} shard
          * @returns {Object}
          */
         removeFlag (room, name, shard = DEFAULT_SHARD) {
@@ -357,8 +363,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         /**
          * POST /api/game/set-notify-when-attacked
          * @param {string} _id
-         * @param {*} enabled is either true or false (literal values, not strings)
-         * @param {*} shard
+         * @param {bool} enabled is either true or false (literal values, not strings)
+         * @param {string} shard
          * @returns {{ ok, result: { ok, nModified, n }, connection: { id, host, port } }}
          */
         setNotifyWhenAttacked (_id, enabled = true, shard = DEFAULT_SHARD) {
@@ -372,7 +378,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          * @param {*} size
          * @param {*} type
          * @param {boolean} boosted
-         * @param {*} shard
+         * @param {string} shard
          * @returns {Object}
          */
         createInvader (room, x, y, size, type, boosted = false, shard = DEFAULT_SHARD) {
@@ -381,7 +387,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         /**
          * POST /api/game/remove-invader
          * @param {string} _id
-         * @param {*} shard
+         * @param {string} shard
          * @returns {Object}
          */
         removeInvader (_id, shard = DEFAULT_SHARD) {
@@ -390,7 +396,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         /**
          * GET /api/game/time
          * @param {string} shard
-         * @returns {{ ok, time }}
+         * @returns {{ ok:number, time:number }}
          */
         time (shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/time', { shard })
@@ -405,8 +411,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         },
         /**
          * GET /api/game/room-decorations
-         * @param {*} room
-         * @param {*} shard
+         * @param {string} room
+         * @param {string} shard
          * @returns {Object}
          */
         roomDecorations (room, shard = DEFAULT_SHARD) {
@@ -414,8 +420,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         },
         /**
          * GET /api/game/room-objects
-         * @param {*} room
-         * @param {*} shard
+         * @param {string} room
+         * @param {string} shard
          * @returns {Object}
          */
         roomObjects (room, shard = DEFAULT_SHARD) {
@@ -423,13 +429,12 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         },
         /**
          * @param {string} room
-         * @param {*} encoded
+         * @param {*} encoded can be anything non-empty
          * @param {string} shard
          * @returns {{ ok, terrain: [ { room:string, x:number, y:number, type:"wall"|"swamp" } ] }
          * | { ok, terrain: [ { _id,room:string, terrain:string, type:"wall"|"swamp" } ] }}
          * terrain is a string of digits, giving the terrain left-to-right and top-to-bottom
          * 0: plain, 1: wall, 2: swamp, 3: also wall
-         * encoded argument can be anything non-empty
          */
         roomTerrain (room, encoded = 1, shard = DEFAULT_SHARD) {
           return self.req('GET', '/api/game/room-terrain', { room, encoded, shard })
@@ -437,8 +442,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         /**
          * @param {string} room
          * @param {string} shard
-         * @returns {{ _id, status, novice }}
-         * status can at least be "normal" or "out of borders"
+         * @returns {{ _id, status:"normal"|"out of borders"|string, novice:string }}
+         * `status` can at least be "normal" or "out of borders"
          * if the room is in a novice area, novice will contain the Unix timestamp of the end of the protection (otherwise it is absent)
          */
         roomStatus (room, shard = DEFAULT_SHARD) {
@@ -446,9 +451,9 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         },
         /**
          * GET /api/game/room-overview
-         * @param {*} room
+         * @param {string} room
          * @param {number} interval
-         * @param {*} shard
+         * @param {string} shard
          * @returns {Object}
          */
         roomOverview (room, interval = 8, shard = DEFAULT_SHARD) {
@@ -486,7 +491,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
           /**
            * GET /api/game/market/stats
            * @param {*} resourceType
-           * @param {*} shard
+           * @param {string} shard
            * @returns {Object}
            */
           stats (resourceType, shard = DEFAULT_SHARD) {
@@ -496,7 +501,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         shards: {
           /**
            * GET /api/game/shards/info
-           * @returns {Object}
+           * @returns {{ok:number, shards:[{name:string,lastTicks:number[],cpuLimimt:number,rooms:number,users:number,tick:number}]}}
            */
           info () {
             return self.req('GET', '/api/game/shards/info')
@@ -506,7 +511,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
       leaderboard: {
         /**
          * GET /api/leaderboard/list
-         * @param {*} limit
+         * @param {number} limit
          * @param {"world"|"power"} mode
          * @param {number?} offset
          * @param {string?} season
@@ -555,8 +560,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         },
         /**
          * POST /api/user/set-active-branch
-         * @param {*} branch
-         * @param {*} activeName
+         * @param {string} branch
+         * @param {string} activeName
          * @returns {Object}
          */
         setActiveBranch (branch, activeName) {
@@ -564,8 +569,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         },
         /**
          * POST /api/user/clone-branch
-         * @param {*} branch
-         * @param {*} newName
+         * @param {string} branch
+         * @param {string} newName
          * @param {*} defaultModules
          * @returns {Object}
          */
@@ -574,7 +579,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         },
         /**
          * POST /api/user/delete-branch
-         * @param {*} branch
+         * @param {string} branch
          * @returns {Object}
          */
         deleteBranch (branch) {
@@ -598,7 +603,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         },
         /**
          * POST /api/user/email
-         * @param {*} email
+         * @param {string} email
          * @returns {Object}
          */
         email (email) {
@@ -606,7 +611,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         },
         /**
          * GET /api/user/world-start-room
-         * @param {*} shard
+         * @param {string} shard
          * @returns {Object}
          */
         worldStartRoom (shard) {
@@ -623,7 +628,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         },
         /**
          * GET /api/user/branches
-         * @returns {{ ok: list: [{
+         * @returns {{ ok:number, list: [{
          *   _id: string;
          *   branch: string;
          *   activeWorld: boolean;
@@ -683,7 +688,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
           /**
            * POST /api/user/decorations/pixelize
            * @param {number} count
-           * @param {*} theme
+           * @param {string} theme
            * @returns {Object}
            */
           pixelize (count, theme = '') {
@@ -783,7 +788,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         },
         /**
          * GET /api/user/rooms
-         * @param {*} id
+         * @param {string} id
          * @returns {Object}
          */
         rooms (id) {
@@ -1019,6 +1024,20 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
  *   "color3": string;
  *   "flip": boolean;
  *   "param": number;
- *   "type": number;
+ *   "type": number|{ path1:string, path2:string};
  *}} Badge
+ */
+
+/**
+ * @typedef {1|2|3|4|5|6|7|8|9|10} FlagColor
+ * - Red = 1,
+ * - Purple = 2,
+ * - Blue = 3,
+ * - Cyan = 4,
+ * - Green = 5,
+ * - Yellow = 6,
+ * - Orange = 7,
+ * - Brown = 8,
+ * - Grey = 9,
+ * - White = 10
  */
