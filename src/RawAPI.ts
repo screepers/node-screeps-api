@@ -1,148 +1,109 @@
-import URL from 'url'
-import { EventEmitter } from 'events'
-import zlib from 'zlib'
-import axios from 'axios'
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios'
 import Debug from 'debug'
-import util from 'util'
+import { EventEmitter } from 'events'
+import { format } from 'url'
+import { promisify } from 'util'
+import { gunzip, inflate } from 'zlib'
+import { AuthMeResponse, AuthmodResponse, AuthQueryTokenResponse, AuthSigninResponse, AuthSteamTicketResponse, ServersListResponse, VersionResponse } from './API.types'
 
 const debugHttp = Debug('screepsapi:http')
 const debugRateLimit = Debug('screepsapi:ratelimit')
 
-const { format } = URL
-
-const gunzipAsync = util.promisify(zlib.gunzip)
-const inflateAsync = util.promisify(zlib.inflate)
+const gunzipAsync = promisify(gunzip)
+const inflateAsync = promisify(inflate)
+const sleep = promisify<number, number>((ms, cb) => setInterval(cb, ms))
 
 const DEFAULT_SHARD = 'shard0'
 const OFFICIAL_HISTORY_INTERVAL = 100
 const PRIVATE_HISTORY_INTERVAL = 20
 
-const sleep = ms => new Promise(resolve => setInterval(resolve, ms))
+type APIOpts = {
+  url?: string
+  pathname?: string
+  path?: string
+  email?: string
+  password?: string
+  experimentalRetry429?: boolean
+}
 
 export class RawAPI extends EventEmitter {
-  constructor (opts = {}) {
+  public http: AxiosInstance
+  public token: string
+  public opts: APIOpts
+  private __authed: boolean
+  public raw: any // TODO: remove once functions migrated
+  constructor (opts: APIOpts = {}) {
     super()
     this.setServer(opts)
     const self = this
-    this.raw = {
-
-      /**
-       * @returns {{
-       *  ok:1, package:number, protocol: number,
-       *  serverData: {
-       *    customObjectTypes,
-       *    historyChunkSize:number,
-       *    features,
-       *    shards: string[]
-       *  },
-       *  users:number
-       * }}
-       */
-      version () {
-        return self.req('GET', '/api/version')
-      },
-      /**
-       * GET /api/authmod
-       * @returns ?
-       */
-      authmod () {
-        if (self.isOfficialServer()) {
-          return Promise.resolve({ name: 'official' })
-        }
-        return self.req('GET', '/api/authmod')
-      },
-      /**
-       * Official:
-       * GET /room-history/${shard}/${room}/${tick}.json
-       * Private:
-       * GET /room-history
-       * @param {string} room
-       * @param {number} tick
-       * @param {string} shard
-       * @returns {Object} A json file with history data
-       */
-      history (room, tick, shard = DEFAULT_SHARD) {
-        if (self.isOfficialServer()) {
-          tick -= tick % OFFICIAL_HISTORY_INTERVAL
-          return self.req('GET', `/room-history/${shard}/${room}/${tick}.json`)
-        } else {
-          tick -= tick % PRIVATE_HISTORY_INTERVAL
-          return self.req('GET', '/room-history', { room, time: tick })
-        }
-      },
-      servers: {
-        /**
-         * POST /api/servers/list
-         * A list of community servers
-         * @returns {{
-         *  ok:number,
-         *  servers:{
-         *   _id:string,
-         *   settings:{
-         *     host:string,
-         *     port:string,
-         *     pass:string
-         *   },
-         *   name:string,
-         *   status:"active"|string
-         *   likeCount:number
-         *  }[]
-         * }}
-         */
-        list () {
-          return self.req('POST', '/api/servers/list', {})
-        }
-      },
-      auth: {
-        /**
-         * POST /api/auth/signin
-         * @param {string} email
-         * @param {string} password
-         * @returns {{ok:number, token:string}}
-         */
-        signin (email, password) {
-          return self.req('POST', '/api/auth/signin', { email, password })
-        },
-        /**
-         * POST /api/auth/steam-ticket
-         * @param {*} ticket
-         * @param {*} useNativeAuth
-         * @returns {Object}
-         */
-        steamTicket (ticket, useNativeAuth = false) {
-          return self.req('POST', '/api/auth/steam-ticket', { ticket, useNativeAuth })
-        },
-        /**
-         * GET /api/auth/me
-         * @returns {{
-         *  ok: any;
-         *  _id: any;
-         *  email: string;
-         *  username: string;
-         *  cpu: number;
-         *  badge: Badge;
-         *  password: string;
-         *  notifyPrefs: { sendOnline: any; errorsInterval: any; disabledOnMessages: any; disabled: any; interval: any };
-         *  gcl: number;
-         *  credits: number;
-         *  lastChargeTime: any;
-         *  lastTweetTime: any;
-         *  github: { id: any; username: any };
-         *  twitter: { username: string; followers_count: number };
-         *}}
-         */
-        me () {
-          return self.req('GET', '/api/auth/me')
-        },
-        /**
-         * GET /api/auth/query-token
-         * @param {*} token
-         * @returns {Object}
-         */
-        queryToken (token) {
-          return self.req('GET', '/api/auth/query-token', { token })
-        }
-      },
+  }
+  /**
+   * GET /api/version
+   */
+  version() {
+    return this.req<VersionResponse>('GET', '/api/version')
+  }
+  /**
+   * GET /api/authmod
+   */
+  async authmod(): Promise<AuthmodResponse> {
+    if (this.isOfficialServer()) {
+      return { name: 'official' }
+    }
+    return this.req<AuthmodResponse>('GET', '/api/authmod')
+  }
+  /**
+   * Official:
+   * GET /room-history/${shard}/${room}/${tick}.json
+   * 
+   * Private:
+   * GET /room-history
+   * 
+   * @returns A json file with history data
+   */
+  history (room: string, tick: number, shard = DEFAULT_SHARD): Promise<object> {
+    if (this.isOfficialServer()) {
+      tick -= tick % OFFICIAL_HISTORY_INTERVAL
+      return this.req('GET', `/room-history/${shard}/${room}/${tick}.json`)
+    } else {
+      tick -= tick % PRIVATE_HISTORY_INTERVAL
+      return this.req('GET', '/room-history', { room, time: tick })
+    }
+  }
+  /**
+   * POST /api/servers/list
+   * A list of community servers
+   */
+  serversList () {
+    return this.req<ServersListResponse>('POST', '/api/servers/list', {})
+  }
+  /**
+   * POST /api/auth/signin
+   */
+  authSignin (emailOrUsername: string, password: string) {
+    return this.req<AuthSigninResponse>('POST', '/api/auth/signin', { email: emailOrUsername, password })
+  }
+  /**
+   * POST /api/auth/steam-ticket
+   */
+  authSteamTicket (ticket: string, useNativeAuth = false) {
+    return this.req<AuthSteamTicketResponse>('POST', '/api/auth/steam-ticket', { ticket, useNativeAuth })
+  }
+  /**
+   * GET /api/auth/me
+   */
+  authMe () {
+    return this.req<AuthMeResponse>('GET', '/api/auth/me')
+  }
+  /**
+   * GET /api/auth/query-token
+   */ 
+  authQueryToken (token: string) {
+    return this.req<AuthQueryTokenResponse>('GET', '/api/auth/query-token', { token })
+  }
+  tmp () {
+    const self = this
+    const raw = {
       register: {
         /**
          * GET /api/register/check-email
@@ -921,9 +882,9 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     return res
   }
 
-  async req (method, path, body = {}) {
-    const opts = {
-      method,
+  async req<T> (method: string, path: string, body = {}): Promise<T> {
+    const opts: AxiosRequestConfig = {
+      method: method as Method,
       url: path,
       headers: {}
     }
@@ -969,30 +930,30 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
       }
       if (res.status === 429 && !res.headers['x-ratelimit-limit'] && this.opts.experimentalRetry429) {
         await sleep(Math.floor(Math.random() * 500) + 200)
-        return this.req(method, path, body)
+        return this.req<T>(method, path, body)
       }
       throw new Error(res.data)
     }
   }
 
-  async gz (data) {
+  async gz<T>(data: string): Promise<T> {
     const buf = Buffer.from(data.slice(3), 'base64')
     const ret = await gunzipAsync(buf)
     return JSON.parse(ret.toString())
   }
 
-  async inflate (data) { // es
+  async inflate<T>(data: string): Promise<T> { // es
     const buf = Buffer.from(data.slice(3), 'base64')
     const ret = await inflateAsync(buf)
     return JSON.parse(ret.toString())
   }
 
-  buildRateLimit (method, path, res) {
+  buildRateLimit (method: string, path: string, res: AxiosResponse) {
     const {
       headers: {
-        'x-ratelimit-limit': limit,
-        'x-ratelimit-remaining': remaining,
-        'x-ratelimit-reset': reset
+        'x-ratelimit-limit': limit = '',
+        'x-ratelimit-remaining': remaining = '',
+        'x-ratelimit-reset': reset = ''
       } = {}
     } = res
     return {
@@ -1005,14 +966,3 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     }
   }
 }
-
-/**
- * @typedef {{
- *   "color1": string;
- *   "color2": string;
- *   "color3": string;
- *   "flip": boolean;
- *   "param": number;
- *   "type": number;
- *}} Badge
- */
