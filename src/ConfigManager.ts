@@ -1,11 +1,33 @@
-import fs from 'fs'
-import util from 'util'
+import * as fs from 'fs'
+import * as path from 'path'
 import YAML from 'yamljs'
-import path from 'path'
 
-const readFileAsync = util.promisify(fs.readFile)
+const readFileAsync = fs.promises.readFile
+
+
+export type ServerConfig = {
+  host: string
+  port: number
+  path?: string
+  secure?: boolean
+  token?: string
+  username?: string
+  password?: string
+}
+
+
+export interface Config {
+  servers: {
+    [name: string]: ServerConfig
+  }
+  configs?: {
+    [name: string]: any
+  }
+}
 
 export class ConfigManager {
+  private _config: Config
+  public path: string
   async refresh () {
     this._config = null
     await this.getConfig()
@@ -64,13 +86,13 @@ export class ConfigManager {
     return null
   }
 
-  async loadConfig (file) {
+  async loadConfig (file: string): Promise<Config> {
     try {
       const contents = await readFileAsync(file, 'utf8')
       return YAML.parse(contents)
     } catch (e) {
       if (e.code === 'ENOENT') {
-        return false
+        return null
       } else {
         throw e
       }

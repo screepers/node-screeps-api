@@ -23,24 +23,9 @@ export class ScreepsAPI extends RawAPI {
       const conf = data.servers[server]
       if (conf.ptr) conf.path = '/ptr'
       if (conf.season) conf.path = '/season'
-      const api = new ScreepsAPI(
-        Object.assign(
-          {
-            hostname: conf.host,
-            port: conf.port,
-            protocol: conf.secure ? 'https' : 'http',
-            token: conf.token,
-            path: conf.path || '/'
-          },
-          opts
-        )
-      )
+      const api = new ScreepsAPI(conf)
 
       api.appConfig = (data.configs && data.configs[config]) || {}
-
-      if (!conf.token && conf.username && conf.password) {
-        await api.auth(conf.username, conf.password)
-      }
 
       return api
     }
