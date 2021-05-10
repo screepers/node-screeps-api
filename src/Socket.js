@@ -92,7 +92,7 @@ export class Socket extends EventEmitter {
 
   async reconnect () {
     if (this.reconnecting) {
-        return;
+      return
     }
     this.reconnecting = true
     let retries = 0
