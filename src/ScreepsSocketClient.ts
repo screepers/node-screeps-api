@@ -250,7 +250,7 @@ export class ScreepsSocketClient extends EventEmitter {
         }
         debug(ScreepsSocketClient.CONNECTED)
         this.emit(ScreepsSocketClient.CONNECTED)
-        resolve(this.auth(this.http.token!))
+        resolve(this.auth())
       })
       this.ws.on('close', () => {
         clearInterval(this.keepAliveInter)
@@ -681,11 +681,13 @@ export class ScreepsSocketClient extends EventEmitter {
   }
 
   /**
-   * Authenticate to the server. This is called automatically after a
-   * connection is successfully established.
-   * @param token The API token with which to authenticate
+   * Attempt to authenticate to the server using the existing HTTP token.
    */
-  private async auth(token: string): Promise<void> {
+  private async attemptAuth(): Promise<void> {
+    const token = this.http.token
+    if (!token) {
+      throw new Error('Missing token')
+    }
     return new Promise<void>((resolve, reject) => {
       this.send(`auth ${token}`)
       this.once(ScreepsSocketClient.AUTH, (event: ServerAuthEvent) => {
@@ -703,6 +705,22 @@ export class ScreepsSocketClient extends EventEmitter {
         }
       })
     })
+  }
+
+  /**
+   * Authenticate to the server. This is called automatically after a
+   * connection is successfully established.
+   */
+  private async auth() {
+    try {
+      await this.attemptAuth()
+    } catch {
+      // When reconnecting we may discover that the token has become invalid.
+      // Fetch a new token and try again.
+      debug('auth retry')
+      await this.http.auth()
+      await this.attemptAuth()
+    }
   }
 
   /**
