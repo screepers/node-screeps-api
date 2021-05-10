@@ -983,9 +983,9 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         return this.req(method, path, body)
       }
       if (err.response) {
-        throw new Error(res.data);
+        throw new Error(res.data)
       }
-      throw new Error(err.message);
+      throw new Error(err.message)
     }
   }
 
