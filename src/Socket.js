@@ -91,7 +91,9 @@ export class Socket extends EventEmitter {
   }
 
   async reconnect () {
-    Object.keys(this.__subs).forEach(sub => this.subscribe(sub))
+    if (this.reconnecting) {
+      return
+    }
     this.reconnecting = true
     let retries = 0
     let retry
@@ -115,6 +117,9 @@ export class Socket extends EventEmitter {
       debug('reconnect failed')
       this.emit('error', err)
       throw err
+    } else {
+      // Resume existing subscriptions on the new socket
+      Object.keys(this.__subs).forEach(sub => this.subscribe(sub))
     }
   }
 
