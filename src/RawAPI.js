@@ -985,7 +985,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
       if (err.response) {
         throw new Error(res.data);
       }
-      throw err;
+      throw new Error(err.message);
     }
   }
 
