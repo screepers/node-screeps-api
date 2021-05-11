@@ -2,7 +2,7 @@ import Debug from 'debug'
 import { EventEmitter, once } from 'events'
 import { promisify } from 'util'
 import { inflate } from 'zlib'
-import * as APITypes from './API.types'
+import { ConsoleEvent, CPUEvent, RoomMap2Event, SocketEvent } from './API.types'
 import { ScreepsAPI } from './ScreepsAPI'
 import WebSocket = require("isomorphic-ws")
 
@@ -26,9 +26,9 @@ const SOCKET_DEFAULTS: SocketOpts = {
 }
 export declare interface Socket {
   on(event: 'auth', listener: (ev: { status: string, token: string }) => void): this
-  on(event: 'cpu', listener: (event: APITypes.CPUEvent) => void): this
-  on(event: 'console', listener: (event: APITypes.ConsoleEvent) => void): this
-  on(event: 'roomMap2', listener: (event: APITypes.RoomMap2Event) => void): this
+  on(event: 'cpu', listener: (event: SocketEvent<CPUEvent>) => void): this
+  on(event: 'console', listener: (event: SocketEvent<ConsoleEvent>) => void): this
+  on(event: 'roomMap2', listener: (event: SocketEvent<RoomMap2Event>) => void): this
   on(event: string, listener: Function): this
 }
 export class Socket extends EventEmitter {
