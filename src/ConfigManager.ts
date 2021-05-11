@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import YAML from 'yamljs'
+import * as YAML from 'yamljs'
 
 const readFileAsync = fs.promises.readFile
 
@@ -13,6 +13,10 @@ export type ServerConfig = {
   token?: string
   username?: string
   password?: string
+  /** @deprecated Please use `path` instead */
+  ptr?: boolean
+  /** @deprecated Please use `path` instead */
+  season?: boolean
 }
 
 

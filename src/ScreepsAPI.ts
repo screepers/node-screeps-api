@@ -2,15 +2,17 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { promisify } from 'util'
-import { gunzip, inflate } from 'zlib'
+import { gunzip } from 'zlib'
 import * as APITypes from './API.types'
-import { ServerConfig } from './ConfigManager'
+import { ConfigManager, ServerConfig } from './ConfigManager'
+import { RateLimit, RateLimitTracker } from './RateLimitTracker'
+import { Socket } from './Socket'
+
+const configManager = new ConfigManager()
 
 const debugHttp = Debug('screepsapi:http')
-const debugRateLimit = Debug('screepsapi:ratelimit')
 
 const gunzipAsync = promisify(gunzip)
-const inflateAsync = promisify(inflate)
 const sleep = promisify<number, number>((ms, cb) => setInterval(cb, ms))
 
 const DEFAULT_SHARD = 'shard0'
@@ -20,6 +22,7 @@ const PRIVATE_HISTORY_INTERVAL = 20
 type APIOpts = ServerConfig & {
   url?: string
   shard?: string
+  appConfig?: any
 }
 
 const DEFAULT_API_OPTS = {
@@ -30,19 +33,52 @@ const DEFAULT_API_OPTS = {
   token: ''
 }
 
-export class RawAPI extends EventEmitter {
-  public http: AxiosInstance
-  public shard: string = DEFAULT_SHARD
-  public token: string
-  public opts: APIOpts
-  private __authed: boolean
-  
-  constructor (opts: APIOpts = DEFAULT_API_OPTS) {
+export declare interface ScreepsAPI {
+  on(event: 'token', listener: (token: string) => void): this
+  on(event: string, listener: Function): this
+}
+
+export class ScreepsAPI extends EventEmitter {
+  private _tokenInfo: Promise<APITypes.TokenInfo>
+  private _user: Promise<APITypes.UserInfo>
+  private _authed: boolean
+  http: AxiosInstance
+  shard: string = DEFAULT_SHARD
+  token: string
+  opts: APIOpts = DEFAULT_API_OPTS
+  readonly rateLimits: RateLimitTracker
+  /** Config from UCF if specified */
+  readonly config: any
+  readonly socket: Socket
+  constructor (opts: Partial<APIOpts> = {}) {
     super()
     if (opts.shard) this.shard = opts.shard
+    if (opts.appConfig) this.config = opts.appConfig
+    this.rateLimits = new RateLimitTracker()
+    this.on('token', token => this.token = token)
+    this.socket = new Socket(this)
     this.setServer(opts)
-    const self = this
   }
+  
+  static async fromConfig(server = 'main', config = '', opts = {}) {
+    const data = await configManager.getConfig()
+
+    if (data) {
+      if (!data.servers[server]) {
+        throw new Error(`Server '${server}' does not exist in '${configManager.path}'`)
+      }
+
+      const conf: APIOpts = data.servers[server]
+      if (conf.ptr) conf.path = '/ptr'
+      if (conf.season) conf.path = '/season'
+      conf.appConfig = (data.configs && data.configs[config]) || {}
+      return new ScreepsAPI(conf)
+    }
+
+    throw new Error('No valid config found')
+  }
+
+  
   /** GET /api/version */
   version() {
     return this.req<APITypes.VersionResponse>('GET', '/api/version')
@@ -330,16 +366,20 @@ export class RawAPI extends EventEmitter {
     return this.req<APITypes.UserRespawnProhibitedRoomsResponse>('GET', '/api/user/respawn-prohibited-rooms')
   }
   /** GET /api/user/memory **/
-  userMemoryGet(path: string, shard: string = this.shard) {
-    return this.req<APITypes.UserMemoryGetResponse>('GET', '/api/user/memory', { path, shard })
+  async userMemoryGet(path: string, shard: string = this.shard) {
+    const res = await this.req<APITypes.UserMemoryGetResponse>('GET', '/api/user/memory', { path, shard })
+    if (res.data.startsWith('gz:')) res.data = await this.gz(res.data)
+    return res.data
   }
   /** POST /api/user/memory **/
   userMemoryPost(path: string, value: any, shard: string = this.shard) {
     return this.req<APITypes.UserMemoryPostResponse>('POST', '/api/user/memory', { path, value, shard })
   }
   /** GET /api/user/memory-segment **/
-  userMemorySegmentGet(segment: number, shard: string = this.shard) {
-    return this.req<APITypes.UserMemorySegmentGetResponse>('GET', '/api/user/memory-segment', { segment, shard })
+  async userMemorySegmentGet(segment: number, shard: string = this.shard) {
+    const res = await this.req<APITypes.UserMemorySegmentGetResponse>('GET', '/api/user/memory-segment', { segment, shard })
+    if (res.data.startsWith('gz:')) res.data = await this.gz(res.data)
+    return res.data
   }
   /** POST /api/user/memory-segment **/
   userMemorySegmentPost(segment: number, data: string, shard: string = this.shard) {
@@ -407,7 +447,7 @@ export class RawAPI extends EventEmitter {
     return this.opts.url.match(/screeps\.com/) !== null
   }
 
-  mapToShard (res: any): any {
+  mapToShard (res: any): any { 
     if (!res.shards) {
       res.shards = {
         privSrv: res.list || res.rooms
@@ -416,17 +456,18 @@ export class RawAPI extends EventEmitter {
     return res
   }
 
-  setServer (opts: APIOpts) {
-    this.opts = Object.assign(DEFAULT_API_OPTS, opts)
+  setServer (opts: Partial<APIOpts>) {
+    this.opts = Object.assign({}, DEFAULT_API_OPTS, opts)
     if (opts.token) {
       this.token = opts.token
     }
+    debugHttp(`setServer ${JSON.stringify(opts)}`)
     this.http = axios.create({
-      baseURL: `${opts.secure?'https':'http'}://${opts.host}:${opts.port}${opts.path}`
+      baseURL: `${this.opts.secure?'https':'http'}://${this.opts.host}:${this.opts.port}${this.opts.path}`
     })
   }
 
-  async auth (emailOrUsername: string, password: string) {
+  async auth (emailOrUsername?: string, password?: string) {
     if (emailOrUsername && password) {
       Object.assign(this.opts, { email: emailOrUsername, password })
     }
@@ -436,8 +477,24 @@ export class RawAPI extends EventEmitter {
     }
     this.emit('token', res.token)
     this.emit('auth')
-    this.__authed = true
+    this._authed = true
     return res
+  }
+
+  private updateRateLimits(method: string, path: string, res: AxiosResponse) {
+    const {
+      headers: {
+        'x-ratelimit-limit': limit = '',
+        'x-ratelimit-remaining': remaining = '',
+        'x-ratelimit-reset': reset = ''
+      } = {}
+    } = res
+    this.emit('rateLimit', { limit, remaining, reset })
+    this.rateLimits.updateLimit(method, path, {
+      limit,
+      remaining,
+      reset
+    })
   }
 
   async req<T> (method: string, path: string, body = {}, retries: number = 0): Promise<T> {
@@ -459,29 +516,22 @@ export class RawAPI extends EventEmitter {
       opts.data = body
     }
     try {
-      const res = await this.http(opts)
+      const res = await this.http(opts) as AxiosResponse<T>
       const token = res.headers['x-token']
       if (token) {
         this.emit('token', token)
       }
-      const rateLimit = this.buildRateLimit(method, path, res)
-      this.emit('rateLimit', rateLimit)
-      debugRateLimit(`${method} ${path} ${rateLimit.remaining}/${rateLimit.limit} ${rateLimit.toReset}s`)
-      if (typeof res.data.data === 'string' && res.data.data.slice(0, 3) === 'gz:') {
-        res.data.data = await this.gz(res.data.data)
-      }
+      this.updateRateLimits(method, path, res.headers)
       this.emit('response', res)
       return res.data
     } catch (err) {
       const res = err.response || {}
-      const rateLimit = this.buildRateLimit(method, path, res)
-      this.emit('rateLimit', rateLimit)
-      debugRateLimit(`${method} ${path} ${rateLimit.remaining}/${rateLimit.limit} ${rateLimit.toReset}s`)
+      this.updateRateLimits(method, path, res.headers)
       if (res.status === 401) {
-        if (this.__authed && !this.isOfficialServer()) {
-          this.__authed = false
+        if (this._authed && !this.isOfficialServer()) {
+          this._authed = false
           await this.auth(this.opts.username, this.opts.password)
-          return this.req(method, path, body)
+          return this.req<T>(method, path, body)
         } else {
           throw new Error('Not Authorized')
         }
@@ -494,37 +544,53 @@ export class RawAPI extends EventEmitter {
         await sleep(time)
         return this.req<T>(method, path, body, retries)
       }
-      throw new Error(res.data)
+      throw new Error(res.data || err.message)
     }
   }
 
-  async gz<T>(data: string): Promise<T> {
+  async gz(data: string): Promise<string> {
     const buf = Buffer.from(data.slice(3), 'base64')
     const ret = await gunzipAsync(buf)
-    return JSON.parse(ret.toString())
+    return ret.toString()
   }
 
-  async inflate<T>(data: string): Promise<T> { // es
-    const buf = Buffer.from(data.slice(3), 'base64')
-    const ret = await inflateAsync(buf)
-    return JSON.parse(ret.toString())
+  getRateLimit(method: string, path: string): RateLimit {
+    return this.rateLimits[method][path] || this.rateLimits.global
   }
 
-  buildRateLimit (method: string, path: string, res: AxiosResponse) {
-    const {
-      headers: {
-        'x-ratelimit-limit': limit = '',
-        'x-ratelimit-remaining': remaining = '',
-        'x-ratelimit-reset': reset = ''
-      } = {}
-    } = res
-    return {
-      method,
-      path,
-      limit: +limit,
-      remaining: +remaining,
-      reset: +reset,
-      toReset: reset - Math.floor(Date.now() / 1000)
+  get rateLimitResetUrl() {
+    return `https://screeps.com/a/#!/account/auth-tokens/noratelimit?token=${this.token.slice(
+      0,
+      8
+    )}`
+  }
+
+  async me() {
+    if (this._user) return this._user
+    const tokenInfo = await this.tokenInfo()
+    if (tokenInfo.full) {
+      this._user = this.authMe()
+    } else {
+      const { username } = await this.userName()
+      this._user = this.userFind(username).then(u => u.user)
     }
+    return this._user
+  }
+
+  async tokenInfo() {
+    if (this._tokenInfo) {
+      return this._tokenInfo
+    }
+    if (this.opts.token) {
+      this._tokenInfo = this.authQueryToken(this.token).then(t => t.token)
+    } else {
+      this._tokenInfo = Promise.resolve({ full: true })
+    }
+    return this._tokenInfo
+  }
+
+  async userId() {
+    const user = await this.me()
+    return user._id
   }
 }

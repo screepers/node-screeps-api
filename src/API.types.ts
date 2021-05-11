@@ -18,6 +18,14 @@ export type UserInfoMap = {
   [id: string]: UserInfo
 }
 
+export type TokenInfo = {
+  _id?: string
+  full: boolean
+  token?: string
+  noRatelimitUntil?: number
+  // TODO: Check limited token and update this.
+}
+
 export type CodeModules = {
   [name: string]: string | { binary: string }
 }
@@ -105,7 +113,9 @@ export type AuthMeResponse = ServerResponse & {
   }
 }
 
-export type AuthQueryTokenResponse = ServerResponse & {}
+export type AuthQueryTokenResponse = ServerResponse & {
+  token: TokenInfo
+}
 export type RegisterCheckEmailResponse = ServerResponse & {}
 export type RegisterCheckUsernameResponse = ServerResponse & {}
 export type RegisterSetUsernameResponse = ServerResponse & {}
@@ -242,8 +252,46 @@ export type UserRoomsResponse = ServerResponse & {}
 export type UserOverviewResponse = ServerResponse & {}
 export type UserMoneyHistoryResponse = ServerResponse & {}
 export type UserConsoleResponse = ServerResponse & {}
-export type UserNameResponse = ServerResponse & {}
+export type UserNameResponse = ServerResponse & {
+  username: string
+}
 export type ExperimentalPvpResponse = ServerResponse & {}
 export type ExperimentalNukesResponse = ServerResponse & {}
 export type WarpathBattlesResponse = ServerResponse & {}
 export type ScoreboardListResponse = ServerResponse & {}
+
+export type SocketEvent<T> = {
+  type: string
+  id: string
+  path: string
+  data: T
+}
+
+type ArrayPos = [x: number, y: number]
+
+export type ConsoleMessages = {
+  log: string[]
+  results: string[]
+}
+
+export type ConsoleEvent = {
+  messages?: ConsoleMessages
+  error?: string
+}
+
+export type CPUEvent = {
+  cpu: number
+  memory: number
+}
+
+export type RoomMap2Event = {
+  w: ArrayPos[]
+  r: ArrayPos[]
+  pb: ArrayPos[]
+  p: ArrayPos[]
+  s: ArrayPos[]
+  c: ArrayPos[]
+  m: ArrayPos[]
+  k: ArrayPos[]
+  [userId: string]: ArrayPos[]
+}

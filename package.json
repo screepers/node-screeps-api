@@ -3,10 +3,9 @@
   "version": "1.15.0",
   "description": "",
   "repository": "screepers/node-screeps-api",
-  "main": "dist/ScreepsAPI.js",
-  "module": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "rollup -c",
+    "build": "tsc",
     "prepublishOnly": "npm run build",
     "lint": "standard src/**/*.js",
     "lint-fix": "standard src/**/*.js --fix",
@@ -23,6 +22,7 @@
     "axios": "^0.21.1",
     "commander": "^7.2.0",
     "debug": "^4.1.1",
+    "isomorphic-ws": "^4.0.1",
     "ws": "^7.4.4",
     "yamljs": "^0.3.0"
   },
@@ -34,15 +34,10 @@
     "lodash": "^4.17.11",
     "mocha": "^8.3.2",
     "publish-if-not-published": "^2.0.0",
-    "rollup": "^2.44.0",
-    "rollup-plugin-typescript2": "^0.30.0",
     "standard": "*",
     "tslib": "^2.2.0",
     "typedoc": "^0.20.35",
     "typescript": "^4.2.4"
-  },
-  "browser": {
-    "ws": "./src/ws-browser.js"
   },
   "types": "dist/types/index.d.ts"
 }
