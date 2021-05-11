@@ -1,6 +1,6 @@
 {
   "name": "screeps-api",
-  "version": "1.15.0",
+  "version": "2.0.0-beta1",
   "description": "",
   "repository": "screepers/node-screeps-api",
   "main": "dist/index.js",
