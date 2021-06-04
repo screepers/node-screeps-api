@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const program = require('commander')
+const { Command } = require('commander')
 const { ScreepsAPI } = require('../')
 const fs = require('fs')
 const util = require('util')
@@ -8,15 +8,15 @@ const path = require('path')
 const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
 
-async function init (opts) {
-  return ScreepsAPI.fromConfig(opts.parent.server)
+async function init(opts) {
+  return ScreepsAPI.fromConfig(opts.server)
 }
 
-async function json (data) {
+async function json(data) {
   process.stdout.write(JSON.stringify(data))
 }
 
-async function out (data, opts) {
+async function out(data, opts) {
   data = await data
   data = (data && data.data) || data
   if (process.stdout.isTTY) {
@@ -26,18 +26,29 @@ async function out (data, opts) {
   }
 }
 
-async function run () {
-  program
-    .version(require('../package.json').version)
-    .option('--server <server>', 'Server config to use', 'main')
+async function run() {
+  const program = new Command()
+  
+  /** @param {string} name */
+  const commandBase = (name, args = '') => {
+    const command = new Command(name)
+    command
+      .arguments(args)
+      .option('--server <server>', 'Server config to use', 'main')
+    program.addCommand(command)
+    return command
+  }
 
   program
-    .command('raw <cmd> [args...]')
+    .version(require('../package.json').version)
+
+  commandBase('raw', '<cmd> [args...]')
     .description('Execute raw API call')
     .action(async function (cmd, args, opts) {
       try {
         const api = await init(opts)
         const path = cmd.split('.')
+        /** @type {function} */
         let fn = api.raw
         for (const part of path) {
           fn = fn[part]
@@ -46,14 +57,13 @@ async function run () {
           console.log('Invalid cmd')
           return
         }
-        out(fn(...args))
+        out(fn.apply(api, args))
       } catch (e) {
         console.error(e)
       }
     })
 
-  program
-    .command('memory [path]')
+  commandBase('memory', '[path]')
     .description(`Get Memory contents`)
     .option('--set <file>', 'Sets the memory path to the contents of file')
     .option('--allow-root', 'Allows writing without path')
@@ -82,8 +92,7 @@ async function run () {
       }
     })
 
-  const seg = program
-    .command('segment <segment>')
+  commandBase('segment', '<segment>')
     .description(`Get segment contents. Use 'all' to get all)`)
     .option('--set <file>', 'Sets the segment content to the contents of file')
     .option('-s --shard <shard>', 'Shard to read from', 'shard0')
@@ -116,8 +125,7 @@ async function run () {
       }
     })
 
-  program
-    .command('download')
+  commandBase('download')
     .description(`Download code`)
     .option('-b --branch <branch>', 'Code branch', 'default')
     .option('-d --dir <dir>', 'Directory to save in (defaults to outputing in console)')
@@ -144,8 +152,7 @@ async function run () {
       }
     })
 
-  program
-    .command('upload <files...>')
+  commandBase('upload', '<files...>')
     .description(`Upload code`)
     .option('-b --branch <branch>', 'Code branch', 'default')
     .action(async function (files, opts) {
@@ -176,7 +183,7 @@ async function run () {
     program.outputHelp()
   }
 
-  program.parse(process.argv)
+  await program.parseAsync()
 }
 
 run().then(data => {
