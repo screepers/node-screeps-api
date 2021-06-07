@@ -61,7 +61,7 @@ export class Socket extends EventEmitter {
         }
         debug('connected')
         this.emit('connected')
-        resolve(this.auth(this.api.token))
+        resolve(this._auth())
       })
       this.ws.on('close', () => {
         clearInterval(this.keepAliveInter)
@@ -169,6 +169,21 @@ export class Socket extends EventEmitter {
       this.__queue.push(data)
     } else {
       this.ws.send(data)
+    }
+  }
+
+  async _auth () {
+    try {
+      await this.auth(this.api.token)
+    } catch (err) {
+      if (err.message === 'socket auth failed') {
+        // Retry with a new token (in case the token is invalid after a reconnect)
+        debug('auth retry')
+        await this.api.auth()
+        await this.auth(this.api.token)
+      } else {
+        throw err
+      }
     }
   }
 
