@@ -196,7 +196,16 @@ export type GameMarketOrdersIndexResponse = ServerResponse & {}
 export type GameMarketMyOrdersResponse = ServerResponse & {}
 export type GameMarketOrdersResponse = ServerResponse & {}
 export type GameMarketStatsResponse = ServerResponse & {}
-export type GameShardsInfoResponse = ServerResponse & {}
+export type GameShardsInfoResponse = ServerResponse & {
+  shards: Array<{
+    name: string;
+    lastTicks: number[]
+    cpuLimit: number
+    rooms: number
+    users: number
+    tick: number
+  }>
+}
 export type LeaderboardListResponse = ServerResponse & {}
 export type LeaderboardFindResponse = ServerResponse & {}
 export type LeaderboardSeasonsResponse = ServerResponse & {}
