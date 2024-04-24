@@ -1,3 +1,4 @@
+import clean from 'rollup-plugin-clean';
 import typescript from 'rollup-plugin-typescript2'
 
 export default {
@@ -8,7 +9,6 @@ export default {
     dir: 'dist',
     format: 'cjs',
     exports: 'named',
-    preferConst: true,
     globals: {
       ws: 'WebSocket'
     },
@@ -18,8 +18,7 @@ export default {
   // },
   external: ['ws', 'fs', 'axios', 'bluebird', 'yamljs', 'url', 'events', 'zlib', 'path','debug', 'util'],
   plugins: [
-    typescript({
-      useTsconfigDeclarationDir: true
-    })
+    clean({ targets: ["dist"] }),
+    typescript()
   ]
 }
