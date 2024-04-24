@@ -1,7 +1,7 @@
-import clean from 'rollup-plugin-clean';
-import typescript from 'rollup-plugin-typescript2'
+const clean = require('rollup-plugin-clean');
+const typescript = require('rollup-plugin-typescript2')
 
-export default {
+module.exports = {
   input: {
     ScreepsAPI: 'src/index.js'
   },

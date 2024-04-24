@@ -5,7 +5,7 @@
   "repository": "screepers/node-screeps-api",
   "main": "dist/ScreepsAPI.js",
   "module": "src/index.js",
-  "type": "module",
+  "type": "commonjs",
   "engines": {
     "node": ">=18",
     "npm": ">=10"
