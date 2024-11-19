@@ -212,7 +212,7 @@ are the ones listed below.
     - `{ ok, time }`
 
 - [GET/POST] `https://screeps.com/api/user/code`
-    - for pushing or pulling code, as documented at http://support.screeps.com/hc/en-us/articles/203022612
+    - for pushing or pulling code, as documented at https://screeps.com/forum/topic/3313/api-user-code-endpoint-with-private-servers/3
 
 - [POST] `https://screeps.com/api/game/map-stats`
     - post data: `{ rooms: [ <room name> ], statName: "..."}`
