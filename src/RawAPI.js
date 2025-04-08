@@ -642,7 +642,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         code: {
           /**
            * GET /api/user/code
-           * for pushing or pulling code, as documented at http://support.screeps.com/hc/en-us/articles/203022612
+           * for pushing or pulling code, as documented at https://screeps.com/forum/topic/3313/api-user-code-endpoint-with-private-servers/3
            * @param {string} branch
            * @returns code
            */
@@ -651,7 +651,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
           },
           /**
            * POST /api/user/code
-           * for pushing or pulling code, as documented at http://support.screeps.com/hc/en-us/articles/203022612
+           * for pushing or pulling code, as documented at https://screeps.com/forum/topic/3313/api-user-code-endpoint-with-private-servers/3
            * @param {string} branch
            * @param {*} modules
            * @param {*} _hash
