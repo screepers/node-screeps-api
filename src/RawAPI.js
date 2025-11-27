@@ -268,7 +268,7 @@ export class RawAPI extends EventEmitter {
          * @param {number} x
          * @param {number} y
          * @param {string} name
-         * @param {string?} shard
+         * @param {string} shard=DEFAULT_SHARD
          */
         placeSpawn (room, x, y, name, shard = DEFAULT_SHARD) {
           return self.req('POST', '/api/game/place-spawn', { name, room, x, y, shard })
@@ -511,10 +511,10 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
       leaderboard: {
         /**
          * GET /api/leaderboard/list
-         * @param {number} limit
-         * @param {"world"|"power"} mode
-         * @param {number?} offset
-         * @param {string?} season
+         * @param {number} limit=10
+         * @param {"world"|"power"} mode="world"
+         * @param {number} offset=0
+         * @param {string} [season]
          * @returns {{ ok, list: [ { _id, season, user, score, rank } ], count, users: { <user's _id>: { _id, username, badge: { type, color1, color2, color3, param, flip }, gcl } } }}
          */
         list (limit = 10, mode = 'world', offset = 0, season) {
@@ -526,7 +526,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          * GET /api/leaderboard/find
          * @param {string} username
          * @param {"world"|string} mode
-         * @param {string?} season An optional date in the format YYYY-MM, if not supplied all ranks in all seasons is returned.
+         * @param {string} [season] An optional date in the format YYYY-MM, if not supplied all ranks in all seasons is returned.
          * @returns {{ ok, _id, season, user, score, rank }}
          * - `user` (not `_id`) is the user's _id, as returned by `me` and `user/find`
          * - `rank` is 0-based
@@ -654,7 +654,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
            * for pushing or pulling code, as documented at http://support.screeps.com/hc/en-us/articles/203022612
            * @param {string} branch
            * @param {*} modules
-           * @param {*} _hash
+           * @param {*} [_hash]
            * @returns {Object}
            */
           set (branch, modules, _hash) {
