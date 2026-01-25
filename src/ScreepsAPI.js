@@ -27,11 +27,10 @@ export class ScreepsAPI extends RawAPI {
         Object.assign(
           {
             hostname: conf.host,
-            port: conf.port,
             protocol: conf.secure ? 'https' : 'http',
-            token: conf.token,
-            path: conf.path || '/'
+            path: '/'
           },
+          conf,
           opts
         )
       )
