@@ -23,7 +23,7 @@ export type TokenInfo = {
   full: boolean
   token?: string
   noRatelimitUntil?: number
-  // TODO: Check limited token and update this.
+  description?: string
 }
 
 export type CodeModules = {
@@ -63,8 +63,13 @@ export type VersionResponse = ServerResponse & {
     customObjectTypes?: { [type: string]: object }
     features?: object[]
     shards?: string[]
+    renderer?: object
   }
   users: number
+  currentSeason?: string
+  seasonAccessCost?: string
+  decorationConvertationCost?: number
+  decorationPixelizationCost?: number
 }
 
 export type AuthmodResponse = ServerResponse & {
@@ -89,7 +94,7 @@ export type AuthSigninResponse = ServerResponse & {
   token: string
 }
 
-export type AuthSteamTicketResponse = ServerResponse & {}
+export type AuthSteamTicketResponse = ServerResponse
 
 export type AuthMeResponse = ServerResponse & {
   _id: string
@@ -97,29 +102,49 @@ export type AuthMeResponse = ServerResponse & {
   username: string
   cpu: number
   badge: Badge
-  password: string
+  /** true if a password is set, false otherwise */
+  password: boolean
   notifyPrefs: NotifyPreferences
   gcl: number
   credits: number
-  lastChargeTime: number
-  lastTweetTime: number
-  github: {
+  subscription: boolean
+  lifetimeSubscription?: boolean
+  power?: number
+  money?: number
+  subscriptionTokens?: number
+  cpuShard?: { [shard: string]: number }
+  cpuShardUpdatedTime?: number
+  runtime?: { ivm: boolean }
+  powerExperimentations?: number
+  powerExperimentationTime?: number
+  resources?: { cpuUnlock?: number; pixel?: number; accessKey?: number }
+  playerColor?: string | null
+  promoPixels?: any
+  lastChargeTime?: number
+  lastTweetTime?: number
+  lastRespawnDate?: number
+  github?: {
     id: string
     username: string
   }
-  twitter: {
+  twitter?: {
     username: string
     followers_count: number
+  }
+  steam?: {
+    id: string
+    displayName: string
+    ownership: number[]
   }
 }
 
 export type AuthQueryTokenResponse = ServerResponse & {
   token: TokenInfo
 }
-export type RegisterCheckEmailResponse = ServerResponse & {}
-export type RegisterCheckUsernameResponse = ServerResponse & {}
-export type RegisterSetUsernameResponse = ServerResponse & {}
-export type RegisterSubmitResponse = ServerResponse & {}
+export type RegisterCheckEmailResponse = ServerResponse
+export type RegisterCheckUsernameResponse = ServerResponse
+export type RegisterSetUsernameResponse = ServerResponse
+export type RegisterSubmitResponse = ServerResponse
 
 export type UserMessage = {
   _id: string
@@ -151,21 +176,27 @@ export type UserMessagesMarkReadResponse = ServerResponse
 
 export type StatName = 'owner0' | 'claim0' | 'creepsLost' | 'creepsProduced' | 'energyConstruction' | 'energyControl' | 'energyCreeps' | 'energyHarvested'
 
+export type GameMapStatsRoomSign = {
+  user: string
+  text: string
+  time: number
+  datetime: number
+}
+
+export type GameMapStatsRoom = {
+  status: string
+  novice?: number
+  own?: { user: string; level: number }
+  sign?: GameMapStatsRoomSign
+  isPowerEnabled?: boolean
+  /** Stat arrays keyed by stat name, e.g. energyHarvested: [{ user, value }] */
+  [statName: string]: { user: string; value: any }[] | any
+}
+
 export type GameMapStatsResponse = ServerResponse & {
-  stats: {
-    [roomName:string]: {
-      status: string,
-      novice: number,
-      own: {
-        user: string
-        level: number
-      }
-      // TODO: Figure out howto map this!
-      /*<stat>: [
-        { user: string, value: any }
-      ]*/
-    }
-  }
+  gameTime?: number
+  stats: { [roomName: string]: GameMapStatsRoom }
+  decorations?: object
   users: UserInfoMap
 }
 export type GameGenUniqueObjectNameResponse = ServerResponse & {
@@ -173,29 +204,105 @@ export type GameGenUniqueObjectNameResponse = ServerResponse & {
 }
 export type GameCheckUniqueObjectNameResponse = ServerResponse
 export type GamePlaceSpawnResponse = ServerResponse
-export type GameCreateFlagResponse = ServerResponse & {}
+export type GameCreateFlagResponse = ServerResponse
 export type GameGenUniqueFlagNameResponse = ServerResponse & {
   name: string
 }
 export type GameCheckUniqueFlagNameResponse = ServerResponse
-export type GameChangeFlagColorResponse = ServerResponse & {}
-export type GameRemoveFlagResponse = ServerResponse & {}
-export type GameAddObjectIntentResponse = ServerResponse & {}
-export type GameCreateConstructionResponse = ServerResponse & {}
-export type GameSetNotifyWhenAttackedResponse = ServerResponse & {}
-export type GameCreateInvaderResponse = ServerResponse & {}
-export type GameRemoveInvaderResponse = ServerResponse & {}
-export type GameTimeResponse = ServerResponse & {}
-export type GameWorldSizeResponse = ServerResponse & {}
-export type GameRoomDecorationsResponse = ServerResponse & {}
-export type GameRoomObjectsResponse = ServerResponse & {}
-export type GameRoomTerrainResponse = ServerResponse & {}
-export type GameRoomStatusResponse = ServerResponse & {}
-export type GameRoomOverviewResponse = ServerResponse & {}
-export type GameMarketOrdersIndexResponse = ServerResponse & {}
-export type GameMarketMyOrdersResponse = ServerResponse & {}
-export type GameMarketOrdersResponse = ServerResponse & {}
-export type GameMarketStatsResponse = ServerResponse & {}
+export type GameChangeFlagColorResponse = ServerResponse
+export type GameRemoveFlagResponse = ServerResponse
+export type GameAddObjectIntentResponse = ServerResponse
+export type GameCreateConstructionResponse = ServerResponse
+export type GameSetNotifyWhenAttackedResponse = ServerResponse
+export type GameCreateInvaderResponse = ServerResponse
+export type GameRemoveInvaderResponse = ServerResponse
+export type GameTimeResponse = ServerResponse & {
+  time: number
+}
+export type GameWorldSizeResponse = ServerResponse & {
+  width: number
+  height: number
+}
+export type GameRoomDecorationsResponse = ServerResponse & {
+  decorations: object[]
+}
+export type RoomObject = {
+  _id: string
+  type: string
+  room: string
+  x: number
+  y: number
+  [key: string]: any
+}
+export type GameRoomObjectsResponse = ServerResponse & {
+  objects: RoomObject[]
+}
+export type GameRoomTerrainResponse = ServerResponse & {
+  terrain: Array<{
+    _id: string
+    room: string
+    terrain: string
+    type: string
+  }>
+}
+export type GameRoomStatusResponse = ServerResponse & {
+  room: {
+    _id: string
+    status: string
+    novice?: number
+  }
+}
+export type GameRoomOverviewStat = { value: number; endTime: number }
+export type GameRoomOverviewResponse = ServerResponse & {
+  owner?: {
+    username: string
+    badge: Badge
+  }
+  stats: { [statName: string]: GameRoomOverviewStat[] }
+  statsMax: { [key: string]: number }
+  totals: { [key: string]: number }
+}
+
+export type MarketOrderSummary = {
+  _id: string
+  count: number
+  avgPrice: number
+  stddevPrice: number
+}
+export type GameMarketOrdersIndexResponse = ServerResponse & {
+  list: MarketOrderSummary[]
+}
+
+export type MarketOrder = {
+  _id: string
+  type: 'buy' | 'sell'
+  amount: number
+  remainingAmount: number
+  price: number
+  roomName?: string
+  resourceType?: string
+  totalAmount?: number
+  shard?: string
+}
+export type GameMarketMyOrdersResponse = ServerResponse & {
+  shards: { [shard: string]: MarketOrder[] }
+}
+export type GameMarketOrdersResponse = ServerResponse & {
+  list: MarketOrder[]
+}
+
+export type MarketStatEntry = {
+  _id: string
+  resourceType: string
+  date: string
+  transactions: number
+  volume: number
+  avgPrice: number
+  stddevPrice: number
+}
+export type GameMarketStatsResponse = ServerResponse & {
+  stats: MarketStatEntry[]
+}
 export type GameShardsInfoResponse = ServerResponse & {
   shards: Array<{
     name: string;
@@ -206,17 +313,35 @@ export type GameShardsInfoResponse = ServerResponse & {
     tick: number
   }>
 }
-export type LeaderboardListResponse = ServerResponse & {}
-export type LeaderboardFindResponse = ServerResponse & {}
-export type LeaderboardSeasonsResponse = ServerResponse & {}
-export type UserBadgeResponse = ServerResponse & {}
-export type UserRespawnResponse = ServerResponse & {}
-export type UserSetActiveBranchResponse = ServerResponse & {}
-export type UserCloneBranchResponse = ServerResponse & {}
-export type UserDeleteBranchResponse = ServerResponse & {}
-export type UserNotifyPrefsResponse = ServerResponse & {}
-export type UserTutorialDoneResponse = ServerResponse & {}
-export type UserEmailResponse = ServerResponse & {}
+export type LeaderboardEntry = {
+  _id: string
+  season: string
+  user: string
+  score: number
+  rank: number
+}
+export type LeaderboardListResponse = ServerResponse & {
+  list: LeaderboardEntry[]
+  count: number
+  users: UserInfoMap
+}
+export type LeaderboardFindResponse = ServerResponse & LeaderboardEntry
+export type LeaderboardSeason = {
+  _id: string
+  name: string
+  date: string
+}
+export type LeaderboardSeasonsResponse = ServerResponse & {
+  seasons: LeaderboardSeason[]
+}
+export type UserBadgeResponse = ServerResponse
+export type UserRespawnResponse = ServerResponse
+export type UserSetActiveBranchResponse = ServerResponse
+export type UserCloneBranchResponse = ServerResponse
+export type UserDeleteBranchResponse = ServerResponse
+export type UserNotifyPrefsResponse = ServerResponse
+export type UserTutorialDoneResponse = ServerResponse
+export type UserEmailResponse = ServerResponse
 export type UserWorldStartRoomResponse = ServerResponse & {
   room: string[]
 }
@@ -238,13 +363,52 @@ export type UserCodeGetResponse = ServerResponse & {
 export type UserCodePostResponse = ServerResponse & {
   timestamp: number
 }
-export type UserDecorationsInventoryResponse = ServerResponse & {}
-export type UserDecorationsThemesResponse = ServerResponse & {}
-export type UserDecorationsConvertResponse = ServerResponse & {}
-export type UserDecorationsPixelizeResponse = ServerResponse & {}
-export type UserDecorationsActivateResponse = ServerResponse & {}
-export type UserDecorationsDeactivateResponse = ServerResponse & {}
-export type UserRespawnProhibitedRoomsResponse = ServerResponse & {}
+export type DecorationGraphic = {
+  url: string
+  color?: string
+  alpha?: string
+}
+export type DecorationInfo = {
+  _id: string
+  name: string
+  type: string
+  theme: string
+  rarity?: number
+  steamItemDefId?: number
+  groupDescription?: string | null
+  preview?: { original: string; [size: string]: string }
+  graphics?: DecorationGraphic[]
+  props?: { [key: string]: object }
+}
+export type UserDecorationItem = {
+  _id: string
+  decoration: DecorationInfo
+  active?: boolean
+  [key: string]: any
+}
+export type UserDecorationsInventoryResponse = ServerResponse & {
+  list: UserDecorationItem[]
+}
+export type DecorationTheme = {
+  _id: string
+  name: string
+  color?: string
+  short?: string
+  restricted?: boolean
+  hidden?: boolean
+  createdAt?: string
+  updatedAt?: string
+}
+export type UserDecorationsThemesResponse = ServerResponse & {
+  list: DecorationTheme[]
+}
+export type UserDecorationsConvertResponse = ServerResponse
+export type UserDecorationsPixelizeResponse = ServerResponse
+export type UserDecorationsActivateResponse = ServerResponse
+export type UserDecorationsDeactivateResponse = ServerResponse
+export type UserRespawnProhibitedRoomsResponse = ServerResponse & {
+  rooms: string[]
+}
 export type UserMemoryGetResponse = ServerResponse & {
   data?: string
 }
@@ -256,18 +420,80 @@ export type UserMemorySegmentPostResponse = ServerResponse
 export type UserFindResponse = ServerResponse & {
   user: UserInfo
 }
-export type UserStatsResponse = ServerResponse & {}
-export type UserRoomsResponse = ServerResponse & {}
-export type UserOverviewResponse = ServerResponse & {}
-export type UserMoneyHistoryResponse = ServerResponse & {}
-export type UserConsoleResponse = ServerResponse & {}
+export type UserStatsResponse = ServerResponse & {
+  stats: Partial<Record<StatName, { value: number; endTime: number }[]>>
+}
+export type UserRoomsResponse = ServerResponse & {
+  shards: { [shard: string]: string[] }
+  reservations?: { [shard: string]: string[] }
+}
+export type UserOverviewShardStats = {
+  rooms: string[]
+  stats: { [roomName: string]: { value: number; endTime: number }[] }
+  gametimes: (number | null)[]
+}
+export type UserOverviewResponse = ServerResponse & {
+  statsMax: number
+  totals: { [statName: string]: number }
+  shards: { [shard: string]: UserOverviewShardStats }
+}
+export type MoneyHistoryEntry = {
+  _id: string
+  date: string
+  tick: number
+  type: string
+  balance: number
+  change: number
+  market?: object
+}
+export type UserMoneyHistoryResponse = ServerResponse & {
+  page: number
+  list: MoneyHistoryEntry[]
+  hasMore: boolean
+}
+export type UserConsoleResponse = ServerResponse
 export type UserNameResponse = ServerResponse & {
   username: string
 }
-export type ExperimentalPvpResponse = ServerResponse & {}
-export type ExperimentalNukesResponse = ServerResponse & {}
-export type WarpathBattlesResponse = ServerResponse & {}
-export type ScoreboardListResponse = ServerResponse & {}
+export type PvpRoom = {
+  _id: string
+  lastPvpTime: number
+}
+export type ExperimentalPvpResponse = ServerResponse & {
+  pvp: { [shard: string]: { time: number; rooms: PvpRoom[] } }
+}
+export type NukeInfo = {
+  _id: string
+  type: 'nuke'
+  room: string
+  x: number
+  y: number
+  landTime: number
+  launchRoomName: string
+}
+export type ExperimentalNukesResponse = ServerResponse & {
+  nukes: { [shard: string]: NukeInfo[] }
+}
+export type WarpathBattle = {
+  _id: string
+  room: string
+  lastBattleTime: number
+  [key: string]: any
+}
+export type WarpathBattlesResponse = ServerResponse & {
+  rooms?: WarpathBattle[]
+}
+export type ScoreboardEntry = {
+  _id: string
+  rank: number
+  score: number
+  user: string
+}
+export type ScoreboardListResponse = ServerResponse & {
+  list?: ScoreboardEntry[]
+  count?: number
+  users?: UserInfoMap
+}
 
 export type SocketEvent<T> = {
   type: string
