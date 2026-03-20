@@ -203,17 +203,39 @@ export type GameGenUniqueObjectNameResponse = ServerResponse & {
   name: string
 }
 export type GameCheckUniqueObjectNameResponse = ServerResponse
-export type GamePlaceSpawnResponse = ServerResponse
-export type GameCreateFlagResponse = ServerResponse
+export type GamePlaceSpawnResponse = ServerResponse & {
+  newbie?: boolean
+}
+export type GameCreateFlagResponse = ServerResponse & {
+  result?: MongoWriteResult
+  connection?: MongoConnection
+}
 export type GameGenUniqueFlagNameResponse = ServerResponse & {
   name: string
 }
 export type GameCheckUniqueFlagNameResponse = ServerResponse
-export type GameChangeFlagColorResponse = ServerResponse
+export type GameChangeFlagColorResponse = ServerResponse & {
+  result?: MongoWriteResult
+  connection?: MongoConnection
+}
 export type GameRemoveFlagResponse = ServerResponse
-export type GameAddObjectIntentResponse = ServerResponse
-export type GameCreateConstructionResponse = ServerResponse
-export type GameSetNotifyWhenAttackedResponse = ServerResponse
+export type GameAddObjectIntentResponse = ServerResponse & {
+  result?: MongoWriteResult
+  connection?: MongoConnection
+}
+export type GameCreateConstructionResponse = ServerResponse & {
+  /** Construction site id (private server) */
+  _id?: string
+  /** Official server MongoDB insert result */
+  result?: MongoWriteResult
+  ops?: ConstructionSiteOp[]
+  insertedCount?: number
+  insertedIds?: string[]
+}
+export type GameSetNotifyWhenAttackedResponse = ServerResponse & {
+  result?: MongoWriteResult
+  connection?: MongoConnection
+}
 export type GameCreateInvaderResponse = ServerResponse
 export type GameRemoveInvaderResponse = ServerResponse
 export type GameTimeResponse = ServerResponse & {
@@ -334,11 +356,42 @@ export type LeaderboardSeason = {
 export type LeaderboardSeasonsResponse = ServerResponse & {
   seasons: LeaderboardSeason[]
 }
+export type MongoWriteResult = {
+  ok: number
+  n: number
+  nModified?: number
+  upserted?: Array<{ index: number; _id: string }>
+}
+
+export type MongoConnection = {
+  host: string
+  id: number
+  port: number
+}
+
+export type ConsoleOp = { user: string; expression: string; _id: string }
+export type MemoryOp = { user: string; expression: string; hidden: boolean }
+export type ConstructionSiteOp = {
+  _id: string
+  type: string
+  room: string
+  x: number
+  y: number
+  structureType: string
+  user: string
+  progress: number
+  progressTotal: number
+}
+
 export type UserBadgeResponse = ServerResponse
 export type UserRespawnResponse = ServerResponse
 export type UserSetActiveBranchResponse = ServerResponse
-export type UserCloneBranchResponse = ServerResponse
-export type UserDeleteBranchResponse = ServerResponse
+export type UserCloneBranchResponse = ServerResponse & {
+  timestamp?: number
+}
+export type UserDeleteBranchResponse = ServerResponse & {
+  timestamp?: number
+}
 export type UserNotifyPrefsResponse = ServerResponse
 export type UserTutorialDoneResponse = ServerResponse
 export type UserEmailResponse = ServerResponse
@@ -412,7 +465,12 @@ export type UserRespawnProhibitedRoomsResponse = ServerResponse & {
 export type UserMemoryGetResponse = ServerResponse & {
   data?: string
 }
-export type UserMemoryPostResponse = ServerResponse
+export type UserMemoryPostResponse = ServerResponse & {
+  result?: MongoWriteResult
+  ops?: MemoryOp[]
+  insertedCount?: number
+  insertedIds?: string[]
+}
 export type UserMemorySegmentGetResponse = ServerResponse & {
   data?: string
 }
@@ -451,7 +509,12 @@ export type UserMoneyHistoryResponse = ServerResponse & {
   list: MoneyHistoryEntry[]
   hasMore: boolean
 }
-export type UserConsoleResponse = ServerResponse
+export type UserConsoleResponse = ServerResponse & {
+  result?: MongoWriteResult
+  ops?: ConsoleOp[]
+  insertedCount?: number
+  insertedIds?: string[]
+}
 export type UserNameResponse = ServerResponse & {
   username: string
 }
@@ -530,3 +593,44 @@ export type RoomMap2Event = {
   k: ArrayPos[]
   [userId: string]: ArrayPos[]
 }
+
+export type CodeEvent = {
+  branch: string
+  modules: CodeModules
+  timestamp: number
+  /** Opaque hash string; computation is server-internal */
+  hash: string
+}
+
+export type RoomFlag = {
+  name: string
+  color: FlagColor
+  secondaryColor: FlagColor
+  room: string
+  x: number
+  y: number
+}
+
+/**
+ * Emitted on `room:ROOM_NAME` (or `room:shard/ROOM_NAME`) subscriptions.
+ * The first event contains full object data; subsequent events send only
+ * changed/deleted properties (null value = object was removed).
+ */
+export type RoomEvent = {
+  objects: { [id: string]: Partial<RoomObject> | null }
+  flags?: RoomFlag[]
+  gameTime?: number
+  /** Raw visual data string from previous tick */
+  visual?: string
+  info?: { mode: string }
+  users?: UserInfoMap
+}
+
+/** Emitted on `user:{id}/resources` — user resource counts plus credits */
+export type ResourcesEvent = {
+  credits?: number
+  [resource: string]: number | undefined
+}
+
+/** Emitted on `user:{id}/memory/{path}` — serialized value at the memory path */
+export type MemoryPathEvent = string
