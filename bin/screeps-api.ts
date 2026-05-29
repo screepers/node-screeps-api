@@ -1,24 +1,26 @@
 #!/usr/bin/env node
-const { Command } = require('commander')
-const { ScreepsAPI } = require('../')
-const fs = require('fs')
-const util = require('util')
-const path = require('path')
+import { Command } from 'commander'
+import { ScreepsAPI } from '../src'
+import fs from 'node:fs'
+import path from 'node:path'
+import process from 'node:process'
+import utils from 'node:util'
+import packageMeta from '../package.json' with { type: 'json' }
 
-const readFile = util.promisify(fs.readFile)
-const writeFile = util.promisify(fs.writeFile)
+const readFile = utils.promisify(fs.readFile);
+const writeFile = utils.promisify(fs.writeFile);
 
-async function init(opts) {
-  return ScreepsAPI.fromConfig(opts.server)
+async function init(opts?: { server?: string }) {
+  return ScreepsAPI.fromConfig(opts?.server)
 }
 
-async function json(data) {
+async function json(data: unknown) {
   process.stdout.write(JSON.stringify(data))
 }
 
-async function out(data, opts) {
+async function out(data: unknown | Promise<unknown>) {
   data = await data
-  data = (data && data.data) || data
+  data = (data as { data?: unknown } | undefined)?.data ?? data
   if (process.stdout.isTTY) {
     console.log(data)
   } else {
@@ -28,9 +30,9 @@ async function out(data, opts) {
 
 async function run() {
   const program = new Command()
-  
+
   /** @param {string} name */
-  const commandBase = (name, args = '') => {
+  const commandBase = (name: string, args = '') => {
     const command = new Command(name)
     command
       .arguments(args)
@@ -40,7 +42,7 @@ async function run() {
   }
 
   program
-    .version(require('../package.json').version)
+    .version(packageMeta.version)
 
   commandBase('raw', '<cmd> [args...]')
     .description('Execute raw API call')
@@ -48,8 +50,7 @@ async function run() {
       try {
         const api = await init(opts)
         const path = cmd.split('.')
-        /** @type {function} */
-        let fn = api.raw
+        let fn: any = api.raw
         for (const part of path) {
           fn = fn[part]
         }
@@ -80,7 +81,7 @@ async function run() {
           await api.memory.set(fpath, data, opts.shard)
           out('Memory written')
         } else {
-          const data = api.memory.get(fpath, opts.shard)
+          const data = await api.memory.get(fpath, opts.shard)
           if (opts.file) {
             await writeFile(opts.file, data)
           } else {
@@ -113,7 +114,7 @@ async function run() {
             if (Array.isArray(segments)) {
               await Promise.all(segments.map((d, i) => d && writeFile(path.join(dir, `segment_${i}`), d)))
             } else {
-              await writeFile(path.join(dir, `segment_${segment}`), d)
+              await writeFile(path.join(dir, `segment_${segment}`), segments)
             }
             out('Segments Saved')
           } else {
@@ -137,7 +138,7 @@ async function run() {
         if (dir) {
           await Promise.all(Object.keys(modules).map(async fn => {
             const data = modules[fn]
-            if (data.binary) {
+            if (typeof data === 'object') {
               await writeFile(path.join(dir, `${fn}.wasm`), Buffer.from(data.binary, 'base64'))
             } else {
               await writeFile(path.join(dir, `${fn}.js`), data)
@@ -158,7 +159,7 @@ async function run() {
     .action(async function (files, opts) {
       try {
         const api = await init(opts)
-        const modules = {}
+        const modules: UserCodeSetApiRequest['modules'] = {}
         const ps = []
         for (const file of files) {
           ps.push((async (file) => {
@@ -173,7 +174,7 @@ async function run() {
           })(file))
         }
         await Promise.all(ps)
-        out(api.code.set(opts.branch, modules))
+        out(api.code.set({ branch: opts.branch, modules }))
       } catch (e) {
         console.error(e)
       }
@@ -186,7 +187,4 @@ async function run() {
   await program.parseAsync()
 }
 
-run().then(data => {
-  if (!data) return
-  console.log(JSON.stringify(data.data || data, null, 2))
-}).catch(console.error)
+await run().catch(console.error)

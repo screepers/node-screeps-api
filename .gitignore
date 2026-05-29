@@ -3,3 +3,7 @@ node_modules
 auth.js
 dist
 npm-debug.log
+
+.screeps.json
+.screeps.yml
+.screeps.yaml

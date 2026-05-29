@@ -1,10 +1,46 @@
+// https://www.typescriptlang.org/tsconfig/
+// Some options derived from:
+// https://github.com/tsconfig/bases/blob/main/bases/node24.json
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-      "declaration": true,
-      "declarationDir": "dist/types",
-      "rootDir": "src",
-      "allowJs": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "allowSyntheticDefaultImports": true,
+    "alwaysStrict": true,
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "lib": [
+      "DOM",
+      "ES2022",
+    ],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUncheckedSideEffectImports": true,
+    "outDir": "dist",
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "rootDirs": ["./src", "./bin"],
+    "strict": true,
+    "strictBuiltinIteratorReturn": true,
+    "strictNullChecks": true,
+    "target": "es2022",
+    "types": [
+      "debug",
+      "lodash",
+      "node",
+    ],
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules/**/*"]
+  "include": [
+    "src",
+    "bin",
+  ],
+  "exclude": [
+    "node_modules",
+  ],
 }

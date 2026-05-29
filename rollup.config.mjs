@@ -2,13 +2,12 @@ import typescript from 'rollup-plugin-typescript2'
 
 export default {
   input: {
-    ScreepsAPI: 'src/index.js'
+    ScreepsAPI: 'src/index.ts'
   },
   output: {
     dir: 'dist',
     format: 'cjs',
     exports: 'named',
-    preferConst: true,
     globals: {
       ws: 'WebSocket'
     },

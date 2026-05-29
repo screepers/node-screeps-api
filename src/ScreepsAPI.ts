@@ -1,8 +1,22 @@
-import { Socket } from './Socket'
-import { RawAPI } from './RawAPI'
 import { ConfigManager } from './ConfigManager'
+import { RawAPI } from './RawAPI'
+import { Socket } from './Socket'
 
-const DEFAULTS = {
+type RateLimit = {
+  limit: number
+  period: 'minute' | 'hour' | 'day'
+  remaining: number
+  reset: number
+  toReset: number
+}
+
+type RateLimits = {
+  global: RateLimit
+} & {
+  [method in HttpMethod]: { [path: string]: RateLimit }
+}
+
+const DEFAULTS: ServerConfig = {
   protocol: 'https',
   hostname: 'screeps.com',
   port: 443,
@@ -12,12 +26,12 @@ const DEFAULTS = {
 const configManager = new ConfigManager()
 
 export class ScreepsAPI extends RawAPI {
-  static async fromConfig (server = 'main', config = false, opts = {}) {
+  static async fromConfig (server = 'main', config?: string, opts = {}) {
     const data = await configManager.getConfig()
 
     if (data) {
       if (!data.servers[server]) {
-        throw new Error(`Server '${server}' does not exist in '${configManager.path}'`)
+        throw new Error(`Server '${server}' does not exist in '${configManager.path}'; valid paths: ${Object.keys(data.servers).join(', ')}`)
       }
 
       const conf = data.servers[server]
@@ -36,7 +50,7 @@ export class ScreepsAPI extends RawAPI {
         )
       )
 
-      api.appConfig = (data.configs && data.configs[config]) || {}
+      api.appConfig = data?.configs?.[config!] || {}
 
       if (!conf.token && conf.username && conf.password) {
         await api.auth(conf.username, conf.password)
@@ -48,14 +62,20 @@ export class ScreepsAPI extends RawAPI {
     throw new Error('No valid config found')
   }
 
-  constructor (opts) {
+  appConfig?: AppConfig
+  rateLimits: RateLimits
+  socket: Socket
+
+  private _user?: AuthMeApiResponse | UserFindApiResponse['user']
+  private _tokenInfo?: TokenInfo
+
+  constructor (opts?: ServerConfig) {
     opts = Object.assign({}, DEFAULTS, opts)
     super(opts)
     this.on('token', token => {
       this.token = token
-      this.raw.token = token
     })
-    const defaultLimit = (limit, period) => ({
+    const defaultLimit = (limit: number, period: 'minute' | 'hour' | 'day') => ({
       limit,
       period,
       remaining: limit,
@@ -84,29 +104,32 @@ export class ScreepsAPI extends RawAPI {
         '/api/user/memory-segment': defaultLimit(60, 'hour')
       }
     }
-    this.on('rateLimit', limits => {
+    this.on('rateLimit', (limits: ReturnType<RawAPI['buildRateLimit']>) => {
       const rate =
-        this.rateLimits[limits.method][limits.path] || this.rateLimits.global
-      const copy = Object.assign({}, limits)
-      delete copy.path
-      delete copy.method
-      Object.assign(rate, copy)
+        this.rateLimits[limits.method]?.[limits.path] || this.rateLimits.global
+      Object.assign(rate, {
+        limit: limits.limit,
+        remaining: limits.remaining,
+        reset: limits.reset,
+        toReset: limits.toReset,
+      })
     })
     this.socket = new Socket(this)
   }
 
-  getRateLimit (method, path) {
+  getRateLimit (method: HttpMethod, path: string) {
     return this.rateLimits[method][path] || this.rateLimits.global
   }
 
   get rateLimitResetUrl () {
+    if (!this.token) throw new Error('API token not found')
     return `https://screeps.com/a/#!/account/auth-tokens/noratelimit?token=${this.token.slice(
       0,
       8
     )}`
   }
 
-  async me () {
+  async me (): Promise<Exclude<typeof this._user, undefined>> {
     if (this._user) return this._user
     const tokenInfo = await this.tokenInfo()
     if (tokenInfo.full) {
@@ -119,7 +142,8 @@ export class ScreepsAPI extends RawAPI {
     return this._user
   }
 
-  async tokenInfo () {
+  async tokenInfo (): Promise<TokenInfo> {
+    if (!this.token) throw new Error('API token not found')
     if (this._tokenInfo) {
       return this._tokenInfo
     }
@@ -127,7 +151,7 @@ export class ScreepsAPI extends RawAPI {
       const { token } = await this.raw.auth.queryToken(this.token)
       this._tokenInfo = token
     } else {
-      this._tokenInfo = { full: true }
+      this._tokenInfo = { full: true, token: this.token }
     }
     return this._tokenInfo
   }
