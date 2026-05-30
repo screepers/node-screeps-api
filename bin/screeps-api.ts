@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 import { Command } from 'commander'
-import { ScreepsAPI } from '../src'
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import utils from 'node:util'
-import packageMeta from '../package.json' with { type: 'json' }
+import { ScreepsAPI } from '../src'
 
 const readFile = utils.promisify(fs.readFile);
 const writeFile = utils.promisify(fs.writeFile);
@@ -41,8 +40,11 @@ async function run() {
     return command
   }
 
+  const pkgUrl = new URL('../package.json', import.meta.url)
+  const pkg = JSON.parse(await readFile(pkgUrl, 'utf8'));
+
   program
-    .version(packageMeta.version)
+    .version(pkg.version)
 
   commandBase('raw', '<cmd> [args...]')
     .description('Execute raw API call')
@@ -187,4 +189,4 @@ async function run() {
   await program.parseAsync()
 }
 
-await run().catch(console.error)
+run().catch(console.error)

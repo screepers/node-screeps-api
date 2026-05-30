@@ -3,14 +3,18 @@
   "version": "2.0.0",
   "description": "",
   "repository": "screepers/node-screeps-api",
-  "main": "dist/ScreepsAPI.js",
-  "module": "src/index.js",
+  "main": "dist/index.js",
+  "types": "dist/src/index.d.ts",
+  "bin": {
+    "screeps-api": "dist/cli.js"
+  },
   "browser": {
-    "ws": "./src/ws-browser.js"
+    "ws": "dist/ws-browser.js"
   },
   "scripts": {
     "build": "rollup -c",
     "prepublishOnly": "npm run build",
+    "cli": "tsx bin/screeps-api.ts",
     "lint": "ts-standard src/**/*.ts",
     "lint-fix": "ts-standard --fix src/**/*.ts",
     "test_": "mocha",
@@ -19,12 +23,13 @@
   },
   "author": "Adam Shumann",
   "license": "ISC",
-  "bin": {
-    "screeps-api": "bin/screeps-api.js"
-  },
   "engines": {
     "node": "22.x || 24.x"
   },
+  "files": [
+    "dist/**/*",
+    "LICENSE"
+  ],
   "dependencies": {
     "axios": "^1.16.1",
     "commander": "^14.0.3",

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import Debug from 'debug'
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
 import URL from 'node:url'
 import utils from 'node:util'
 import zlib from 'zlib'

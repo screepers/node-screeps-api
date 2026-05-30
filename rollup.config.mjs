@@ -2,23 +2,34 @@ import typescript from 'rollup-plugin-typescript2'
 
 export default {
   input: {
-    ScreepsAPI: 'src/index.ts'
+    cli: 'bin/screeps-api.ts',
+    index: 'src/index.ts',
+    'ws-browser': 'src/ws-browser.ts'
   },
   output: {
     dir: 'dist',
     format: 'cjs',
-    exports: 'named',
     globals: {
       ws: 'WebSocket'
     },
+    sourcemap: true
   },
-  // external(id){
-  //   return !!require('./package.json').dependencies[id];
-  // },
-  external: ['ws', 'fs', 'axios', 'bluebird', 'yamljs', 'url', 'events', 'zlib', 'path','debug', 'util'],
+  external: [
+    'axios',
+    'bluebird',
+    'commander',
+    'debug',
+    'node:events',
+    'node:fs',
+    'node:path',
+    'node:process',
+    'node:url',
+    'node:util',
+    'ws',
+    'yaml',
+    'zlib'
+  ],
   plugins: [
-    typescript({
-      useTsconfigDeclarationDir: true
-    })
+    typescript()
   ]
 }
