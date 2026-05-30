@@ -18,14 +18,12 @@ WebSocket.prototype.off = function (event: string, callback: (this: globalThis.W
 }
 
 WebSocket.prototype.once = function (
-  this: globalThis.WebSocket,
   event: string,
-  callback: (this: globalThis.WebSocket, ...args: unknown[]) => unknown,
+  callback: (...args: unknown[]) => unknown,
   ...args: unknown[]
 ): void {
-  const self = this
-  this.addEventListener(event, function handler () {
-    callback.apply(self, args)
+  this.addEventListener(event, function handler(this: globalThis.WebSocket) {
+    callback.apply(this, args)
     self.removeEventListener(event, handler)
   })
 }

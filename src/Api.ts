@@ -53,17 +53,17 @@ declare global {
           resources: object
           metadata: object
         }
-        features: Array<{
+        features: {
           name: string
           version: number
-          menuItems: Array<{
+          menuItems: {
             section: number
             start?: number
             after?: string
             module?: string
             item: object
-          }>
-        }>
+          }[]
+        }[]
         shards: string[]
         /** socket update rate; undefined on official servers */
         socketUpdateThrottle?: number
@@ -261,7 +261,7 @@ declare global {
         ok: 1
         n: 1
       }
-      ops: Array<{
+      ops: {
         _id: string
         type: RoomObjectConstant
         room: string
@@ -271,7 +271,7 @@ declare global {
         user: string
         progress: number
         progressTotal: number
-      }>
+      }[]
       insertedCount: number
       insertedIds: string[]
     }
@@ -320,12 +320,12 @@ declare global {
     /** GET /api/game/room-terrain response when `encoded` param is undefined|null|'' */
     interface GameRoomTerrainUnencodedResponse extends Response {
       /** Unlisted positions are of type `plain` */
-      terrain: Array<{
+      terrain: {
         room: string
         x: number
         y: number
         type: 'swamp' | 'wall'
-      }>
+      }[]
     }
 
     /** GET /api/game/room-status response */
@@ -352,14 +352,14 @@ declare global {
          * Each stat contains an 8-element array listing stat values
          * for each time slot (least recent to most recent)
          */
-        [statId in RoomStat]: Array<{
+        [statId in RoomStat]: {
           value: number
           /**
            * Monotonically increasing integers that do not correspond
            * to game time or UNIX timestamps
            */
           endTime: number
-        }>
+        }[]
       }
       statsMax: { [statMaxId in `${RoomStat}${RoomStatInterval}`]: number }
       /** Total values for each non-zero stat (stats with 0 totals are undefined) */
@@ -368,13 +368,13 @@ declare global {
 
     /** GET /api/game/market/orders-index response */
     interface GameMarketIndexResponse extends Response {
-      list: Array<{
+      list: {
         _id: MarketResourceConstant
         /** Number of open orders */
         count: number
         avgPrice: number
         stdeevPrice: number
-      }>
+      }[]
     }
 
     /**
@@ -392,7 +392,7 @@ declare global {
 
     /** GET /api/game/market/stats resonse */
     interface GameMarketStatsResponse extends Response {
-      stats: Array<{
+      stats: {
         _id: string
         /** YYYY-MM-DD format */
         date: string
@@ -401,12 +401,12 @@ declare global {
         stddevPrice: number
         volume: number
         transactions: number
-      }>
+      }[]
     }
 
     /** GET /api/game/shards/info response */
     interface GameShardsInfoResponse extends Response {
-      shards: Array<{
+      shards: {
         name: string
         cpuLimit: number
         /** Durations of the most recent (30?) ticks in milliseconds */
@@ -417,7 +417,7 @@ declare global {
         users: number
         /** Average tick duration */
         tick: number
-      }>
+      }[]
     }
 
     /** GET /api/leaderboard/list response */
@@ -441,14 +441,14 @@ declare global {
 
     /** GET /api/leaderboard/seasons response */
     interface LeaderboardSeasonsResponse extends Response {
-      seasons: Array<{
+      seasons: {
         /** YYYY-MM */
         _id: string
         /** ISO 8601 season start timestamp */
         date: string
         /** <Month> <Year> */
         name: string
-      }>
+      }[]
     }
 
     /** GET /api/seasons/current response */
@@ -500,12 +500,12 @@ declare global {
 
     /** GET /api/user/branches response */
     interface UserBranchesResponse extends Response {
-      list: Array<{
+      list: {
         _id: string
         branch: string
         activeWorld: boolean
         activeSim: boolean
-      }>
+      }[]
     }
 
     /** GET /api/user/code response */
@@ -524,7 +524,7 @@ declare global {
 
     /** GET /api/user/decorations/themes response */
     interface UserDecorationThemesResponse extends Response {
-      list: Array<{
+      list: {
         _id: string
         /** Web color format */
         color: string
@@ -535,12 +535,12 @@ declare global {
         updatedAt: string
         /** Appears to always be 0 */
         __v: number
-      }>
+      }[]
     }
 
     /** GET /api/user/messages/list response */
     interface UserMessagesListResponse extends Response {
-      messages: Array<{
+      messages: {
         /** ID of the message */
         _id: string
         /** ISO 8601 timestamp */
@@ -550,7 +550,7 @@ declare global {
         /** Message body */
         text: string
         unread: boolean
-      }>
+      }[]
     }
 
     /**
@@ -571,10 +571,10 @@ declare global {
 
     /** GET /api/user/messages/index response */
     interface UserMessagesIndexResponse extends Response {
-      messages: Array<{
+      messages: {
         _id: string
         message: Message
-      }>
+      }[]
       users: Users
     }
 
@@ -602,11 +602,11 @@ declare global {
 
     /** POST /api/user/memory response */
     interface UserMemorySetResponse extends Response, DbModifiedResponse {
-      ops: Array<{
+      ops: {
         user: string
         expression: string
         hidden: boolean
-      }>
+      }[]
       data: string
       insertedCount: number
       insertedIds: string[]
@@ -614,7 +614,7 @@ declare global {
 
     /** GET /api/user/memory-segment response */
     interface UserMemorySegmentGetResponse extends Response {
-      data: string
+      data: string | string[]
     }
 
     /** GET /api/user/find response */
@@ -659,14 +659,14 @@ declare global {
              * Each room contains an 8-element array listing stat values
              * for each time slot (least recent to most recent)
              */
-            [roomName: string]: Array<{
+            [roomName: string]: {
               value: number
               /**
                * Monotonically increasing integers that do not correspond
                * to game time or UNIX timestamps
                */
               endTime: number
-            }>
+            }[]
           }
           /** Shard game time of the beginning of the displayed stat interval */
           gameTimes: [number, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
@@ -676,7 +676,7 @@ declare global {
 
     /** GET /api/user/money-history response */
     interface UserMoneyHistoryResponse extends Response {
-      list: Array<{
+      list: {
         _id: string
         /** ISO 8601 transaction timestamp */
         date: string
@@ -691,7 +691,7 @@ declare global {
         change: number
         shard?: string
         market: MoneyHistoryChangeOrderPrice | MoneyHistoryExtendOrder | MoneyHistoryFillOrder | MoneyHistoryNewOrder
-      }>
+      }[]
       page: number
       /** True if additional pages can be fetched */
       hasMore: boolean
@@ -761,12 +761,12 @@ declare global {
       pvp: {
         [shardName: string]: {
           /** Results sorted by {@link lastPvpTime} DESC */
-          rooms: Array<{
+          rooms: {
             /** Name of the room */
             _id: string
             /** Last tick at which a combat action occurred in this room */
             lastPvpTime: number
-          }>
+          }[]
           /** Current game time on this shard */
           time: number
         }
@@ -785,12 +785,12 @@ declare global {
         length: number
       }
       /** A page of player leaderboard results */
-      users: Array<{
+      users: {
         /** A player's username */
         username: string
         /** The player's current score for this season */
         score: number
-      }>
+      }[]
     }
 
     // Common Types
@@ -848,39 +848,39 @@ declare global {
 
     /** MongoDB result output from an upsert operation */
     interface DbUpsertedResult extends DbModifiedResult {
-      upserted: Array<{
+      upserted: {
         _id?: string
         index: number
-      }>
+      }[]
     }
 
     /** All HTTP methods used for Screeps API endpoints */
     type HttpMethod = 'GET' | 'POST'
 
     /** IDs of stats that can be used with the POST /api/game/map-stats endpoint */
-    type MapStat =
-      | 'owner0'
-      | 'claim0'
-      | RoomStat
+    type MapStat
+      = | 'owner0'
+        | 'claim0'
+        | RoomStat
 
     /** IDs of room-level stats that can be viewed in a room/player overview */
-    type RoomStat =
-      | 'creepsLost'
-      | 'creepsProduced'
-      | 'energyConstruction'
-      | 'energyControl'
-      | 'energyCreeps'
-      | 'energyHarvested'
-      | 'powerProcessed'
+    type RoomStat
+      = | 'creepsLost'
+        | 'creepsProduced'
+        | 'energyConstruction'
+        | 'energyControl'
+        | 'energyCreeps'
+        | 'energyHarvested'
+        | 'powerProcessed'
 
     type RoomStatInterval = 8 | 180 | 1440
 
     /** @see https://docs.screeps.com/api/#Game.map.getRoomStatus */
-    type RoomStatus =
-      | 'closed'
-      | 'normal'
-      | 'novice'
-      | 'respawn'
+    type RoomStatus
+      = | 'closed'
+        | 'normal'
+        | 'novice'
+        | 'respawn'
 
     /** High-level metadata for an individual user */
     interface User {
@@ -898,44 +898,44 @@ declare global {
       name?: string
     }
 
-    type RoomObjectConstant =
-      | 'constructionSite'
-      | 'creep'
-      | 'deposit'
-      | 'mineral'
-      | 'nuke'
-      | 'powerCreep'
-      | 'source'
-      | 'ruin'
-      | 'tombstone'
-      | StructureConstant
-      | ResourceConstant
+    type RoomObjectConstant
+      = | 'constructionSite'
+        | 'creep'
+        | 'deposit'
+        | 'mineral'
+        | 'nuke'
+        | 'powerCreep'
+        | 'source'
+        | 'ruin'
+        | 'tombstone'
+        | StructureConstant
+        | ResourceConstant
 
-    type BuildableStructureConstant =
-      | 'constructedWall'
-      | 'container'
-      | 'controller'
-      | 'extension'
-      | 'extractor'
-      | 'factory'
-      | 'lab'
-      | 'link'
-      | 'nuker'
-      | 'observer'
-      | 'powerSpawn'
-      | 'rampart'
-      | 'road'
-      | 'spawn'
-      | 'storage'
-      | 'terminal'
-      | 'tower'
+    type BuildableStructureConstant
+      = | 'constructedWall'
+        | 'container'
+        | 'controller'
+        | 'extension'
+        | 'extractor'
+        | 'factory'
+        | 'lab'
+        | 'link'
+        | 'nuker'
+        | 'observer'
+        | 'powerSpawn'
+        | 'rampart'
+        | 'road'
+        | 'spawn'
+        | 'storage'
+        | 'terminal'
+        | 'tower'
 
-    type StructureConstant =
-      | BuildableStructureConstant
-      | 'invaderCore'
-      | 'keeperLair'
-      | 'portal'
-      | 'powerBank'
+    type StructureConstant
+      = | BuildableStructureConstant
+        | 'invaderCore'
+        | 'keeperLair'
+        | 'portal'
+        | 'powerBank'
 
     // Creeps
 
@@ -963,24 +963,24 @@ declare global {
         say: SayAction | null
         upgradeController: _HasPosition | null
       }
-      body: Array<{
+      body: {
         name: BodyPartConstant
         hits: number
-        '$name': string
+        $name: string
         boost?: MineralBoostConstant
-      }>
+      }[]
       fatigue: number
     }
 
-    type BodyPartConstant =
-      | 'attack'
-      | 'carry'
-      | 'claim'
-      | 'heal'
-      | 'move'
-      | 'rangedAttack'
-      | 'tough'
-      | 'work'
+    type BodyPartConstant
+      = | 'attack'
+        | 'carry'
+        | 'claim'
+        | 'heal'
+        | 'move'
+        | 'rangedAttack'
+        | 'tough'
+        | 'work'
 
     interface PowerCreep extends AnyCreep {
       type: 'powerCreep'
@@ -1287,103 +1287,103 @@ declare global {
       [resType: string]: number | undefined
     }
 
-    type DepositResourceConstant =
-      | 'biomass'
-      | 'metal'
-      | 'silicon'
-      | 'mist'
+    type DepositResourceConstant
+      = | 'biomass'
+        | 'metal'
+        | 'silicon'
+        | 'mist'
 
-    type MineralResourceConstant =
-      | 'H'
-      | 'K'
-      | 'L'
-      | 'O'
-      | 'U'
-      | 'X'
-      | 'Z'
+    type MineralResourceConstant
+      = | 'H'
+        | 'K'
+        | 'L'
+        | 'O'
+        | 'U'
+        | 'X'
+        | 'Z'
 
-    type MineralBoostConstant =
-      | 'UH'
-      | 'UO'
-      | 'KH'
-      | 'KO'
-      | 'LH'
-      | 'LO'
-      | 'ZH'
-      | 'ZO'
-      | 'GH'
-      | 'GO'
-      | 'UH2O'
-      | 'UHO2'
-      | 'KH2O'
-      | 'KHO2'
-      | 'LH2O'
-      | 'LHO2'
-      | 'ZH2O'
-      | 'ZHO2'
-      | 'GH2O'
-      | 'GHO2'
-      | 'XUH2O'
-      | 'XUHO2'
-      | 'XKH2O'
-      | 'XKHO2'
-      | 'XLH2O'
-      | 'XLHO2'
-      | 'XZH2O'
-      | 'XZHO2'
-      | 'XGH2O'
-      | 'XGHO2'
+    type MineralBoostConstant
+      = | 'UH'
+        | 'UO'
+        | 'KH'
+        | 'KO'
+        | 'LH'
+        | 'LO'
+        | 'ZH'
+        | 'ZO'
+        | 'GH'
+        | 'GO'
+        | 'UH2O'
+        | 'UHO2'
+        | 'KH2O'
+        | 'KHO2'
+        | 'LH2O'
+        | 'LHO2'
+        | 'ZH2O'
+        | 'ZHO2'
+        | 'GH2O'
+        | 'GHO2'
+        | 'XUH2O'
+        | 'XUHO2'
+        | 'XKH2O'
+        | 'XKHO2'
+        | 'XLH2O'
+        | 'XLHO2'
+        | 'XZH2O'
+        | 'XZHO2'
+        | 'XGH2O'
+        | 'XGHO2'
 
-    type MineralCompoundConstant =
-      | 'G'
-      | 'OH'
-      | 'ZK'
-      | 'UL'
-      | MineralBoostConstant
+    type MineralCompoundConstant
+      = | 'G'
+        | 'OH'
+        | 'ZK'
+        | 'UL'
+        | MineralBoostConstant
 
-    type ResourceConstant =
-      | 'energy'
-      | 'power'
-      | DepositResourceConstant
-      | MineralResourceConstant
-      | MineralCompoundConstant
-      | 'ops'
-      | 'utrium_bar'
-      | 'lemergium_bar'
-      | 'zynthium_bar'
-      | 'keanium_bar'
-      | 'ghodium_melt'
-      | 'oxidant'
-      | 'reductant'
-      | 'purifier'
-      | 'battery'
-      | 'composite'
-      | 'crystal'
-      | 'liquid'
-      | 'wire'
-      | 'switch'
-      | 'transistor'
-      | 'microchip'
-      | 'circuit'
-      | 'device'
-      | 'cell'
-      | 'phlegm'
-      | 'tissue'
-      | 'muscle'
-      | 'organoid'
-      | 'organism'
-      | 'alloy'
-      | 'tube'
-      | 'fixtures'
-      | 'frame'
-      | 'hydraulics'
-      | 'machine'
-      | 'condensate'
-      | 'concentrate'
-      | 'extract'
-      | 'spirit'
-      | 'emanation'
-      | 'essence'
+    type ResourceConstant
+      = | 'energy'
+        | 'power'
+        | DepositResourceConstant
+        | MineralResourceConstant
+        | MineralCompoundConstant
+        | 'ops'
+        | 'utrium_bar'
+        | 'lemergium_bar'
+        | 'zynthium_bar'
+        | 'keanium_bar'
+        | 'ghodium_melt'
+        | 'oxidant'
+        | 'reductant'
+        | 'purifier'
+        | 'battery'
+        | 'composite'
+        | 'crystal'
+        | 'liquid'
+        | 'wire'
+        | 'switch'
+        | 'transistor'
+        | 'microchip'
+        | 'circuit'
+        | 'device'
+        | 'cell'
+        | 'phlegm'
+        | 'tissue'
+        | 'muscle'
+        | 'organoid'
+        | 'organism'
+        | 'alloy'
+        | 'tube'
+        | 'fixtures'
+        | 'frame'
+        | 'hydraulics'
+        | 'machine'
+        | 'condensate'
+        | 'concentrate'
+        | 'extract'
+        | 'spirit'
+        | 'emanation'
+        | 'essence'
 
     interface SayAction {
       isPublic: boolean
@@ -1431,10 +1431,10 @@ declare global {
       roomName: string
     }
 
-    type IntershardResourceConstant =
-      | 'accessKey'
-      | 'cpuUnlock'
-      | 'pixel'
+    type IntershardResourceConstant
+      = | 'accessKey'
+        | 'cpuUnlock'
+        | 'pixel'
 
     type MarketResourceConstant = ResourceConstant | IntershardResourceConstant
   }
@@ -1450,7 +1450,7 @@ declare global {
        */
       active?: { [key in P]: unknown } | null
       /** The underlying decoration */
-      decoration: Badge|Decoration<P>
+      decoration: Badge | Decoration<P>
       /** ISO 8601 timestamp */
       createdAt: string
       /** ISO 8601 timestamp */
@@ -1461,13 +1461,13 @@ declare global {
       deactivatedAt?: string
     }
 
-    type Constant =
-      | 'badge'
-      | 'creep'
-      | 'floorLandscape'
-      | 'object'
-      | 'wallGraffiti'
-      | 'wallLandscape'
+    type Constant
+      = | 'badge'
+        | 'creep'
+        | 'floorLandscape'
+        | 'object'
+        | 'wallGraffiti'
+        | 'wallLandscape'
 
     /**
      * Represents a single premium user {@link Api.Badge}.
@@ -1486,10 +1486,10 @@ declare global {
      * of each decoration can be earned by users via pixelization.
      */
     interface Decoration<P extends string> extends _Decoration {
-      graphics: Array<{
+      graphics: ({
         /** Image asset URL (appears to always be an SVG file) */
         url: string
-      } & { [key in P]: unknown }>
+      } & { [key in P]: unknown })[]
       /** Appears to always be a .svg filename */
       description: string
       /**
@@ -1511,12 +1511,12 @@ declare global {
       readonly: boolean
     }
 
-    type PropertyConstant =
-      | 'boolean'
-      | 'color'
-      | 'number'
-      | 'range'
-      | 'string'
+    type PropertyConstant
+      = | 'boolean'
+        | 'color'
+        | 'number'
+        | 'range'
+        | 'string'
 
     interface BooleanProperty {
       type: 'boolean'
@@ -1628,7 +1628,7 @@ interface _Decoration {
   theme: string
   /** Preview image asset URLs */
   preview: {
-    original: string
+    'original': string
     '128x128': string
     '256x256': string
   }
@@ -1648,5 +1648,5 @@ export enum FlagColor {
   Orange = 7,
   Brown = 8,
   Grey = 9,
-  White = 10,
+  White = 10
 }

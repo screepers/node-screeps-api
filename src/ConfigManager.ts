@@ -4,23 +4,23 @@ import process from 'node:process'
 import utils from 'node:util'
 import { parse } from 'yaml'
 
-const readFile = utils.promisify(fs.readFile);
+const readFile = utils.promisify(fs.readFile)
 
 export class ConfigManager {
   path?: string
   private _config?: Api.YamlConfig | null
 
-  async refresh () {
+  async refresh() {
     this._config = null
     await this.getConfig()
   }
 
-  async getServers (): Promise<string[]> {
+  async getServers(): Promise<string[]> {
     const conf = await this.getConfig()
     return Object.keys(conf?.servers ?? [])
   }
 
-  async getConfig (): Promise<Api.YamlConfig | null> {
+  async getConfig(): Promise<Api.YamlConfig | null> {
     if (this._config) {
       return this._config
     }
@@ -60,11 +60,11 @@ export class ConfigManager {
         return data
       }
     }
-    console.debug('No valid config found; paths checked:', paths);
+    console.warn('No valid config found; paths checked:', paths)
     return null
   }
 
-  async loadConfig (file: string): Promise<Api.YamlConfig | null> {
+  async loadConfig(file: string): Promise<Api.YamlConfig | null> {
     try {
       const contents = await readFile(file, { encoding: 'utf8' })
       const data = parse(contents) as Api.YamlConfig

@@ -36,26 +36,26 @@ export class Socket extends EventEmitter {
   private __subQueue: (string | WebSocket.RawData)[] = []
   private __subs: { [path: string]: number } = {}
 
-  constructor (api: ScreepsAPI) {
+  constructor(api: ScreepsAPI) {
     super()
     this.api = api
     this.opts = Object.assign({}, DEFAULTS)
-    this.on('error', () => {}) // catch to prevent unhandled-exception errors
+    this.on('error', console.error)
     this.reset()
-    this.on('auth', ev => {
+    this.on('auth', (ev: AuthEvent) => {
       if (ev.data.status === 'ok') {
         while (this.__queue.length) {
           this.emit(this.__queue.shift()! as string)
         }
         clearInterval(this.keepAliveInter)
         if (this.opts.keepAlive) {
-          this.keepAliveInter = setInterval(() => this.ws && this.ws.ping(1), 10000)
+          this.keepAliveInter = setInterval(() => this.ws?.ping(1), 10000)
         }
       }
     })
   }
 
-  reset () {
+  reset() {
     this.authed = false
     this.connected = false
     this.reconnecting = false
@@ -66,13 +66,13 @@ export class Socket extends EventEmitter {
     this.__subs = {} // number of callbacks for each subscription
   }
 
-  async connect (opts = {}) {
+  async connect(opts = {}) {
     Object.assign(this.opts, opts)
     if (!this.api.token) {
       throw new Error('No token! Call api.auth() before connecting the socket!')
     }
-    return new Promise((resolve, reject) => {
-      const baseURL = this.api.opts!.url!.replace('http', 'ws')
+    return await new Promise((resolve, reject) => {
+      const baseURL = this.api.opts.url!.replace('http', 'ws')
       const wsurl = new URL('socket/websocket', baseURL)
       this.ws = new WebSocket(wsurl)
       this.ws.on('open', () => {
@@ -108,11 +108,11 @@ export class Socket extends EventEmitter {
         this.emit('error', err)
         reject(err)
       })
-      this.ws.on('message', (data) => this.handleMessage(data as unknown as string))
+      this.ws.on('message', data => void this.handleMessage(data as unknown as string))
     })
   }
 
-  async reconnect () {
+  async reconnect() {
     if (this.reconnecting) {
       return
     }
@@ -127,7 +127,7 @@ export class Socket extends EventEmitter {
       try {
         await this.connect()
         retry = false
-      } catch (err) {
+      } catch {
         retry = true
       }
       retries++
@@ -141,11 +141,11 @@ export class Socket extends EventEmitter {
       throw err
     } else {
       // Resume existing subscriptions on the new socket
-      Object.keys(this.__subs).forEach(sub => this.subscribe(sub))
+      Object.keys(this.__subs).forEach(sub => void this.subscribe(sub))
     }
   }
 
-  disconnect () {
+  disconnect() {
     if (!this.ws) return
     debug('disconnect')
     clearInterval(this.keepAliveInter)
@@ -155,33 +155,42 @@ export class Socket extends EventEmitter {
     this.emit('disconnected')
   }
 
-  async handleMessage (rawMsg: string | { data: string }) {
+  async handleMessage(rawMsg: string | { data: string }) {
     let msg = typeof rawMsg === 'object' ? rawMsg.data : rawMsg // Handle ws/browser difference
-    if (msg.slice(0, 3) === 'gz:') { msg = await this.api.inflate(msg) }
+    if (msg.startsWith('gz:')) {
+      msg = await this.api.inflate(msg) as string
+    }
     debug(`message ${msg}`)
-    if (msg[0] === '[') {
-      msg = JSON.parse(msg)
-      let [, type, id, channel] = msg[0].match(/^(.+):(.+?)(?:\/(.+))?$/)!
-      channel = channel || type
-      const event = { channel, id, type, data: msg[1] }
-      this.emit(msg[0], event)
+    if (msg.startsWith('[')) {
+      const tupleMsg = JSON.parse(msg) as [string, unknown]
+      const [, type, id, channel] = /^(.+):(.+?)(?:\/(.+))?$/.exec(tupleMsg[0])!
+      const event = { channel: channel ?? type, id, type, data: tupleMsg[1] }
+      this.emit(tupleMsg[0], event)
       this.emit(event.channel, event)
       this.emit('message', event)
     } else {
-      const [channel, ...data]: any = msg.split(' ') as [string, string[]]
-      const event = { type: 'server', channel, data }
-      if (channel === 'auth') { event.data = { status: data[0], token: data[1] } }
-      if (['protocol', 'time', 'package'].includes(channel)) { event.data = { [channel]: data[0] } }
+      const [channel, ...data] = msg.split(' ')
+      const event: {
+        type: 'server'
+        channel: string
+        data: string[] | { status: string, token: string } | { [channel: string]: string }
+      } = { type: 'server', channel, data }
+      if (channel === 'auth') {
+        event.data = { status: data[0], token: data[1] }
+      }
+      if (['protocol', 'time', 'package'].includes(channel)) {
+        event.data = { [channel]: data[0] }
+      }
       this.emit(channel, event)
       this.emit('message', event)
     }
   }
 
-  async gzip (bool: boolean) {
+  gzip(bool: boolean) {
     this.send(`gzip ${bool ? 'on' : 'off'}`)
   }
 
-  async send (data: string | WebSocket.RawData) {
+  send(data: string | WebSocket.RawData) {
     if (!this.connected || !this.ws) {
       this.__queue.push(data)
     } else {
@@ -189,11 +198,11 @@ export class Socket extends EventEmitter {
     }
   }
 
-  async auth (token: string) {
-    return new Promise<void>((resolve, reject) => {
+  async auth(token: string) {
+    return await new Promise<void>((resolve, reject) => {
       this.send(`auth ${token}`)
       this.once('auth', (ev) => {
-        const { data } = ev
+        const { data } = ev as AuthEvent
         if (data.status === 'ok') {
           this.authed = true
           this.emit('token', data.token)
@@ -209,10 +218,12 @@ export class Socket extends EventEmitter {
     })
   }
 
-  async subscribe (path: string, cb?: (...args: unknown[]) => void) {
+  async subscribe(path: string, cb?: (...args: unknown[]) => void) {
     if (!path) return
     const userID = await this.api.userID()
-    if (!path.match(/^(\w+):(.+?)$/)) { path = `user:${userID}/${path}` }
+    if (!(/^(\w+):(.+?)$/.exec(path))) {
+      path = `user:${userID}/${path}`
+    }
     if (this.authed) {
       this.send(`subscribe ${path}`)
     } else {
@@ -224,12 +235,21 @@ export class Socket extends EventEmitter {
     if (cb) this.on(path, cb)
   }
 
-  async unsubscribe (path: string) {
+  async unsubscribe(path: string) {
     if (!path) return
     const userID = await this.api.userID()
-    if (!path.match(/^(\w+):(.+?)$/)) { path = `user:${userID}/${path}` }
+    if (!(/^(\w+):(.+?)$/.exec(path))) {
+      path = `user:${userID}/${path}`
+    }
     this.send(`unsubscribe ${path}`)
     this.emit('unsubscribe', path)
     if (this.__subs[path]) this.__subs[path]--
+  }
+}
+
+interface AuthEvent {
+  data: {
+    status: string
+    token: string
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import Debug from 'debug'
 import { EventEmitter } from 'node:events'
@@ -18,23 +19,23 @@ const DEFAULT_SHARD = 'shard0'
 const OFFICIAL_HISTORY_INTERVAL = 100
 const PRIVATE_HISTORY_INTERVAL = 20
 
-export async function sleep (ms: number): Promise<void> {
+export async function sleep(ms: number): Promise<void> {
   await new Promise(resolve => setInterval(resolve, ms))
 }
 
 export class RawAPI extends EventEmitter {
   readonly raw = {
     /** GET /api/version */
-    version: (): Promise<Api.VersionResponse> => {
-      return this.req('GET', '/api/version')
+    version: async (): Promise<Api.VersionResponse> => {
+      return await this.req('GET', '/api/version')
     },
 
     /** GET /api/authmod */
-    authmod: (): Promise<Api.AuthModResponse> => {
+    authmod: async (): Promise<Api.AuthModResponse> => {
       if (this.isOfficialServer()) {
-        return Promise.resolve({ ok: 1, name: 'official' })
+        return await Promise.resolve({ ok: 1, name: 'official' })
       }
-      return this.req('GET', '/api/authmod')
+      return await this.req('GET', '/api/authmod')
     },
 
     /**
@@ -44,13 +45,13 @@ export class RawAPI extends EventEmitter {
      * GET /room-history
      * @returns A json file with history data
      */
-    history: (room: string, tick: number, shard = DEFAULT_SHARD): Promise<Api.RoomHistoryResponse> => {
+    history: async (room: string, tick: number, shard = DEFAULT_SHARD): Promise<Api.RoomHistoryResponse> => {
       if (this.isOfficialServer()) {
         tick -= tick % OFFICIAL_HISTORY_INTERVAL
-        return this.req('GET', `/room-history/${shard}/${room}/${tick}.json`)
+        return await this.req('GET', `/room-history/${shard}/${room}/${tick}.json`)
       } else {
         tick -= tick % PRIVATE_HISTORY_INTERVAL
-        return this.req('GET', '/room-history', { room, time: tick })
+        return await this.req('GET', '/room-history', { room, time: tick })
       }
     },
 
@@ -59,25 +60,25 @@ export class RawAPI extends EventEmitter {
        * A list of curated community servers
        * POST /api/servers/list
        */
-      list: (): Promise<Api.ServerListResponse> => {
-        return this.req('POST', '/api/servers/list', {})
+      list: async (): Promise<Api.ServerListResponse> => {
+        return await this.req('POST', '/api/servers/list', {})
       }
     },
 
     auth: {
       /** POST /api/auth/signin */
-      signin: (email: string, password: string): Promise<Api.AuthSigninResponse> => {
-        return this.req('POST', '/api/auth/signin', { email, password })
+      signin: async (email: string, password: string): Promise<Api.AuthSigninResponse> => {
+        return await this.req('POST', '/api/auth/signin', { email, password })
       },
 
       /** POST /api/auth/steam-ticket */
-      steamTicket: (ticket: unknown, useNativeAuth = false): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/auth/steam-ticket', { ticket, useNativeAuth })
+      steamTicket: async (ticket: unknown, useNativeAuth = false): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/auth/steam-ticket', { ticket, useNativeAuth })
       },
 
       /** GET /api/auth/me */
-      me: (): Promise<Api.AuthMeResponse> => {
-        return this.req('GET', '/api/auth/me')
+      me: async (): Promise<Api.AuthMeResponse> => {
+        return await this.req('GET', '/api/auth/me')
       },
 
       /**
@@ -86,30 +87,30 @@ export class RawAPI extends EventEmitter {
        *
        * GET /api/auth/query-token
        */
-      queryToken: (token: string): Promise<Api.AuthQueryTokenResponse> => {
-        return this.req('GET', '/api/auth/query-token', { token })
+      queryToken: async (token: string): Promise<Api.AuthQueryTokenResponse> => {
+        return await this.req('GET', '/api/auth/query-token', { token })
       }
     },
 
     register: {
       /** GET /api/register/check-email */
-      checkEmail: (email: string): Promise<Api.UnknownResponse> => {
-        return this.req('GET', '/api/register/check-email', { email })
+      checkEmail: async (email: string): Promise<Api.UnknownResponse> => {
+        return await this.req('GET', '/api/register/check-email', { email })
       },
 
       /** GET /api/register/check-username */
-      checkUsername: (username: string): Promise<Api.UnknownResponse> => {
-        return this.req('GET', '/api/register/check-username', { username })
+      checkUsername: async (username: string): Promise<Api.UnknownResponse> => {
+        return await this.req('GET', '/api/register/check-username', { username })
       },
 
       /** POST /api/register/set-username */
-      setUsername: (username: string): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/register/set-username', { username })
+      setUsername: async (username: string): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/register/set-username', { username })
       },
 
       /** POST /api/register/submit */
-      submit: (username: string, email: string, password: string, modules: unknown): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/register/submit', { username, email, password, modules })
+      submit: async (username: string, email: string, password: string, modules: unknown): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/register/submit', { username, email, password, modules })
       }
     },
 
@@ -124,8 +125,8 @@ export class RawAPI extends EventEmitter {
        * @param statName the ID of the stat to fetch
        * @param shard
        */
-      mapStats: <S extends Api.MapStat>(rooms: string[], statName: S, shard = DEFAULT_SHARD): Promise<Api.GameMapStatsResponse<S>> => {
-        return this.req('POST', '/api/game/map-stats', { rooms, statName, shard })
+      mapStats: async <S extends Api.MapStat>(rooms: string[], statName: S, shard = DEFAULT_SHARD): Promise<Api.GameMapStatsResponse<S>> => {
+        return await this.req('POST', '/api/game/map-stats', { rooms, statName, shard })
       },
 
       /**
@@ -133,18 +134,18 @@ export class RawAPI extends EventEmitter {
        * @param type the type of object for which to generate the name (ex: "flag" or "spawn")
        * @param shard
        */
-      genUniqueObjectName: (type: "flag" | "spawn" | string, shard = DEFAULT_SHARD): Promise<Api.GameGenUniqueNameResponse> => {
-        return this.req('POST', '/api/game/gen-unique-object-name', { type, shard })
+      genUniqueObjectName: async (type: string, shard = DEFAULT_SHARD): Promise<Api.GameGenUniqueNameResponse> => {
+        return await this.req('POST', '/api/game/gen-unique-object-name', { type, shard })
       },
 
       /** POST /api/game/check-unique-object-name */
-      checkUniqueObjectName: (type: string, name: string, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/game/check-unique-object-name', { type, name, shard })
+      checkUniqueObjectName: async (type: string, name: string, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/game/check-unique-object-name', { type, name, shard })
       },
 
       /** POST /api/game/place-spawn */
-      placeSpawn: (room: string, x: number, y: number, name: string, shard: string | null = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/game/place-spawn', { name, room, x, y, shard })
+      placeSpawn: async (room: string, x: number, y: number, name: string, shard: string | null = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/game/place-spawn', { name, room, x, y, shard })
       },
 
       /**
@@ -154,28 +155,28 @@ export class RawAPI extends EventEmitter {
        *
        * POST /api/game/create-flag
        */
-      createFlag: (room: string, x: number, y: number, name: string, color: FlagColor = 1, secondaryColor: FlagColor = 1, shard = DEFAULT_SHARD): Promise<Api.DbUpsertedResponse> => {
-        return this.req('POST', '/api/game/create-flag', { name, room, x, y, color, secondaryColor, shard })
+      createFlag: async (room: string, x: number, y: number, name: string, color: FlagColor = 1, secondaryColor: FlagColor = 1, shard = DEFAULT_SHARD): Promise<Api.DbUpsertedResponse> => {
+        return await this.req('POST', '/api/game/create-flag', { name, room, x, y, color, secondaryColor, shard })
       },
 
       /** POST/api/game/gen-unique-flag-name */
-      genUniqueFlagName: (shard = DEFAULT_SHARD): Promise<Api.GameGenUniqueNameResponse> => {
-        return this.req('POST', '/api/game/gen-unique-flag-name', { shard })
+      genUniqueFlagName: async (shard = DEFAULT_SHARD): Promise<Api.GameGenUniqueNameResponse> => {
+        return await this.req('POST', '/api/game/gen-unique-flag-name', { shard })
       },
 
       /** POST /api/game/check-unique-flag-name */
-      checkUniqueFlagName: (name: string, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/game/check-unique-flag-name', { name, shard })
+      checkUniqueFlagName: async (name: string, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/game/check-unique-flag-name', { name, shard })
       },
 
       /** POST /api/game/change-flag-color */
-      changeFlagColor: (color: FlagColor = 1, secondaryColor: FlagColor = 1, shard = DEFAULT_SHARD): Promise<Api.DbModifiedResponse> => {
-        return this.req('POST', '/api/game/change-flag-color', { color, secondaryColor, shard })
+      changeFlagColor: async (color: FlagColor = 1, secondaryColor: FlagColor = 1, shard = DEFAULT_SHARD): Promise<Api.DbModifiedResponse> => {
+        return await this.req('POST', '/api/game/change-flag-color', { color, secondaryColor, shard })
       },
 
       /** POST /api/game/remove-flag */
-      removeFlag: (room: string, name: string, shard = DEFAULT_SHARD): Promise<Api.Response> => {
-        return this.req('POST', '/api/game/remove-flag', { name, room, shard })
+      removeFlag: async (room: string, name: string, shard = DEFAULT_SHARD): Promise<Api.Response> => {
+        return await this.req('POST', '/api/game/remove-flag', { name, room, shard })
       },
 
       /**
@@ -196,75 +197,75 @@ can destroy multiple structures at once
 intent can be an empty object for suicide and unclaim, but the web interface sends the id in it, as described
         * @example remove construction site: name = "remove", intent = {}
         */
-      addObjectIntent: (_id: string, room: string, name: string, intent?: string, shard = DEFAULT_SHARD): Promise<Api.DbUpsertedResponse> => {
-        return this.req('POST', '/api/game/add-object-intent', { _id, room, name, intent, shard })
+      addObjectIntent: async (_id: string, room: string, name: string, intent?: string, shard = DEFAULT_SHARD): Promise<Api.DbUpsertedResponse> => {
+        return await this.req('POST', '/api/game/add-object-intent', { _id, room, name, intent, shard })
       },
 
       /**
        * POST /api/game/create-construction
        * @param structureType the same value as one of the in-game STRUCTURE_* constants ('road', 'spawn', etc.)
        */
-      createConstruction: (room: string, x: number, y: number, structureType: Api.BuildableStructureConstant, name: string, shard = DEFAULT_SHARD): Promise<Api.GameCreateConstructionResponse> => {
-        return this.req('POST', '/api/game/create-construction', { room, x, y, structureType, name, shard })
+      createConstruction: async (room: string, x: number, y: number, structureType: Api.BuildableStructureConstant, name: string, shard = DEFAULT_SHARD): Promise<Api.GameCreateConstructionResponse> => {
+        return await this.req('POST', '/api/game/create-construction', { room, x, y, structureType, name, shard })
       },
 
       /**
        * POST /api/game/set-notify-when-attacked
        * @param enabled is either true or false (literal values, not strings)
        */
-      setNotifyWhenAttacked: (_id: string, enabled = true, shard = DEFAULT_SHARD): Promise<Api.DbModifiedResponse> => {
-        return this.req('POST', '/api/game/set-notify-when-attacked', { _id, enabled, shard })
+      setNotifyWhenAttacked: async (_id: string, enabled = true, shard = DEFAULT_SHARD): Promise<Api.DbModifiedResponse> => {
+        return await this.req('POST', '/api/game/set-notify-when-attacked', { _id, enabled, shard })
       },
 
       /** POST /api/game/create-invader */
-      createInvader: (room: string, x: number, y: number, size: 'Melee' | 'Ranged' | 'Healer', type: 'small' | 'big', boosted = false, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/game/create-invader', { room, x, y, size, type, boosted, shard })
+      createInvader: async (room: string, x: number, y: number, size: 'Melee' | 'Ranged' | 'Healer', type: 'small' | 'big', boosted = false, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/game/create-invader', { room, x, y, size, type, boosted, shard })
       },
 
       /** POST /api/game/remove-invader */
-      removeInvader: (_id: string, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/game/remove-invader', { _id, shard })
+      removeInvader: async (_id: string, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/game/remove-invader', { _id, shard })
       },
 
       /** GET /api/game/time */
-      time: (shard = DEFAULT_SHARD): Promise<Api.GameTimeResponse> => {
-        return this.req('GET', '/api/game/time', { shard })
+      time: async (shard = DEFAULT_SHARD): Promise<Api.GameTimeResponse> => {
+        return await this.req('GET', '/api/game/time', { shard })
       },
 
       /** GET /api/game/world-size */
-      worldSize: (shard = DEFAULT_SHARD): Promise<Api.GameWorldSizeResponse> => {
-        return this.req('GET', '/api/game/world-size', { shard })
+      worldSize: async (shard = DEFAULT_SHARD): Promise<Api.GameWorldSizeResponse> => {
+        return await this.req('GET', '/api/game/world-size', { shard })
       },
 
       /** GET /api/game/room-decorations */
-      roomDecorations: (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomDecorationsResponse> => {
-        return this.req('GET', '/api/game/room-decorations', { room, shard })
+      roomDecorations: async (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomDecorationsResponse> => {
+        return await this.req('GET', '/api/game/room-decorations', { room, shard })
       },
 
       /** GET /api/game/room-objects */
-      roomObjects: (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomObjectsResponse> => {
-        return this.req('GET', '/api/game/room-objects', { room, shard })
+      roomObjects: async (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomObjectsResponse> => {
+        return await this.req('GET', '/api/game/room-objects', { room, shard })
       },
 
       /**
        * GET /api/game/room-terrain
        * Returns results in "encoded" form (see return type documentation)
        */
-      roomTerrain: (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomTerrainEncodedResponse> => {
-        return this.req('GET', '/api/game/room-terrain', { room, encoded: 1, shard })
+      roomTerrain: async (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomTerrainEncodedResponse> => {
+        return await this.req('GET', '/api/game/room-terrain', { room, encoded: 1, shard })
       },
 
       /**
        * GET /api/game/room-terrain
        * Returns results in "unencoded" form (see return type documentation)
        */
-      roomTerrainUnencoded: (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomTerrainUnencodedResponse> => {
-        return this.req('GET', '/api/game/room-terrain', { room, shard })
+      roomTerrainUnencoded: async (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomTerrainUnencodedResponse> => {
+        return await this.req('GET', '/api/game/room-terrain', { room, shard })
       },
 
       /** GET /api/game/room-status */
-      roomStatus: (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomStatusResponse> => {
-        return this.req('GET', '/api/game/room-status', { room, shard })
+      roomStatus: async (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomStatusResponse> => {
+        return await this.req('GET', '/api/game/room-status', { room, shard })
       },
 
       /**
@@ -277,8 +278,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * - 180: 3 hours each; 24 hours total
        * - 1440: 24 hours each; 8 days total
        */
-      roomOverview: (room: string, interval: Api.RoomStatInterval = 8, shard = DEFAULT_SHARD): Promise<Api.GameRoomOverviewResponse> => {
-        return this.req('GET', '/api/game/room-overview', { room, interval, shard })
+      roomOverview: async (room: string, interval: Api.RoomStatInterval = 8, shard = DEFAULT_SHARD): Promise<Api.GameRoomOverviewResponse> => {
+        return await this.req('GET', '/api/game/room-overview', { room, interval, shard })
       },
 
       market: {
@@ -288,33 +289,33 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          *
          * GET /api/game/market/orders-index
          */
-        ordersIndex: (shard = DEFAULT_SHARD): Promise<Api.GameMarketIndexResponse> => {
-          return this.req('GET', '/api/game/market/orders-index', { shard })
+        ordersIndex: async (shard = DEFAULT_SHARD): Promise<Api.GameMarketIndexResponse> => {
+          return await this.req('GET', '/api/game/market/orders-index', { shard })
         },
 
         /** GET /api/game/market/my-orders */
-        myOrders: (): Promise<Api.GameMarketMyOrdersResponse> => {
-          return this.req('GET', '/api/game/market/my-orders').then(this.mapToShard)
+        myOrders: async (): Promise<Api.GameMarketMyOrdersResponse> => {
+          return await this.req('GET', '/api/game/market/my-orders').then(this.mapToShard)
         },
 
         /**
          * GET /api/game/market/orders
          * @param shard if {@link resourceType} is an {@link IntershardResourceConstant}, this must be set to `undefined`
          */
-        orders: (resourceType: Api.MarketResourceConstant, shard = DEFAULT_SHARD): Promise<Api.GameMarketOrdersResponse> => {
-          return this.req('GET', '/api/game/market/orders', { resourceType, shard })
+        orders: async (resourceType: Api.MarketResourceConstant, shard = DEFAULT_SHARD): Promise<Api.GameMarketOrdersResponse> => {
+          return await this.req('GET', '/api/game/market/orders', { resourceType, shard })
         },
 
         /** GET /api/game/market/stats */
-        stats: (resourceType: any, shard = DEFAULT_SHARD): Promise<Api.GameMarketStatsResponse> => {
-          return this.req('GET', '/api/game/market/stats', { resourceType, shard })
+        stats: async (resourceType: Api.MarketResourceConstant, shard = DEFAULT_SHARD): Promise<Api.GameMarketStatsResponse> => {
+          return await this.req('GET', '/api/game/market/stats', { resourceType, shard })
         }
       },
 
       shards: {
         /** GET /api/game/shards/info */
-        info: (): Promise<Api.GameShardsInfoResponse> => {
-          return this.req('GET', '/api/game/shards/info')
+        info: async (): Promise<Api.GameShardsInfoResponse> => {
+          return await this.req('GET', '/api/game/shards/info')
         }
       }
     },
@@ -325,9 +326,9 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * @param mode 'world' (control points) or 'power' (power processed)
        * @param season A date in the format `YYYY-MM`, NOT a seasonal world name/number
        */
-      list: (limit: number = 10, mode: 'world' | 'power' = 'world', offset: number | null = 0, season?: string): Promise<Api.LeaderboardListResponse> => {
+      list: async (limit = 10, mode: 'world' | 'power' = 'world', offset: number | null = 0, season?: string): Promise<Api.LeaderboardListResponse> => {
         season ??= this.currentSeason()
-        return this.req('GET', '/api/leaderboard/list', { limit, mode, offset, season })
+        return await this.req('GET', '/api/leaderboard/list', { limit, mode, offset, season })
       },
 
       /**
@@ -335,16 +336,16 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * @param mode 'world' (control points) or 'power' (power processed)
        * @param season An optional date in the format YYYY-MM, if not supplied all ranks in all seasons is returned.
        */
-      find: (username: string, mode: 'world' | 'power' = 'world', season?: string): Promise<Api.LeaderboardFindResponse> => {
-        return this.req('GET', '/api/leaderboard/find', { season, mode, username })
+      find: async (username: string, mode: 'world' | 'power' = 'world', season?: string): Promise<Api.LeaderboardFindResponse> => {
+        return await this.req('GET', '/api/leaderboard/find', { season, mode, username })
       },
 
       /**
        * Get a list of all seasons for which leaderboard rankings exist
        * GET /api/leaderboard/seasons
        */
-      seasons: (): Promise<Api.LeaderboardSeasonsResponse> => {
-        return this.req('GET', '/api/leaderboard/seasons')
+      seasons: async (): Promise<Api.LeaderboardSeasonsResponse> => {
+        return await this.req('GET', '/api/leaderboard/seasons')
       }
     },
 
@@ -353,9 +354,9 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * Get data about the current season
        * GET /api/seasons/current
        */
-      current: (): Promise<Api.SeasonsCurrentResponse | null> => {
-        if (!this.isSeasonServer()) return Promise.resolve(null)
-        return this.req('GET', '/api/seasons/current')
+      current: async (): Promise<Api.SeasonsCurrentResponse | null> => {
+        if (!this.isSeasonServer()) return await Promise.resolve(null)
+        return await this.req('GET', '/api/seasons/current')
       }
     },
 
@@ -364,16 +365,16 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * Update the authenticated user's {@link Badge}.
        * POST /api/user/badge
        */
-      badge: (badge: Api.Badge): Promise<Api.DbModifiedResponse> => {
-        return this.req('POST', '/api/user/badge', { badge })
+      badge: async (badge: Api.Badge): Promise<Api.DbModifiedResponse> => {
+        return await this.req('POST', '/api/user/badge', { badge })
       },
 
       /**
        * Update the authenticated user's shard CPU limits.
        * POST /api/user/cpu-shards
        */
-      cpuShards: (cpu: Api.CpuShardLimits): Promise<Api.DbModifiedResponse> => {
-        return this.req('POST', '/api/user/cpu-shards', { cpu })
+      cpuShards: async (cpu: Api.CpuShardLimits): Promise<Api.DbModifiedResponse> => {
+        return await this.req('POST', '/api/user/cpu-shards', { cpu })
       },
 
       /**
@@ -381,65 +382,65 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * to pick a new spawn room.
        * POST /api/user/respawn
        */
-      respawn: (): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/user/respawn')
+      respawn: async (): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/user/respawn')
       },
 
       /** POST /api/user/set-active-branch */
-      setActiveBranch: (branch: string, activeName: string): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/user/set-active-branch', { branch, activeName })
+      setActiveBranch: async (branch: string, activeName: string): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/user/set-active-branch', { branch, activeName })
       },
 
       /** POST /api/user/clone-branch */
-      cloneBranch: (branch: string, newName: string, defaultModules: unknown): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/user/clone-branch', { branch, newName, defaultModules })
+      cloneBranch: async (branch: string, newName: string, defaultModules: unknown): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/user/clone-branch', { branch, newName, defaultModules })
       },
 
       /** POST /api/user/delete-branch */
-      deleteBranch: (branch: string): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/user/delete-branch', { branch })
+      deleteBranch: async (branch: string): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/user/delete-branch', { branch })
       },
 
       /**
        * Update the authenticated user's notification preferences
        * POST /api/user/notify-prefs
        */
-      notifyPrefs: (prefs: Api.UserNotifyPrefsRequest): Promise<Api.DbModifiedResponse> => {
-        return this.req('POST', '/api/user/notify-prefs', prefs)
+      notifyPrefs: async (prefs: Api.UserNotifyPrefsRequest): Promise<Api.DbModifiedResponse> => {
+        return await this.req('POST', '/api/user/notify-prefs', prefs)
       },
 
       /**
        * Mark tutorial as completed for the authenticated user
        * POST /api/user/tutorial-done
        */
-      tutorialDone: (): Promise<Api.Response> => {
-        return this.req('POST', '/api/user/tutorial-done')
+      tutorialDone: async (): Promise<Api.Response> => {
+        return await this.req('POST', '/api/user/tutorial-done')
       },
 
       /**
        * Update the authenticated user's email address
        * POST /api/user/email
        */
-      email: (email: string): Promise<Api.UnknownResponse> => {
-        return this.req('POST', '/api/user/email', { email })
+      email: async (email: string): Promise<Api.UnknownResponse> => {
+        return await this.req('POST', '/api/user/email', { email })
       },
 
       /** GET /api/user/world-start-room */
-      worldStartRoom: (shard: string): Promise<Api.UserWorldStartRoomResponse> => {
-        return this.req('GET', '/api/user/world-start-room', { shard })
+      worldStartRoom: async (shard: string): Promise<Api.UserWorldStartRoomResponse> => {
+        return await this.req('GET', '/api/user/world-start-room', { shard })
       },
 
       /**
        * Get the authenticated user's status on this server
        * GET /api/user/world-status
        */
-      worldStatus: (): Promise<Api.UserWorldStatusResponse> => {
-        return this.req('GET', '/api/user/world-status')
+      worldStatus: async (): Promise<Api.UserWorldStatusResponse> => {
+        return await this.req('GET', '/api/user/world-status')
       },
 
       /** GET /api/user/branches */
-      branches: (): Promise<Api.UserBranchesResponse> => {
-        return this.req('GET', '/api/user/branches')
+      branches: async (): Promise<Api.UserBranchesResponse> => {
+        return await this.req('GET', '/api/user/branches')
       },
 
       code: {
@@ -448,8 +449,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          * Documentation: https://docs.screeps.com/commit.html
          * GET /api/user/code
          */
-        get: (branch: string): Promise<Api.UserCodeGetResponse> => {
-          return this.req('GET', '/api/user/code', { branch })
+        get: async (branch: string): Promise<Api.UserCodeGetResponse> => {
+          return await this.req('GET', '/api/user/code', { branch })
         },
 
         /**
@@ -457,30 +458,30 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          * Documentation: https://docs.screeps.com/commit.html
          * POST /api/user/code
          */
-        set: (params: Api.UserCodeSetRequest): Promise<Api.UnknownResponse> => {
-          return this.req('POST', '/api/user/code', params)
+        set: async (params: Api.UserCodeSetRequest): Promise<Api.UnknownResponse> => {
+          return await this.req('POST', '/api/user/code', params)
         }
       },
 
       decorations: {
         /** GET /api/user/decorations/inventory */
-        inventory: (): Promise<Api.UserDecorationInventoryResponse> => {
-          return this.req('GET', '/api/user/decorations/inventory')
+        inventory: async (): Promise<Api.UserDecorationInventoryResponse> => {
+          return await this.req('GET', '/api/user/decorations/inventory')
         },
 
         /** GET /api/user/decorations/themes */
-        themes: (): Promise<Api.UserDecorationThemesResponse> => {
-          return this.req('GET', '/api/user/decorations/themes')
+        themes: async (): Promise<Api.UserDecorationThemesResponse> => {
+          return await this.req('GET', '/api/user/decorations/themes')
         },
 
         /** POST /api/user/decorations/convert */
-        convert: (decorations: string[]): Promise<Api.UnknownResponse> => {
-          return this.req('POST', '/api/user/decorations/convert', { decorations })
+        convert: async (decorations: string[]): Promise<Api.UnknownResponse> => {
+          return await this.req('POST', '/api/user/decorations/convert', { decorations })
         },
 
         /** POST /api/user/decorations/pixelize */
-        pixelize: (count: number, theme = ''): Promise<Api.UnknownResponse> => {
-          return this.req('POST', '/api/user/decorations/pixelize', { count, theme })
+        pixelize: async (count: number, theme = ''): Promise<Api.UnknownResponse> => {
+          return await this.req('POST', '/api/user/decorations/pixelize', { count, theme })
         },
 
         /**
@@ -489,22 +490,22 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          * @param _id the {@link DecorationInstance} to activate
          * @param active values to assign to configurable {@link Decoration.props|properties}
          */
-        activate: (_id: string, active: object): Promise<Api.UnknownResponse> => {
-          return this.req('POST', '/api/user/decorations/activate', { _id, active })
+        activate: async (_id: string, active: object): Promise<Api.UnknownResponse> => {
+          return await this.req('POST', '/api/user/decorations/activate', { _id, active })
         },
 
         /**
          * Removes one or more applied decoratoins
          * POST /api/user/decorations/deactivate
          */
-        deactivate: (decorations: string[]): Promise<Api.UnknownResponse> => {
-          return this.req('POST', '/api/user/decorations/deactivate', { decorations })
+        deactivate: async (decorations: string[]): Promise<Api.UnknownResponse> => {
+          return await this.req('POST', '/api/user/decorations/deactivate', { decorations })
         }
       },
 
       /** GET /api/user/respawn-prohibited-rooms */
-      respawnProhibitedRooms: (): Promise<Api.UserRespawnProhibitedRoomsResponse> => {
-        return this.req('GET', '/api/user/respawn-prohibited-rooms')
+      respawnProhibitedRooms: async (): Promise<Api.UserRespawnProhibitedRoomsResponse> => {
+        return await this.req('GET', '/api/user/respawn-prohibited-rooms')
       },
 
       memory: {
@@ -515,8 +516,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          *  if undefined/empty, returns the entire Memory object
          * @returns the prefix `'gz:'` followed by the base64-encoded gzipped JSON encoding of the requested memory path
          */
-        get: (path?: string, shard = DEFAULT_SHARD): Promise<string> => {
-          return this.req('GET', '/api/user/memory', { path, shard })
+        get: async (path?: string, shard = DEFAULT_SHARD): Promise<string> => {
+          return await this.req('GET', '/api/user/memory', { path, shard })
         },
 
         /**
@@ -526,8 +527,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          * @param {string} shard
          * @returns {{ ok, result: { ok, n }, ops: [ { user, expression, hidden } ], data, insertedCount, insertedIds }}
          */
-        set: (path: string | undefined, value: unknown, shard = DEFAULT_SHARD): Promise<Api.UserMemorySetResponse> => {
-          return this.req('POST', '/api/user/memory', { path, value, shard })
+        set: async (path: string | undefined, value: unknown, shard = DEFAULT_SHARD): Promise<Api.UserMemorySetResponse> => {
+          return await this.req('POST', '/api/user/memory', { path, value, shard })
         },
 
         segment: {
@@ -535,16 +536,16 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
            * GET /api/user/memory-segment
            * @param segment A number from 0-99
            */
-          get: (segment: number, shard = DEFAULT_SHARD): Promise<Api.UserMemorySegmentGetResponse> => {
-            return this.req('GET', '/api/user/memory-segment', { segment, shard })
+          get: async (segment: number | string, shard = DEFAULT_SHARD): Promise<Api.UserMemorySegmentGetResponse> => {
+            return await this.req('GET', '/api/user/memory-segment', { segment, shard })
           },
 
           /**
            * POST /api/user/memory-segment
            * @param segment A number from 0-99
            */
-          set: (segment: number, data: unknown, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
-            return this.req('POST', '/api/user/memory-segment', { segment, data, shard })
+          set: async (segment: number | string, data: unknown, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
+            return await this.req('POST', '/api/user/memory-segment', { segment, data, shard })
           }
         }
       },
@@ -554,61 +555,61 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          * GET /api/user/messages/list?respondent={userId}
          * @param respondent the long `_id` of the user, not the username
          */
-        list: (respondent: string): Promise<Api.UserMessagesListResponse> => {
-          return this.req('GET', '/api/user/messages/list', { respondent })
+        list: async (respondent: string): Promise<Api.UserMessagesListResponse> => {
+          return await this.req('GET', '/api/user/messages/list', { respondent })
         },
 
         /**
          * Gets the last message from every thread this user is in
          * GET /api/user/messages/index
          */
-        index: (): Promise<Api.UserMessagesIndexResponse> => {
-          return this.req('GET', '/api/user/messages/index')
+        index: async (): Promise<Api.UserMessagesIndexResponse> => {
+          return await this.req('GET', '/api/user/messages/index')
         },
 
         /** GET /api/user/messages/unread-count */
-        unreadCount: (): Promise<Api.UserMessagesUnreadCountResponse> => {
-          return this.req('GET', '/api/user/messages/unread-count')
+        unreadCount: async (): Promise<Api.UserMessagesUnreadCountResponse> => {
+          return await this.req('GET', '/api/user/messages/unread-count')
         },
 
         /**
          * POST /api/user/messages/send
          * @param respondent the long `_id` of the user, not the username
          */
-        send: (respondent: string, text: string): Promise<Api.UnknownResponse> => {
-          return this.req('POST', '/api/user/messages/send', { respondent, text })
+        send: async (respondent: string, text: string): Promise<Api.UnknownResponse> => {
+          return await this.req('POST', '/api/user/messages/send', { respondent, text })
         },
 
         /**
          * POST /api/user/messages/mark-read
          * @param id
          */
-        markRead: (id: string): Promise<Api.UserMessagesMarkReadResponse> => {
-          return this.req('POST', '/api/user/messages/mark-read', { id })
+        markRead: async (id: string): Promise<Api.UserMessagesMarkReadResponse> => {
+          return await this.req('POST', '/api/user/messages/mark-read', { id })
         }
       },
 
       /** GET /api/user/find?username={username} */
-      find: (username: string): Promise<Api.UserFindResponse> => {
-        return this.req('GET', '/api/user/find', { username })
+      find: async (username: string): Promise<Api.UserFindResponse> => {
+        return await this.req('GET', '/api/user/find', { username })
       },
 
       /** GET /api/user/find?id={userId} */
-      findById: (id: string): Promise<Api.UserFindResponse> => {
-        return this.req('GET', '/api/user/find', { id })
+      findById: async (id: string): Promise<Api.UserFindResponse> => {
+        return await this.req('GET', '/api/user/find', { id })
       },
 
       /** GET /api/user/stats */
-      stats: (interval: number): Promise<Api.UnknownResponse> => {
-        return this.req('GET', '/api/user/stats', { interval })
+      stats: async (interval: number): Promise<Api.UnknownResponse> => {
+        return await this.req('GET', '/api/user/stats', { interval })
       },
 
       /**
        * Find all rooms claimed by the specified player.
        * GET /api/user/rooms
        */
-      rooms: (id: string): Promise<Api.UserRoomsResponse> => {
-        return this.req('GET', '/api/user/rooms', { id }).then(this.mapToShard)
+      rooms: async (id: string): Promise<Api.UserRoomsResponse> => {
+        return await this.req('GET', '/api/user/rooms', { id }).then(this.mapToShard)
       },
 
       /**
@@ -620,26 +621,26 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * - 1440: 24 hours each; 8 days total
        * @param statName the stat to view for this user
        */
-      overview: (interval: Api.RoomStatInterval = 8, statName: Api.RoomStat = 'energyControl'): Promise<Api.UserOverviewResponse> => {
-        return this.req('GET', '/api/user/overview', { interval, statName })
+      overview: async (interval: Api.RoomStatInterval = 8, statName: Api.RoomStat = 'energyControl'): Promise<Api.UserOverviewResponse> => {
+        return await this.req('GET', '/api/user/overview', { interval, statName })
       },
 
       /**
        * GET /api/user/money-history
        * @param page Used for pagination
        */
-      moneyHistory: (page = 0): Promise<Api.UserMoneyHistoryResponse> => {
-        return this.req('GET', '/api/user/money-history', { page })
+      moneyHistory: async (page = 0): Promise<Api.UserMoneyHistoryResponse> => {
+        return await this.req('GET', '/api/user/money-history', { page })
       },
 
       /** POST /api/user/console */
-      console: (expression: string, shard = DEFAULT_SHARD): Promise<Api.UserConsoleResponse> => {
-        return this.req('POST', '/api/user/console', { expression, shard })
+      console: async (expression: string, shard = DEFAULT_SHARD): Promise<Api.UserConsoleResponse> => {
+        return await this.req('POST', '/api/user/console', { expression, shard })
       },
 
       /** GET /api/user/name */
-      name: (): Promise<Api.UserNameResponse> => {
-        return this.req('GET', '/api/user/name')
+      name: async (): Promise<Api.UserNameResponse> => {
+        return await this.req('GET', '/api/user/name')
       }
     },
 
@@ -650,16 +651,16 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * GET /api/experimental/pvp
        * @param interval minimum time (in ticks?) since last combat action
        */
-      pvp: (interval: number = 100): Promise<Api.ExperimentalPvpResponse> => {
-        return this.req('GET', '/api/experimental/pvp', { interval }).then(this.mapToShard)
+      pvp: async (interval = 100): Promise<Api.ExperimentalPvpResponse> => {
+        return await this.req('GET', '/api/experimental/pvp', { interval }).then(this.mapToShard)
       },
 
       /**
        * Find all active nuclear launches
        * GET /api/experimental/nukes
        */
-      nukes: (): Promise<Api.ExperimentalNukesResponse> => {
-        return this.req('GET', '/api/experimental/nukes').then(this.mapToShard)
+      nukes: async (): Promise<Api.ExperimentalNukesResponse> => {
+        return await this.req('GET', '/api/experimental/nukes').then(this.mapToShard)
       }
     },
 
@@ -668,25 +669,25 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * GET /api/warpath/battles
        * @param interval
        */
-      battles: (interval: number = 100): Promise<Api.UnknownResponse> => {
-        return this.req('GET', '/api/warpath/battles', { interval })
+      battles: async (interval = 100): Promise<Api.UnknownResponse> => {
+        return await this.req('GET', '/api/warpath/battles', { interval })
       }
     },
 
     scoreboard: {
       /** GET /api/scoreboard/list */
-      list: (limit = 20, offset = 0): Promise<Api.ScoreboardListResponse> => {
-        return this.req('GET', '/api/scoreboard/list', { limit, offset })
+      list: async (limit = 20, offset = 0): Promise<Api.ScoreboardListResponse> => {
+        return await this.req('GET', '/api/scoreboard/list', { limit, offset })
       }
     }
   }
 
-  opts: Api.ServerConfig = {};
-  token?: string;
-  protected http?: AxiosInstance;
-  private __authed = false;
+  opts: Api.ServerConfig = {}
+  token?: string
+  protected http?: AxiosInstance
+  private __authed = false
 
-  constructor (opts?: Api.ServerConfig) {
+  constructor(opts?: Api.ServerConfig) {
     super()
     this.setServer(opts ?? {})
   }
@@ -694,7 +695,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
   /**
    * Get the current leaderboard season (not the current seasonal world season)
    */
-  currentSeason (): string {
+  currentSeason(): string {
     const now = new Date()
     const year = now.getFullYear()
     let month = (now.getUTCMonth() + 1).toString()
@@ -706,23 +707,23 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * True if this client is configured for the official world, PTR,
    * or seasonal world servers
    */
-  isOfficialServer (): boolean {
+  isOfficialServer(): boolean {
     return !!this.opts?.url?.match(/screeps\.com/)
   }
 
   /** True if this client is configured for the seasonal world server */
-  isSeasonServer (): boolean {
+  isSeasonServer(): boolean {
     return !!this.opts?.url?.match(/screeps\.com\/season/)
   }
 
-  protected mapToShard <R extends Response>(res: R & { shards?: unknown, list?: unknown, rooms?: unknown }): R {
+  protected mapToShard <R extends Response>(this: void, res: R & { shards?: unknown, list?: unknown, rooms?: unknown }): R {
     res.shards ??= {
       privSrv: res.list ?? res.rooms
     }
     return res
   }
 
-  setServer (opts?: Api.ServerConfig) {
+  setServer(opts?: Api.ServerConfig) {
     Object.assign(this.opts, opts ?? {})
     if (this.opts.path && !this.opts.pathname) {
       this.opts.pathname = this.opts.path
@@ -739,7 +740,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     })
   }
 
-  async auth (email: string, password: string, opts?: Api.ServerConfig) {
+  async auth(email: string, password: string, opts?: Api.ServerConfig) {
     this.setServer(opts)
     if (email && password) {
       Object.assign(this.opts, { email, password })
@@ -754,7 +755,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     return res
   }
 
-  async req (method: Api.HttpMethod, path: string, body = {}): Promise<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async req(method: Api.HttpMethod, path: string, body = {}): Promise<any> {
     if (!this.http) {
       throw new Error('http client not configured')
     }
@@ -777,20 +779,21 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     }
     try {
       const res = await this.http(req)
-      const token = res.headers['x-token']
+      const token = res.headers['x-token'] as string
       if (token) {
         this.emit('token', token)
       }
-      const rateLimit = this.buildRateLimit(method, path, res)
+      const rateLimit = this.buildRateLimit(method, path, res as RateLimitResponse)
       this.emit('rateLimit', rateLimit)
       debugRateLimit(`${method} ${path} ${rateLimit.remaining}/${rateLimit.limit} ${rateLimit.toReset}s`)
-      if (typeof res.data.data === 'string' && res.data.data.slice(0, 3) === 'gz:') {
-        res.data.data = await this.gz(res.data.data)
+      const data = res.data as { data?: unknown }
+      if (typeof data.data === 'string' && data.data.startsWith('gz:')) {
+        data.data = await this.gz(data.data)
       }
       this.emit('response', res)
       return res.data
     } catch (err) {
-      const res = (err as unknown as { response?: AxiosResponse }).response ?? {} as AxiosResponse
+      const res = ((err as { response?: AxiosResponse }).response ?? {}) as RateLimitResponse
       const rateLimit = this.buildRateLimit(method, path, res)
       this.emit('rateLimit', rateLimit)
       debugRateLimit(`${method} ${path} ${rateLimit.remaining}/${rateLimit.limit} ${rateLimit.toReset}s`)
@@ -798,45 +801,45 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         if (this.__authed && this.opts.email && this.opts.password) {
           this.__authed = false
           await this.auth(this.opts.email, this.opts.password)
-          return this.req(method, path, body)
+          return await this.req(method, path, body)
         } else {
-          throw new Error('Not Authorized')
+          throw new Error('Not Authorized', { cause: err })
         }
       }
       if (res.status === 429 && !res.headers['x-ratelimit-limit'] && this.opts.experimentalRetry429) {
         await sleep(Math.floor(Math.random() * 500) + 200)
-        return this.req(method, path, body)
+        return await this.req(method, path, body)
       }
-      if ((err as unknown as { response?: AxiosResponse }).response) {
+      if ((err as { response?: AxiosResponse }).response) {
         const details = {
-          params: undefined,
-          data: res.data,
+          params: {},
+          data: res.data as string,
           headers: res.headers,
           status: res.status,
-          statusText: res.statusText,
+          statusText: res.statusText
         }
         if (!path.startsWith('/api/auth')) {
-          details.params = res.config?.params
+          Object.assign(details.params, res.config?.params as object ?? {})
         }
-        throw new Error(JSON.stringify(details, undefined, 2))
+        throw new Error(JSON.stringify(details, undefined, 2), { cause: err })
       }
-      throw new Error((err as Error).message)
+      throw err
     }
   }
 
-  async gz (data: string): Promise<any> {
+  async gz(data: string): Promise<unknown> {
     const buf = Buffer.from(data.slice(3), 'base64')
     const ret = await gunzipAsync(buf)
     return JSON.parse(ret.toString())
   }
 
-  async inflate (data: string): Promise<any> {
+  async inflate(data: string): Promise<unknown> {
     const buf = Buffer.from(data.slice(3), 'base64')
     const ret = await inflateAsync(buf)
     return JSON.parse(ret.toString())
   }
 
-  buildRateLimit (method: Api.HttpMethod, path: string, res: any) {
+  buildRateLimit(method: Api.HttpMethod, path: string, res: RateLimitResponse) {
     const {
       headers: {
         'x-ratelimit-limit': limit,
@@ -854,3 +857,9 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     }
   }
 }
+
+type RateLimitResponse = AxiosResponse<unknown, unknown, {
+  'x-ratelimit-limit': number
+  'x-ratelimit-remaining': number
+  'x-ratelimit-reset': number
+}>

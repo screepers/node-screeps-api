@@ -2,7 +2,7 @@ import { ConfigManager } from './ConfigManager'
 import { RawAPI } from './RawAPI'
 import { Socket } from './Socket'
 
-type RateLimit = {
+interface RateLimit {
   limit: number
   period: 'minute' | 'hour' | 'day'
   remaining: number
@@ -26,7 +26,7 @@ const DEFAULTS: Api.ServerConfig = {
 const configManager = new ConfigManager()
 
 export class ScreepsAPI extends RawAPI {
-  static async fromConfig (server = 'main', config?: string, opts = {}) {
+  static async fromConfig(server = 'main', config?: string, opts = {}) {
     const data = await configManager.getConfig()
 
     if (data) {
@@ -44,13 +44,13 @@ export class ScreepsAPI extends RawAPI {
             port: conf.port,
             protocol: conf.secure ? 'https' : 'http',
             token: conf.token,
-            path: conf.path || '/'
+            path: conf.path ?? '/'
           },
           opts
         )
       )
 
-      api.appConfig = data?.configs?.[config!] || {}
+      api.appConfig = data?.configs?.[config!] ?? {}
 
       if (!conf.token && conf.username && conf.password) {
         await api.auth(conf.username, conf.password)
@@ -69,10 +69,10 @@ export class ScreepsAPI extends RawAPI {
   private _user?: Api.AuthMeResponse | Api.UserFindResponse['user']
   private _tokenInfo?: Api.TokenInfo
 
-  constructor (opts?: Api.ServerConfig) {
+  constructor(opts?: Api.ServerConfig) {
     opts = Object.assign({}, DEFAULTS, opts)
     super(opts)
-    this.on('token', token => {
+    this.on('token', (token: string) => {
       this.token = token
     })
     const defaultLimit = (limit: number, period: 'minute' | 'hour' | 'day') => ({
@@ -105,23 +105,23 @@ export class ScreepsAPI extends RawAPI {
       }
     }
     this.on('rateLimit', (limits: ReturnType<RawAPI['buildRateLimit']>) => {
-      const rate =
-        this.rateLimits[limits.method]?.[limits.path] || this.rateLimits.global
+      const rate
+        = this.rateLimits[limits.method]?.[limits.path] || this.rateLimits.global
       Object.assign(rate, {
         limit: limits.limit,
         remaining: limits.remaining,
         reset: limits.reset,
-        toReset: limits.toReset,
+        toReset: limits.toReset
       })
     })
     this.socket = new Socket(this)
   }
 
-  getRateLimit (method: Api.HttpMethod, path: string) {
+  getRateLimit(method: Api.HttpMethod, path: string) {
     return this.rateLimits[method][path] || this.rateLimits.global
   }
 
-  get rateLimitResetUrl () {
+  get rateLimitResetUrl() {
     if (!this.token) throw new Error('API token not found')
     return `https://screeps.com/a/#!/account/auth-tokens/noratelimit?token=${this.token.slice(
       0,
@@ -129,7 +129,7 @@ export class ScreepsAPI extends RawAPI {
     )}`
   }
 
-  async me (): Promise<Exclude<typeof this._user, undefined>> {
+  async me(): Promise<Exclude<typeof this._user, undefined>> {
     if (this._user) return this._user
     const tokenInfo = await this.tokenInfo()
     if (tokenInfo.full) {
@@ -142,7 +142,7 @@ export class ScreepsAPI extends RawAPI {
     return this._user
   }
 
-  async tokenInfo (): Promise<Api.TokenInfo> {
+  async tokenInfo(): Promise<Api.TokenInfo> {
     if (!this.token) throw new Error('API token not found')
     if (this._tokenInfo) {
       return this._tokenInfo
@@ -156,52 +156,52 @@ export class ScreepsAPI extends RawAPI {
     return this._tokenInfo
   }
 
-  async userID () {
+  async userID() {
     const user = await this.me()
     return user._id
   }
 
-  get history () {
+  get history() {
     return this.raw.history
   }
 
-  get authmod () {
+  get authmod() {
     return this.raw.authmod
   }
 
-  get version () {
+  get version() {
     return this.raw.version
   }
 
-  get time () {
+  get time() {
     return this.raw.game.time
   }
 
-  get leaderboard () {
+  get leaderboard() {
     return this.raw.leaderboard
   }
 
-  get market () {
+  get market() {
     return this.raw.game.market
   }
 
-  get registerUser () {
+  get registerUser() {
     return this.raw.register.submit
   }
 
-  get code () {
+  get code() {
     return this.raw.user.code
   }
 
-  get memory () {
+  get memory() {
     return this.raw.user.memory
   }
 
-  get segment () {
+  get segment() {
     return this.raw.user.memory.segment
   }
 
-  get console () {
+  get console() {
     return this.raw.user.console
   }
 }
