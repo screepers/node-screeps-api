@@ -8,7 +8,7 @@ const readFile = utils.promisify(fs.readFile);
 
 export class ConfigManager {
   path?: string
-  private _config?: YamlConfig | null
+  private _config?: Api.YamlConfig | null
 
   async refresh () {
     this._config = null
@@ -20,7 +20,7 @@ export class ConfigManager {
     return Object.keys(conf?.servers ?? [])
   }
 
-  async getConfig (): Promise<YamlConfig | null> {
+  async getConfig (): Promise<Api.YamlConfig | null> {
     if (this._config) {
       return this._config
     }
@@ -64,10 +64,10 @@ export class ConfigManager {
     return null
   }
 
-  async loadConfig (file: string): Promise<YamlConfig | null> {
+  async loadConfig (file: string): Promise<Api.YamlConfig | null> {
     try {
       const contents = await readFile(file, { encoding: 'utf8' })
-      const data = parse(contents) as YamlConfig
+      const data = parse(contents) as Api.YamlConfig
       if (!data.servers) {
         throw new Error(
           `Invalid config: 'servers' object does not exist in '${path}'`
@@ -81,5 +81,46 @@ export class ConfigManager {
         throw e
       }
     }
+  }
+}
+
+declare global {
+  namespace Api {
+    /**
+     * Format of a screeps unified credential file:
+     * https://github.com/screepers/screepers-standards/blob/3877e86f38caed9891ef6270aa9690df556e6c22/SS3-Unified_Credentials_File.md
+     */
+    interface YamlConfig {
+      servers: { [serverName: string]: ServerConfig | undefined }
+      configs?: { [appName: string]: AppConfig | undefined }
+    }
+
+    /** Format of a screeps.json credential file */
+    interface JsonConfig {
+      [serverName: string]: ServerConfig | undefined
+    }
+
+    /** Configuration for a single Screeps World server */
+    interface ServerConfig {
+      token?: string
+      email?: string
+      username?: string
+      password?: string
+      protocol?: string
+      secure?: boolean
+      host?: string
+      hostname?: string
+      port?: number
+      path?: string
+      pathname?: string
+      url?: string
+      ptr?: boolean
+      season?: boolean
+      /** Automatically retry requests that fail due to rate limiting */
+      experimentalRetry429?: boolean
+    }
+
+    /** Application-level configuration from {@link YamlConfig} */
+    interface AppConfig { [propertyName: string]: unknown }
   }
 }

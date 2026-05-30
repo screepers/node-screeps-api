@@ -13,10 +13,10 @@ type RateLimit = {
 type RateLimits = {
   global: RateLimit
 } & {
-  [method in HttpMethod]: { [path: string]: RateLimit }
+  [method in Api.HttpMethod]: { [path: string]: RateLimit }
 }
 
-const DEFAULTS: ServerConfig = {
+const DEFAULTS: Api.ServerConfig = {
   protocol: 'https',
   hostname: 'screeps.com',
   port: 443,
@@ -62,14 +62,14 @@ export class ScreepsAPI extends RawAPI {
     throw new Error('No valid config found')
   }
 
-  appConfig?: AppConfig
+  appConfig?: Api.AppConfig
   rateLimits: RateLimits
   socket: Socket
 
-  private _user?: AuthMeApiResponse | UserFindApiResponse['user']
-  private _tokenInfo?: TokenInfo
+  private _user?: Api.AuthMeResponse | Api.UserFindResponse['user']
+  private _tokenInfo?: Api.TokenInfo
 
-  constructor (opts?: ServerConfig) {
+  constructor (opts?: Api.ServerConfig) {
     opts = Object.assign({}, DEFAULTS, opts)
     super(opts)
     this.on('token', token => {
@@ -117,7 +117,7 @@ export class ScreepsAPI extends RawAPI {
     this.socket = new Socket(this)
   }
 
-  getRateLimit (method: HttpMethod, path: string) {
+  getRateLimit (method: Api.HttpMethod, path: string) {
     return this.rateLimits[method][path] || this.rateLimits.global
   }
 
@@ -142,7 +142,7 @@ export class ScreepsAPI extends RawAPI {
     return this._user
   }
 
-  async tokenInfo (): Promise<TokenInfo> {
+  async tokenInfo (): Promise<Api.TokenInfo> {
     if (!this.token) throw new Error('API token not found')
     if (this._tokenInfo) {
       return this._tokenInfo

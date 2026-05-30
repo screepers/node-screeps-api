@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import utils from 'node:util'
-import { ScreepsAPI } from '../src'
+import { ScreepsAPI } from '../src/ScreepsAPI'
 
 const readFile = utils.promisify(fs.readFile);
 const writeFile = utils.promisify(fs.writeFile);
@@ -161,7 +161,7 @@ async function run() {
     .action(async function (files, opts) {
       try {
         const api = await init(opts)
-        const modules: UserCodeSetApiRequest['modules'] = {}
+        const modules: Api.UserCodeSetRequest['modules'] = {}
         const ps = []
         for (const file of files) {
           ps.push((async (file) => {
