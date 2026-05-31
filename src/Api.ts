@@ -244,6 +244,12 @@ declare global {
         user: string
         level: number
       }
+      sign?: {
+        user: string
+        text: string
+        time: number
+        datetime: number
+      }
       status: RoomStatus
     }
 
