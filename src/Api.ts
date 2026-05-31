@@ -244,13 +244,25 @@ declare global {
         user: string
         level: number
       }
-      sign?: {
-        user: string
-        text: string
-        time: number
-        datetime: number
-      }
+      sign?: Sign
+      hardSign?: SystemSign
       status: RoomStatus
+    }
+
+    /** A player signature on a room controller */
+    interface Sign {
+      user: string
+      text: string
+      time: number
+      datetime: number
+    }
+
+    /** A system signature on a room / room controller */
+    interface SystemSign {
+      text: string
+      time: number
+      datetime: number
+      endDatetime: number
     }
 
     /**
