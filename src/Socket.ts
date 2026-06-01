@@ -69,10 +69,12 @@ export class Socket extends EventEmitter {
   async connect(opts = {}) {
     Object.assign(this.opts, opts)
     if (!this.api.token) {
-      throw new Error('No token! Call api.auth() before connecting the socket!')
+      await this.api.auth(
+        new Error('No token! Call api.auth() before connecting the socket!')
+      )
     }
     return await new Promise((resolve, reject) => {
-      const baseURL = this.api.opts.url!.replace('http', 'ws')
+      const baseURL = this.api.config.server.url.replace('http', 'ws')
       const wsurl = new URL('socket/websocket', baseURL)
       this.ws = new WebSocket(wsurl)
       this.ws.on('open', () => {

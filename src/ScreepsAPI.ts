@@ -16,65 +16,50 @@ type RateLimits = {
   [method in Api.HttpMethod]: { [path: string]: RateLimit }
 }
 
-const DEFAULTS: Api.ServerConfig = {
-  protocol: 'https',
-  hostname: 'screeps.com',
-  port: 443,
-  path: '/'
-}
-
 const configManager = new ConfigManager()
 
 export class ScreepsAPI extends RawAPI {
-  static async fromConfig(server = 'main', config?: string, opts = {}) {
-    const data = await configManager.getConfig()
+  /**
+   * Search for a config/credential file and initializes the client from the first file found.
+   * If a valid config is loaded and email/password auth is being used, authenticate automatically.
+   * The client can also be initialized by passing a configuration object directly to the constructor.
+   *
+   * @param serverName the property name of the server object to use from the config file
+   * @param opts see {@link Api.LoadConfigOptions}
+   * @throws if the selected config file is invalid or if no config files are found
+   */
+  static async fromConfig(serverName: string, opts?: Api.LoadConfigOptions): Promise<ScreepsAPI> {
+    const config = await configManager.getConfig(serverName, opts)
+    if (!config) throw new Error('No valid config found')
 
-    if (data) {
-      if (!data.servers[server]) {
-        throw new Error(`Server '${server}' does not exist in '${configManager.path}'; valid paths: ${Object.keys(data.servers).join(', ')}`)
-      }
+    const api = new ScreepsAPI(config)
 
-      const conf = data.servers[server]
-      if (conf.ptr) conf.path = '/ptr'
-      if (conf.season) conf.path = '/season'
-      const api = new ScreepsAPI(
-        Object.assign(
-          {
-            hostname: conf.host,
-            port: conf.port,
-            protocol: conf.secure ? 'https' : 'http',
-            token: conf.token,
-            path: conf.path ?? '/'
-          },
-          opts
-        )
-      )
-
-      api.appConfig = data?.configs?.[config!] ?? {}
-
-      if (!conf.token && conf.username && conf.password) {
-        await api.auth(conf.username, conf.password)
-      }
-
-      return api
+    const server = config.server
+    if (!server.token) {
+      await api.auth()
     }
 
-    throw new Error('No valid config found')
+    return api
   }
 
-  appConfig?: Api.AppConfig
   rateLimits: RateLimits
   socket: Socket
 
   private _user?: Api.AuthMeResponse | Api.UserFindResponse['user']
   private _tokenInfo?: Api.TokenInfo
 
-  constructor(opts?: Api.ServerConfig) {
-    opts = Object.assign({}, DEFAULTS, opts)
-    super(opts)
-    this.on('token', (token: string) => {
-      this.token = token
-    })
+  constructor(config: Api.Config)
+  constructor(serverConfig: Api.ServerConfig | Api.RawServerConfig)
+  constructor(config: Api.Config | Api.ServerConfig | Api.RawServerConfig) {
+    if (!('server' in config) || !('client' in config)) {
+      config = {
+        server: new ConfigManager().normalizeServerConfig(config),
+        client: {}
+      }
+    }
+
+    super(config)
+
     const defaultLimit = (limit: number, period: 'minute' | 'hour' | 'day') => ({
       limit,
       period,
@@ -114,6 +99,7 @@ export class ScreepsAPI extends RawAPI {
         toReset: limits.toReset
       })
     })
+
     this.socket = new Socket(this)
   }
 
@@ -142,17 +128,27 @@ export class ScreepsAPI extends RawAPI {
     return this._user
   }
 
+  /**
+   * Fetch permissions and other information about the API token
+   * currently being used by this client
+   */
   async tokenInfo(): Promise<Api.TokenInfo> {
-    if (!this.token) throw new Error('API token not found')
+    if (!this.token) {
+      await this.auth(new Error('Not authenticated; cannot query token info'))
+    }
+
     if (this._tokenInfo) {
       return this._tokenInfo
     }
-    if (this.opts.token) {
-      const { token } = await this.raw.auth.queryToken(this.token)
+
+    if (this.config.server.token) {
+      const { token } = await this.raw.auth.queryToken(this.config.server.token)
       this._tokenInfo = token
     } else {
-      this._tokenInfo = { full: true, token: this.token }
+      // Email/password auth always gets full privileges
+      this._tokenInfo = { full: true, token: this.token! }
     }
+
     return this._tokenInfo
   }
 
