@@ -1,9 +1,9 @@
 import Debug from 'debug'
 import { EventEmitter } from 'node:events'
+import { setTimeout } from 'node:timers/promises'
 import { URL } from 'node:url'
 import WebSocket from 'ws'
 import { ScreepsAPI } from './ScreepsAPI'
-import { sleep } from './RawAPI'
 
 const debug = Debug('screepsapi:socket')
 
@@ -122,7 +122,7 @@ export class Socket extends EventEmitter {
     do {
       let time = Math.pow(2, retries) * 100
       if (time > this.opts.maxRetryDelay) time = this.opts.maxRetryDelay
-      await sleep(time)
+      await setTimeout(time)
       if (!this.reconnecting) return // reset() called in-between
       try {
         await this.connect()

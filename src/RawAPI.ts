@@ -2,6 +2,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import Debug from 'debug'
 import { EventEmitter } from 'node:events'
+import { setTimeout } from 'node:timers/promises'
 import URL from 'node:url'
 import utils from 'node:util'
 import zlib from 'zlib'
@@ -18,10 +19,6 @@ const inflateAsync = utils.promisify(zlib.inflate)
 const DEFAULT_SHARD = 'shard0'
 const OFFICIAL_HISTORY_INTERVAL = 100
 const PRIVATE_HISTORY_INTERVAL = 20
-
-export async function sleep(ms: number): Promise<void> {
-  await new Promise(resolve => setTimeout(resolve, ms))
-}
 
 export class RawAPI extends EventEmitter {
   readonly raw = {
@@ -825,7 +822,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         }
       }
       if (res.status === 429 && !res.headers['x-ratelimit-limit'] && this.opts.experimentalRetry429) {
-        await sleep(Math.floor(Math.random() * 500) + 200)
+        await setTimeout(Math.floor(Math.random() * 500) + 200)
         return await this.req(method, path, body)
       }
       if ((err as { response?: AxiosResponse }).response) {
