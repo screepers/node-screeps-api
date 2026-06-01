@@ -1,6 +1,7 @@
+import { defineConfig } from 'rollup';
 import typescript from 'rollup-plugin-typescript2'
 
-export default {
+export default defineConfig({
   input: {
     cli: 'bin/screeps-api.ts',
     index: 'src/index.ts',
@@ -8,7 +9,7 @@ export default {
   },
   output: {
     dir: 'dist',
-    format: 'cjs',
+    format: 'esm',
     globals: {
       ws: 'WebSocket'
     },
@@ -33,4 +34,4 @@ export default {
   plugins: [
     typescript()
   ]
-}
+})
