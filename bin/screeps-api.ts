@@ -37,8 +37,8 @@ type RawApiFn = (...args: unknown[]) => Promise<unknown>
 const readFile = utils.promisify(fs.readFile)
 const writeFile = utils.promisify(fs.writeFile)
 
-async function init(opts?: CommandOptions): Promise<ScreepsAPI> {
-  return await ScreepsAPI.fromConfig(opts?.server)
+function init(opts?: CommandOptions): Promise<ScreepsAPI> {
+  return ScreepsAPI.fromConfig(opts?.server)
 }
 
 function json(data: unknown) {
