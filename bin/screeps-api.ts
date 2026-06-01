@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 import { Command } from 'commander'
-import fs from 'node:fs'
+import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
-import utils from 'node:util'
 import { ScreepsAPI } from '../src/ScreepsAPI'
 
 interface CommandOptions {
@@ -33,9 +32,6 @@ interface UploadOptions extends CommandOptions {
 }
 
 type RawApiFn = (...args: unknown[]) => Promise<unknown>
-
-const readFile = utils.promisify(fs.readFile)
-const writeFile = utils.promisify(fs.writeFile)
 
 function init(opts?: CommandOptions): Promise<ScreepsAPI> {
   return ScreepsAPI.fromConfig(opts?.server)

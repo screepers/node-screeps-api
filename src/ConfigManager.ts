@@ -1,10 +1,7 @@
-import fs from 'node:fs'
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
-import utils from 'node:util'
 import { parse } from 'yaml'
-
-const readFile = utils.promisify(fs.readFile)
 
 export class ConfigManager {
   path?: string
