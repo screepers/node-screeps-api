@@ -362,6 +362,19 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
 
     user: {
       /**
+       * PTR only: unlock CPU for one week. Does nothing on non-PTR servers.
+       * POST /api/user/activate-ptr
+       */
+      activatePtr: async (): Promise<Api.Response> => {
+        // Without this check, an `{ error: 'not ptr' }` response is returned
+        // on MMO/season, and a 404 error is thrown on unofficial servers
+        if (!this.isPtrServer()) {
+          return Promise.resolve({ ok: 1 })
+        }
+        return await this.req('POST', '/api/user/activate-ptr')
+      },
+
+      /**
        * Update the authenticated user's {@link Badge}.
        * POST /api/user/badge
        */
@@ -714,6 +727,11 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
   /** True if this client is configured for the seasonal world server */
   isSeasonServer(): boolean {
     return !!this.opts?.url?.match(/screeps\.com\/season/)
+  }
+
+  /** True if this client is configured for the public test realm (PTR) server */
+  isPtrServer(): boolean {
+    return !!this.opts?.url?.match(/screeps\.com\/ptr/)
   }
 
   protected mapToShard <R extends Response>(this: void, res: R & { shards?: unknown, list?: unknown, rooms?: unknown }): R {
