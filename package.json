@@ -2,7 +2,11 @@
   "name": "screeps-api",
   "version": "2.0.0",
   "description": "",
-  "repository": "screepers/node-screeps-api",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/screepers/node-screeps-api.git"
+  },
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/src/index.d.ts",
   "bin": {
@@ -27,8 +31,7 @@
     "node": "22.x || 24.x"
   },
   "files": [
-    "dist/**/*",
-    "LICENSE"
+    "dist/**/*"
   ],
   "dependencies": {
     "axios": "^1.16.1",
