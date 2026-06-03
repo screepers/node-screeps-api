@@ -5,8 +5,8 @@
 [![License](https://img.shields.io/npm/l/screeps-api.svg)](https://npmjs.com/package/screeps-api)
 [![Version](https://img.shields.io/npm/v/screeps-api.svg)](https://npmjs.com/package/screeps-api)
 [![Downloads](https://img.shields.io/npm/dw/screeps-api.svg)](https://npmjs.com/package/screeps-api)
-![Lint Status](https://github.com/screepers/node-screeps-api/actions/workflows/lint.yml/badge.svg)
-![Test Status](https://github.com/screepers/node-screeps-api/actions/workflows/test.yml/badge.svg)
+[![Test Status](https://github.com/screepers/node-screeps-api/actions/workflows/test.yml/badge.svg)](https://github.com/screepers/node-screeps-api/actions/workflows/test.yml)
+[![Lint Status](https://github.com/screepers/node-screeps-api/actions/workflows/lint.yml/badge.svg)](https://github.com/screepers/node-screeps-api/actions/workflows/lint.yml)
 
 ![npm](https://nodei.co/npm/screeps-api.png "NPM")
 
