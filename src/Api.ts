@@ -803,12 +803,24 @@ declare global {
         length: number
       }
       /** A page of player leaderboard results */
-      users: {
-        /** A player's username */
-        username: string
-        /** The player's current score for this season */
-        score: number
-      }[]
+      users: ScoreboardUser[]
+    }
+
+    /** A user from {@link ScoreboardListResponse} */
+    interface ScoreboardUser {
+      /** A player's username */
+      username: string
+      badge: Badge
+      /**
+       * The player's current rank for this season;
+       * ties appear to be broken in alphabetical order.
+       */
+      rank: number
+      /**
+       * The player's current score for this season;
+       * may be undefined if the player hasn't scored anything yet.
+       */
+      score?: number
     }
 
     // Common Types
@@ -1162,8 +1174,16 @@ declare global {
         x: number
         y: number
       }
-      /** UNIX timestamp at which this portal will disappear */
-      unstableDate?: number
+      /**
+       * UNIX timestamp at which this portal will begin to decay;
+       * undefined for intershard portals; null if portal is already decaying
+       */
+      unstableDate?: number | null
+      /**
+       * Number of ticks before this portal disappears;
+       * undefined if {@link unstableDate} is undefined or null
+       */
+      decayTime?: number
     }
 
     interface StructurePowerBank extends Structure, _HasHits {
