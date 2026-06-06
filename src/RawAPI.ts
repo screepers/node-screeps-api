@@ -524,9 +524,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          * GET /api/user/memory
          * @param path the portion of the Memory JSON object to retrieve (ex: 'flags.Flag1');
          *  if undefined/empty, returns the entire Memory object
-         * @returns the prefix `'gz:'` followed by the base64-encoded gzipped JSON encoding of the requested memory path
          */
-        get: (path?: string, shard = DEFAULT_SHARD): Promise<string> => {
+        get: (path?: string, shard = DEFAULT_SHARD): Promise<Api.UserMemoryGetResponse> => {
           return this.req('GET', '/api/user/memory', { path, shard })
         },
 
@@ -534,8 +533,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          * POST /api/user/memory
          * @param path the portion of the Memory JSON object to write (ex: 'flags.Flag1');
          *  if undefined/empty, returns the entire Memory object
-         * @param {string} shard
-         * @returns {{ ok, result: { ok, n }, ops: [ { user, expression, hidden } ], data, insertedCount, insertedIds }}
+         * @param shard
          */
         set: (path: string | undefined, value: unknown, shard = DEFAULT_SHARD): Promise<Api.UserMemorySetResponse> => {
           return this.req('POST', '/api/user/memory', { path, value, shard })

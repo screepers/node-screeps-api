@@ -618,6 +618,12 @@ declare global {
       2: DbModifiedResult
     }
 
+    /** GET /api/user/memory response */
+    interface UserMemoryGetResponse extends Response {
+      /** Undefined if the specified memory path does not exist */
+      data?: unknown
+    }
+
     /** POST /api/user/memory response */
     interface UserMemorySetResponse extends Response, DbModifiedResponse {
       ops: {
