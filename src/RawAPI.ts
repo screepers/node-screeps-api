@@ -822,7 +822,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         }
       }
       if (res.status === 429 && !res.headers['x-ratelimit-limit'] && this.opts.experimentalRetry429) {
-        await setTimeout(Math.floor(Math.random() * 500) + 200)
+        await setTimeout(Math.floor(Math.random() * 500_000) + 200_000)
         return await this.req(method, path, body)
       }
       if ((err as { response?: AxiosResponse }).response) {
