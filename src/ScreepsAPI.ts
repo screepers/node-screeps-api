@@ -1,4 +1,4 @@
-import { ConfigManager } from './ConfigManager'
+import { ConfigManager, DEFAULT_CLIENT_CONFIG } from './ConfigManager'
 import { RawAPI } from './RawAPI'
 import { Socket } from './Socket'
 
@@ -54,7 +54,7 @@ export class ScreepsAPI extends RawAPI {
     if (!('server' in config) || !('client' in config)) {
       config = {
         server: new ConfigManager().normalizeServerConfig(config),
-        client: {}
+        client: { ...DEFAULT_CLIENT_CONFIG }
       }
     }
 

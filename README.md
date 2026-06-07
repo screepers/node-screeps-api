@@ -157,6 +157,7 @@ Those lists are currently not exhaustive.
 `node-screeps-api` uses the [Debug](https://www.npmjs.com/package/debug) package to expose diagnostic information. Debug output is divided into several namespaces:
 * `screepsApi:http`: HTTP requests
 * `screepsApi.ratelimit`: HTTP API rate limit state
+* `screepsApi.ratelimitexceeded`: HTTP API endpoint rate limit exceeded events
 * `screepsApi.socket`: Socket API events/messages
 
 Multiple namespaces can be specified by providing a comma-delimited list (ex: `screepsApi:http,screepsApi:ratelimit`). All namespaces can be specified by providing `screepsApi:*`.

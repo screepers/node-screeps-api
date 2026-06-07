@@ -6,6 +6,12 @@ import { parse } from 'yaml'
 
 const DEFAULT_SERVER_HOST = 'screeps.com'
 const DEFAULT_SERVER_PATH = '/'
+export const DEFAULT_CLIENT_CONFIG: Api.ClientConfig = {
+  retry429Global: true,
+  retry429InitDelay: 60_000,
+  retry429MaxDelay: 10_800_000,
+  retry429MaxRetries: 0
+} as const
 
 export class ConfigManager {
   path?: string
@@ -187,7 +193,7 @@ export class ConfigManager {
     file: string,
     opts?: Api.LoadConfigOptions
   ): Api.ClientConfig {
-    const client: Api.ClientConfig = {}
+    const client: Api.ClientConfig = { ...DEFAULT_CLIENT_CONFIG }
     if (!opts?.client) {
       return client
     }
@@ -246,7 +252,7 @@ declare global {
        * {@link ClientConfig} will be pulled from the `configs[client]` key
        * in that file.
        */
-      client?: string | ClientConfig
+      client?: string | Partial<ClientConfig>
     }
 
     /** Normalized configuration for a single Screeps World server */
@@ -269,10 +275,32 @@ declare global {
        */
       defaultShard?: string
       /**
-       * Automatically retry requests that fail due to rate limiting
+       * Wait for a short period of time before automatically retriing
+       * requests that fail due to the global 120 requests/minute rate limit.
        * @default true
        */
-      retry429?: boolean
+      retry429Global: boolean
+      /**
+       * Delay (in milliseconds) before the first retry attempt.
+       * Only applies to retries for endpoint-specific rate limits.
+       * @default 60000 (one minute)
+       */
+      retry429InitDelay: number
+      /**
+       * Maximum delay (in milliseconds) between retry attempts.
+       * Only applies to retries for endpoint-specific rate limits.
+       * @default 10800000 (three hours)
+       */
+      retry429MaxDelay: number
+      /**
+       * Maximum number of retry attempts. Exponential backoff is used
+       * to increase the delay between subsequent retry attempts.
+       * Only applies to retries for endpoint-specific rate limits.
+       * When this is enabled, `ScreepsAPI.debug('screepsapi:ratelimitexceeded')`
+       * will cause the client to emit logs when delays occur due to retries.
+       * @default 0
+       */
+      retry429MaxRetries: number
     } & { [propertyName: string]: unknown }
 
     /** Server configuration schema from {@link JsonConfig}/{@link YamlConfig} */

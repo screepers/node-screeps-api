@@ -9,6 +9,7 @@ import { FlagColor } from './Api'
 
 const debugHttp = Debug('screepsapi:http')
 const debugRateLimit = Debug('screepsapi:ratelimit')
+const debugRateLimitExceeded = Debug('screepsapi:ratelimitexceeded')
 
 const gunzipAsync = utils.promisify(zlib.gunzip)
 const inflateAsync = utils.promisify(zlib.inflate)
@@ -873,34 +874,45 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     return res
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async req(method: Api.HttpMethod, path: string, body = {}): Promise<any> {
+  async req(
+    method: Api.HttpMethod,
+    path: string,
+    body = {},
+    retriesAttempted = 0
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
+    debugHttp(`${method} ${path} ${JSON.stringify(body)}`)
+
     const req: AxiosRequestConfig = {
       method,
       url: path,
       headers: {}
     }
-    debugHttp(`${method} ${path} ${JSON.stringify(body)}`)
+
     if (this.token) {
       Object.assign((req.headers as object), {
         'X-Token': this.token,
         'X-Username': this.token
       })
     }
+
     if (method === 'GET') {
       req.params = body
     } else {
       req.data = body
     }
+
     try {
       const res = await this.http(req)
       const token = res.headers['x-token'] as string
       if (token) {
         this.emit('token', token)
       }
+
       const rateLimit = this.buildRateLimit(method, path, res as RateLimitResponse)
       this.emit('rateLimit', rateLimit)
       debugRateLimit(`${method} ${path} ${rateLimit.remaining}/${rateLimit.limit} ${rateLimit.toReset}s`)
+
       const data = res.data as { data?: unknown }
       if (typeof data.data === 'string' && data.data.startsWith('gz:')) {
         data.data = await this.gz(data.data)
@@ -909,9 +921,13 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
       return res.data
     } catch (err) {
       const res = ((err as { response?: AxiosResponse }).response ?? {}) as RateLimitResponse
+
       const rateLimit = this.buildRateLimit(method, path, res)
       this.emit('rateLimit', rateLimit)
-      debugRateLimit(`${method} ${path} ${rateLimit.remaining}/${rateLimit.limit} ${rateLimit.toReset}s`)
+      const rateLimitDesc = `${method} ${path} remaining=${rateLimit.remaining}/${rateLimit.limit} reset=${rateLimit.toReset}s`
+      debugRateLimit(rateLimitDesc)
+
+      // Attempt to authenticate in response to "Not Authorized" errors
       if (res.status === 401) {
         const { email, password } = this.config.server
         if (this.__authed && email && password) {
@@ -922,10 +938,32 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
           throw new Error('Not Authorized', { cause: err })
         }
       }
-      if (res.status === 429 && !res.headers['x-ratelimit-limit'] && this.config.client.retry429 !== false) {
-        await setTimeout(Math.floor(Math.random() * 500) + 200)
-        return await this.req(method, path, body)
+
+      // Retry (if enabled) in response to "Too Many Requests" errors
+      if (res.status === 429) {
+        // Global rate limit is indicated by the lack of rate limit headers
+        const isGlobal = !res.headers['x-ratelimit-limit']
+        const cfg = this.config.client
+
+        // Handle global rate limit
+        if (isGlobal && cfg.retry429Global !== false) {
+          const delay = Math.floor(Math.random() * 500) + 200
+          await setTimeout(delay)
+          return await this.req(method, path, body, retriesAttempted + 1)
+        }
+
+        // Handle endpoint-specific rate limits
+        if (!isGlobal && retriesAttempted < cfg.retry429MaxRetries) {
+          const delay = Math.min(
+            cfg.retry429InitDelay * (2 ** retriesAttempted),
+            cfg.retry429MaxDelay
+          )
+          debugRateLimitExceeded(rateLimitDesc + ` retriesAttempted=${retriesAttempted} delay=${delay / 1_000}s`)
+          await setTimeout(delay)
+          return await this.req(method, path, body, retriesAttempted + 1)
+        }
       }
+
       if ((err as { response?: AxiosResponse }).response) {
         const details = {
           params: {},
@@ -934,11 +972,14 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
           status: res.status,
           statusText: res.statusText
         }
+
         if (!path.startsWith('/api/auth')) {
           Object.assign(details.params, res.config?.params as object ?? {})
         }
+
         throw new Error(JSON.stringify(details, undefined, 2), { cause: err })
       }
+
       throw err
     }
   }
@@ -1007,6 +1048,8 @@ declare global {
       http?: boolean
       /** Enable debug logs for HTTP API rate limit state */
       ratelimit?: boolean
+      /** Enable debug logs for HTTP API rate limit exceeded events */
+      ratelimitexceeded?: boolean
       /** Enable debug logs for WebSocket API events and messages */
       socket?: boolean
     }
