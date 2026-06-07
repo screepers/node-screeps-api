@@ -45,6 +45,7 @@ declare global {
       /** Client version number; undefined on non-official servers */
       package?: number
       protocol: number
+      databaseVersion?: number
       serverData: {
         customObjectTypes: object
         /** Number of ticks in each complete history file/chunk */

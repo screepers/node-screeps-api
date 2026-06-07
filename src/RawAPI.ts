@@ -3,7 +3,6 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import Debug from 'debug'
 import { EventEmitter } from 'node:events'
 import { setTimeout } from 'node:timers/promises'
-import URL from 'node:url'
 import utils from 'node:util'
 import zlib from 'zlib'
 import { FlagColor } from './Api'
@@ -11,12 +10,9 @@ import { FlagColor } from './Api'
 const debugHttp = Debug('screepsapi:http')
 const debugRateLimit = Debug('screepsapi:ratelimit')
 
-const { format } = URL
-
 const gunzipAsync = utils.promisify(zlib.gunzip)
 const inflateAsync = utils.promisify(zlib.inflate)
 
-const DEFAULT_SHARD = 'shard0'
 const OFFICIAL_HISTORY_INTERVAL = 100
 const PRIVATE_HISTORY_INTERVAL = 20
 
@@ -42,7 +38,8 @@ export class RawAPI extends EventEmitter {
      * GET /room-history
      * @returns A json file with history data
      */
-    history: (room: string, tick: number, shard = DEFAULT_SHARD): Promise<Api.RoomHistoryResponse> => {
+    history: (room: string, tick: number, shard?: string): Promise<Api.RoomHistoryResponse> => {
+      shard ??= this.config.client.defaultShard
       if (this.isOfficialServer()) {
         tick -= tick % OFFICIAL_HISTORY_INTERVAL
         return this.req('GET', `/room-history/${shard}/${room}/${tick}.json`)
@@ -122,7 +119,11 @@ export class RawAPI extends EventEmitter {
        * @param statName the ID of the stat to fetch
        * @param shard
        */
-      mapStats: async <S extends Api.MapStat>(rooms: string[], statName: S, shard = DEFAULT_SHARD): Promise<Api.GameMapStatsResponse<S>> => {
+      mapStats: async <S extends Api.MapStat>(rooms: string[], statName: S, shard?: string): Promise<Api.GameMapStatsResponse<S>> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/map-stats', { rooms, statName, shard })
       },
 
@@ -131,17 +132,29 @@ export class RawAPI extends EventEmitter {
        * @param type the type of object for which to generate the name (ex: "flag" or "spawn")
        * @param shard
        */
-      genUniqueObjectName: (type: string, shard = DEFAULT_SHARD): Promise<Api.GameGenUniqueNameResponse> => {
+      genUniqueObjectName: (type: string, shard?: string): Promise<Api.GameGenUniqueNameResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/gen-unique-object-name', { type, shard })
       },
 
       /** POST /api/game/check-unique-object-name */
-      checkUniqueObjectName: (type: string, name: string, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
+      checkUniqueObjectName: (type: string, name: string, shard?: string): Promise<Api.UnknownResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/check-unique-object-name', { type, name, shard })
       },
 
       /** POST /api/game/place-spawn */
-      placeSpawn: (room: string, x: number, y: number, name: string, shard: string | null = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
+      placeSpawn: (room: string, x: number, y: number, name: string, shard?: string): Promise<Api.UnknownResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/place-spawn', { name, room, x, y, shard })
       },
 
@@ -152,27 +165,47 @@ export class RawAPI extends EventEmitter {
        *
        * POST /api/game/create-flag
        */
-      createFlag: (room: string, x: number, y: number, name: string, color: FlagColor = 1, secondaryColor: FlagColor = 1, shard = DEFAULT_SHARD): Promise<Api.DbUpsertedResponse> => {
+      createFlag: (room: string, x: number, y: number, name: string, color: FlagColor = 1, secondaryColor: FlagColor = 1, shard?: string): Promise<Api.DbUpsertedResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/create-flag', { name, room, x, y, color, secondaryColor, shard })
       },
 
       /** POST/api/game/gen-unique-flag-name */
-      genUniqueFlagName: (shard = DEFAULT_SHARD): Promise<Api.GameGenUniqueNameResponse> => {
+      genUniqueFlagName: (shard?: string): Promise<Api.GameGenUniqueNameResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/gen-unique-flag-name', { shard })
       },
 
       /** POST /api/game/check-unique-flag-name */
-      checkUniqueFlagName: (name: string, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
+      checkUniqueFlagName: (name: string, shard?: string): Promise<Api.UnknownResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/check-unique-flag-name', { name, shard })
       },
 
       /** POST /api/game/change-flag-color */
-      changeFlagColor: (color: FlagColor = 1, secondaryColor: FlagColor = 1, shard = DEFAULT_SHARD): Promise<Api.DbModifiedResponse> => {
+      changeFlagColor: (color: FlagColor = 1, secondaryColor: FlagColor = 1, shard?: string): Promise<Api.DbModifiedResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/change-flag-color', { color, secondaryColor, shard })
       },
 
       /** POST /api/game/remove-flag */
-      removeFlag: (room: string, name: string, shard = DEFAULT_SHARD): Promise<Api.Response> => {
+      removeFlag: (room: string, name: string, shard?: string): Promise<Api.Response> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/remove-flag', { name, room, shard })
       },
 
@@ -194,7 +227,11 @@ can destroy multiple structures at once
 intent can be an empty object for suicide and unclaim, but the web interface sends the id in it, as described
         * @example remove construction site: name = "remove", intent = {}
         */
-      addObjectIntent: (_id: string, room: string, name: string, intent?: string, shard = DEFAULT_SHARD): Promise<Api.DbUpsertedResponse> => {
+      addObjectIntent: (_id: string, room: string, name: string, intent?: string, shard?: string): Promise<Api.DbUpsertedResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/add-object-intent', { _id, room, name, intent, shard })
       },
 
@@ -202,7 +239,11 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * POST /api/game/create-construction
        * @param structureType the same value as one of the in-game STRUCTURE_* constants ('road', 'spawn', etc.)
        */
-      createConstruction: (room: string, x: number, y: number, structureType: Api.BuildableStructureConstant, name: string, shard = DEFAULT_SHARD): Promise<Api.GameCreateConstructionResponse> => {
+      createConstruction: (room: string, x: number, y: number, structureType: Api.BuildableStructureConstant, name: string, shard?: string): Promise<Api.GameCreateConstructionResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/create-construction', { room, x, y, structureType, name, shard })
       },
 
@@ -210,37 +251,65 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * POST /api/game/set-notify-when-attacked
        * @param enabled is either true or false (literal values, not strings)
        */
-      setNotifyWhenAttacked: (_id: string, enabled = true, shard = DEFAULT_SHARD): Promise<Api.DbModifiedResponse> => {
+      setNotifyWhenAttacked: (_id: string, enabled = true, shard?: string): Promise<Api.DbModifiedResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/set-notify-when-attacked', { _id, enabled, shard })
       },
 
       /** POST /api/game/create-invader */
-      createInvader: (room: string, x: number, y: number, size: 'Melee' | 'Ranged' | 'Healer', type: 'small' | 'big', boosted = false, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
+      createInvader: (room: string, x: number, y: number, size: 'Melee' | 'Ranged' | 'Healer', type: 'small' | 'big', boosted = false, shard?: string): Promise<Api.UnknownResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/create-invader', { room, x, y, size, type, boosted, shard })
       },
 
       /** POST /api/game/remove-invader */
-      removeInvader: (_id: string, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
+      removeInvader: (_id: string, shard?: string): Promise<Api.UnknownResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/game/remove-invader', { _id, shard })
       },
 
       /** GET /api/game/time */
-      time: (shard = DEFAULT_SHARD): Promise<Api.GameTimeResponse> => {
+      time: (shard?: string): Promise<Api.GameTimeResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('GET', '/api/game/time', { shard })
       },
 
       /** GET /api/game/world-size */
-      worldSize: (shard = DEFAULT_SHARD): Promise<Api.GameWorldSizeResponse> => {
+      worldSize: (shard?: string): Promise<Api.GameWorldSizeResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('GET', '/api/game/world-size', { shard })
       },
 
       /** GET /api/game/room-decorations */
-      roomDecorations: (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomDecorationsResponse> => {
+      roomDecorations: (room: string, shard?: string): Promise<Api.GameRoomDecorationsResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('GET', '/api/game/room-decorations', { room, shard })
       },
 
       /** GET /api/game/room-objects */
-      roomObjects: (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomObjectsResponse> => {
+      roomObjects: (room: string, shard?: string): Promise<Api.GameRoomObjectsResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('GET', '/api/game/room-objects', { room, shard })
       },
 
@@ -248,7 +317,11 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * GET /api/game/room-terrain
        * Returns results in "encoded" form (see return type documentation)
        */
-      roomTerrain: (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomTerrainEncodedResponse> => {
+      roomTerrain: (room: string, shard?: string): Promise<Api.GameRoomTerrainEncodedResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('GET', '/api/game/room-terrain', { room, encoded: 1, shard })
       },
 
@@ -256,12 +329,20 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * GET /api/game/room-terrain
        * Returns results in "unencoded" form (see return type documentation)
        */
-      roomTerrainUnencoded: (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomTerrainUnencodedResponse> => {
+      roomTerrainUnencoded: (room: string, shard?: string): Promise<Api.GameRoomTerrainUnencodedResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('GET', '/api/game/room-terrain', { room, shard })
       },
 
       /** GET /api/game/room-status */
-      roomStatus: (room: string, shard = DEFAULT_SHARD): Promise<Api.GameRoomStatusResponse> => {
+      roomStatus: (room: string, shard?: string): Promise<Api.GameRoomStatusResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('GET', '/api/game/room-status', { room, shard })
       },
 
@@ -275,7 +356,11 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
        * - 180: 3 hours each; 24 hours total
        * - 1440: 24 hours each; 8 days total
        */
-      roomOverview: (room: string, interval: Api.RoomStatInterval = 8, shard = DEFAULT_SHARD): Promise<Api.GameRoomOverviewResponse> => {
+      roomOverview: (room: string, interval: Api.RoomStatInterval = 8, shard?: string): Promise<Api.GameRoomOverviewResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('GET', '/api/game/room-overview', { room, interval, shard })
       },
 
@@ -286,7 +371,11 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          *
          * GET /api/game/market/orders-index
          */
-        ordersIndex: (shard = DEFAULT_SHARD): Promise<Api.GameMarketIndexResponse> => {
+        ordersIndex: (shard?: string): Promise<Api.GameMarketIndexResponse> => {
+          shard ??= this.config.client.defaultShard
+          if (shard === undefined) {
+            throw new Error('shard must be defined')
+          }
           return this.req('GET', '/api/game/market/orders-index', { shard })
         },
 
@@ -297,14 +386,19 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
 
         /**
          * GET /api/game/market/orders
-         * @param shard if {@link resourceType} is an {@link IntershardResourceConstant}, this must be set to `undefined`
+         * @param shard if {@link resourceType} is an {@link IntershardResourceConstant}, this must be set to `undefined`.
+         *  {@link Api.ClientConfig.defaultShard} is ignored here for compatibility with intershard resources.
          */
-        orders: (resourceType: Api.MarketResourceConstant, shard = DEFAULT_SHARD): Promise<Api.GameMarketOrdersResponse> => {
+        orders: (resourceType: Api.MarketResourceConstant, shard?: string): Promise<Api.GameMarketOrdersResponse> => {
           return this.req('GET', '/api/game/market/orders', { resourceType, shard })
         },
 
         /** GET /api/game/market/stats */
-        stats: (resourceType: Api.MarketResourceConstant, shard = DEFAULT_SHARD): Promise<Api.GameMarketStatsResponse> => {
+        stats: (resourceType: Api.MarketResourceConstant, shard?: string): Promise<Api.GameMarketStatsResponse> => {
+          shard ??= this.config.client.defaultShard
+          if (shard === undefined) {
+            throw new Error('shard must be defined')
+          }
           return this.req('GET', '/api/game/market/stats', { resourceType, shard })
         }
       },
@@ -525,7 +619,11 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          * @param path the portion of the Memory JSON object to retrieve (ex: 'flags.Flag1');
          *  if undefined/empty, returns the entire Memory object
          */
-        get: (path?: string, shard = DEFAULT_SHARD): Promise<Api.UserMemoryGetResponse> => {
+        get: (path?: string, shard?: string): Promise<Api.UserMemoryGetResponse> => {
+          shard ??= this.config.client.defaultShard
+          if (shard === undefined) {
+            throw new Error('shard must be defined')
+          }
           return this.req('GET', '/api/user/memory', { path, shard })
         },
 
@@ -535,7 +633,11 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
          *  if undefined/empty, returns the entire Memory object
          * @param shard
          */
-        set: (path: string | undefined, value: unknown, shard = DEFAULT_SHARD): Promise<Api.UserMemorySetResponse> => {
+        set: (path: string | undefined, value: unknown, shard?: string): Promise<Api.UserMemorySetResponse> => {
+          shard ??= this.config.client.defaultShard
+          if (shard === undefined) {
+            throw new Error('shard must be defined')
+          }
           return this.req('POST', '/api/user/memory', { path, value, shard })
         },
 
@@ -544,7 +646,11 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
            * GET /api/user/memory-segment
            * @param segment A number from 0-99
            */
-          get: (segment: number | string, shard = DEFAULT_SHARD): Promise<Api.UserMemorySegmentGetResponse> => {
+          get: (segment: number | string, shard?: string): Promise<Api.UserMemorySegmentGetResponse> => {
+            shard ??= this.config.client.defaultShard
+            if (shard === undefined) {
+              throw new Error('shard must be defined')
+            }
             return this.req('GET', '/api/user/memory-segment', { segment, shard })
           },
 
@@ -552,7 +658,11 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
            * POST /api/user/memory-segment
            * @param segment A number from 0-99
            */
-          set: (segment: number | string, data: unknown, shard = DEFAULT_SHARD): Promise<Api.UnknownResponse> => {
+          set: (segment: number | string, data: unknown, shard?: string): Promise<Api.UnknownResponse> => {
+            shard ??= this.config.client.defaultShard
+            if (shard === undefined) {
+              throw new Error('shard must be defined')
+            }
             return this.req('POST', '/api/user/memory-segment', { segment, data, shard })
           }
         }
@@ -642,7 +752,11 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
       },
 
       /** POST /api/user/console */
-      console: (expression: string, shard = DEFAULT_SHARD): Promise<Api.UserConsoleResponse> => {
+      console: (expression: string, shard?: string): Promise<Api.UserConsoleResponse> => {
+        shard ??= this.config.client.defaultShard
+        if (shard === undefined) {
+          throw new Error('shard must be defined')
+        }
         return this.req('POST', '/api/user/console', { expression, shard })
       },
 
@@ -690,14 +804,16 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     }
   }
 
-  opts: Api.ServerConfig = {}
+  config: Api.Config
   token?: string
-  protected http?: AxiosInstance
+  protected http: AxiosInstance
   private __authed = false
 
-  constructor(opts?: Api.ServerConfig) {
+  constructor(config: Api.Config) {
     super()
-    this.setServer(opts ?? {})
+    this.config = config
+    this.token = this.config.server.token
+    this.http = axios.create({ baseURL: this.config.server.url })
   }
 
   /**
@@ -716,17 +832,17 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * or seasonal world servers
    */
   isOfficialServer(): boolean {
-    return !!this.opts?.url?.match(/screeps\.com/)
+    return !!(/screeps\.com/.exec(this.config.server.url))
   }
 
   /** True if this client is configured for the seasonal world server */
   isSeasonServer(): boolean {
-    return !!this.opts?.url?.match(/screeps\.com\/season/)
+    return !!(/screeps\.com\/season/.exec(this.config.server.url))
   }
 
   /** True if this client is configured for the public test realm (PTR) server */
   isPtrServer(): boolean {
-    return !!this.opts?.url?.match(/screeps\.com\/ptr/)
+    return !!(/screeps\.com\/ptr/.exec(this.config.server.url))
   }
 
   protected mapToShard <R extends Response>(this: void, res: R & { shards?: unknown, list?: unknown, rooms?: unknown }): R {
@@ -736,32 +852,21 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     return res
   }
 
-  setServer(opts?: Api.ServerConfig) {
-    Object.assign(this.opts, opts ?? {})
-    if (this.opts.path && !this.opts.pathname) {
-      this.opts.pathname = this.opts.path
-    }
-    if (!this.opts.url) {
-      this.opts.url = format(this.opts)
-      if (!this.opts.url.endsWith('/')) this.opts.url += '/'
-    }
-    if (this.opts.token) {
-      this.token = this.opts.token
-    }
-    this.http = axios.create({
-      baseURL: this.opts.url
-    })
-  }
+  /**
+   * Authenticate to the server using the email and password in
+   * `this.config.server`.
+   */
+  async auth(cause?: unknown) {
+    // Skip if already authenticating via API token
+    const server = this.config.server
+    if (server.token) return
 
-  async auth(email: string, password: string, opts?: Api.ServerConfig) {
-    this.setServer(opts)
-    if (email && password) {
-      Object.assign(this.opts, { email, password })
+    if (!server.email || !server.password) {
+      throw new Error('Email or password not provided', { cause })
     }
-    if (!this.opts?.email || !this.opts?.password) {
-      throw new Error('email or password not provided')
-    }
-    const res = await this.raw.auth.signin(this.opts.email, this.opts.password)
+
+    const res = await this.raw.auth.signin(server.email, server.password)
+    this.token = res.token
     this.emit('token', res.token)
     this.emit('auth')
     this.__authed = true
@@ -770,9 +875,6 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async req(method: Api.HttpMethod, path: string, body = {}): Promise<any> {
-    if (!this.http) {
-      throw new Error('http client not configured')
-    }
     const req: AxiosRequestConfig = {
       method,
       url: path,
@@ -811,15 +913,16 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
       this.emit('rateLimit', rateLimit)
       debugRateLimit(`${method} ${path} ${rateLimit.remaining}/${rateLimit.limit} ${rateLimit.toReset}s`)
       if (res.status === 401) {
-        if (this.__authed && this.opts.email && this.opts.password) {
+        const { email, password } = this.config.server
+        if (this.__authed && email && password) {
           this.__authed = false
-          await this.auth(this.opts.email, this.opts.password)
+          await this.auth(err)
           return await this.req(method, path, body)
         } else {
           throw new Error('Not Authorized', { cause: err })
         }
       }
-      if (res.status === 429 && !res.headers['x-ratelimit-limit'] && this.opts.experimentalRetry429) {
+      if (res.status === 429 && !res.headers['x-ratelimit-limit'] && this.config.client.retry429 !== false) {
         await setTimeout(Math.floor(Math.random() * 500) + 200)
         return await this.req(method, path, body)
       }
