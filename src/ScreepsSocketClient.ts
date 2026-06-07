@@ -5,67 +5,66 @@ import { URL } from 'node:url'
 import utils from 'node:util'
 import WebSocket from 'ws'
 import zlib from 'zlib'
-import { ScreepsAPI } from './ScreepsAPI'
+import { ScreepsHttpClient } from './ScreepsHttpClient'
+import { ServerAuthEvent, ServerAuthStatus, SocketEvent } from './socket'
 
 const debug = Debug('screepsapi:socket')
 
 const inflateAsync = utils.promisify(zlib.inflate)
 
-declare global {
-  namespace Api {
-    /**
-     * Configuration options for {@link Socket}.
-     * These are provided when calling {@link Socket.connect}.
-     * @see {@link SOCKET_DEFAULTS} for default values
-     */
-    export interface SocketOptions {
-      /**
-       * If enabled, {@link Socket} will call {@link reconnect} automatically
-       * when disconnected.
-       */
-      reconnect: boolean
-      /**
-       * If enabled, all previous subscriptions will be recreated
-       * after successfully reconnecting.
-       */
-      resubscribe: boolean
-      /**
-       * If enabled, ping the server periodically to prevent the connection
-       * from being closed.
-       */
-      keepAlive: boolean
-      /**
-       * The maximum number of connection attempts to make before
-       * throwing an error in {@link Socket.reconnect}.
-       */
-      maxRetries: number
-      /**
-       * The maximum delay (in milliseconds) before a retry attempt
-       * in {@link Socket.reconnect}.
-       */
-      maxRetryDelay: number
-    }
-  }
+/**
+ * Configuration options for {@link ScreepsSocketClient}.
+ * These are provided when calling {@link ScreepsSocketClient.connect}.
+ * @see {@link DEFAULT_SOCKET_CONFIG} for default values
+ */
+export interface ScreepsSocketConfig {
+  /**
+   * If enabled, {@link ScreepsSocketClient} will call {@link reconnect} automatically
+   * when disconnected.
+   */
+  reconnect: boolean
+  /**
+   * If enabled, all previous subscriptions will be recreated
+   * after successfully reconnecting.
+   */
+  resubscribe: boolean
+  /**
+   * If enabled, ping the server periodically to prevent the connection
+   * from being closed.
+   */
+  keepAlive: boolean
+  /** Time (in milliseconds) between keep-alive pings */
+  keepAliveInterval: number
+  /**
+   * The maximum number of connection attempts to make before
+   * throwing an error in {@link ScreepsSocketClient.reconnect}.
+   */
+  maxRetries: number
+  /**
+   * The maximum delay (in milliseconds) before a retry attempt
+   * in {@link ScreepsSocketClient.reconnect}.
+   */
+  maxRetryDelay: number
 }
 
-/** Default {@link Api.SocketOptions} used by {@link Socket.connect} */
-export const SOCKET_DEFAULTS: Readonly<Api.SocketOptions> = {
+/** Default {@link ScreepsSocketConfig} used by {@link ScreepsSocketClient.connect} */
+export const DEFAULT_SOCKET_CONFIG = {
   reconnect: true,
   resubscribe: true,
   keepAlive: true,
+  keepAliveInterval: 10_000, // 10 seconds
   maxRetries: 10,
-  maxRetryDelay: 60 * 1000 // in milli-seconds
-}
+  maxRetryDelay: 60_000 // 1 minute
+} as const
 
 /**
  * Provides access to the Screeps WebSocket API.
- *
- * {@include ../docs/Websocket_endpoints.md}
- * @see {@link ScreepsAPI} for the HTTP API client
+ * @document ../guides/websocket.md
+ * @see {@link ScreepsHttpClient} for the HTTP API client
  */
-export class Socket extends EventEmitter {
-  api: ScreepsAPI
-  opts: Api.SocketOptions
+export class ScreepsSocketClient extends EventEmitter {
+  api: ScreepsHttpClient
+  opts: ScreepsSocketConfig
   ws?: WebSocket
   authed = false
   connected = false
@@ -90,24 +89,24 @@ export class Socket extends EventEmitter {
 
   /**
    * Initializes a new WebSocket API client. Do not call this directly.
-   * Instead, use the instance from {@link ScreepsAPI.socket}.
+   * Instead, use the instance from {@link ScreepsHttpClient.socket}.
    * @param api The HTTP client instance with which config and auth credentials
    *  should be shared
    */
-  constructor(api: ScreepsAPI) {
+  constructor(api: ScreepsHttpClient) {
     super()
     this.api = api
-    this.opts = Object.assign({}, SOCKET_DEFAULTS)
+    this.opts = Object.assign({}, DEFAULT_SOCKET_CONFIG)
     this.on('error', console.error)
     this.reset()
-    this.on('auth', (ev: AuthEvent) => {
-      if (ev.data.status === 'ok') {
+    this.on('auth', (ev: ServerAuthEvent) => {
+      if (ev.data.status === ServerAuthStatus.OK) {
         while (this.__queue.length) {
           this.emit(this.__queue.shift()! as string)
         }
         clearInterval(this.keepAliveInter)
         if (this.opts.keepAlive) {
-          this.keepAliveInter = setInterval(() => this.ws?.ping(1), 10_000)
+          this.keepAliveInter = setInterval(() => this.ws?.ping(1), this.opts.keepAliveInterval)
         }
       }
     })
@@ -129,10 +128,10 @@ export class Socket extends EventEmitter {
    * Connect to the server and immediately attempt to authenticate.
    *
    * If successful, any queued messages will be sent automatically.
-   * @param opts WebSocket API client options. See {@link Api.SocketOptions}.
+   * @param opts WebSocket API client options. See {@link ScreepsSocketConfig}.
    * @throws {Error} if an API token is not available due to missing auth credentials
    */
-  async connect(opts?: Partial<Api.SocketOptions>) {
+  async connect(opts?: Partial<ScreepsSocketConfig>) {
     Object.assign(this.opts, opts ?? {})
     if (!this.api.token) {
       await this.api.auth(
@@ -140,8 +139,8 @@ export class Socket extends EventEmitter {
       )
     }
     await new Promise((resolve, reject) => {
-      const baseURL = this.api.config.server.url.replace('http', 'ws')
-      const wsurl = new URL('socket/websocket', baseURL)
+      const baseUrl = this.api.server.url.replace('http', 'ws')
+      const wsurl = new URL('socket/websocket', baseUrl)
       this.ws = new WebSocket(wsurl)
       this.ws.on('open', () => {
         this.connected = true
@@ -184,9 +183,9 @@ export class Socket extends EventEmitter {
    * Reconnect to the server using current client settings.
    *
    * Upon success, all previous subscriptions will be reestablished
-   * (if {@link Api.SocketOptions.resubscribe} is enabled).
+   * (if {@link ScreepsSocketConfig.resubscribe} is enabled).
    *
-   * Up to {@link Api.SocketOptions.maxRetries} connections will be attempted
+   * Up to {@link ScreepsSocketConfig.maxRetries} connections will be attempted
    * with exponential backoff.
    * @throws {Error} if the maximum number of retry attempts is exceeded
    */
@@ -242,34 +241,46 @@ export class Socket extends EventEmitter {
    * @param rawMsg The raw message content sent by the server
    */
   private async handleMessage(rawMsg: string | { data: string }) {
-    let msg = typeof rawMsg === 'object' ? rawMsg.data : rawMsg // Handle ws/browser difference
+    // Normalize message contents across ws/browser APIs
+    let msg = typeof rawMsg === 'object' && ('data' in rawMsg)
+      ? rawMsg.data
+      : rawMsg
+
+    // Decompress message if gzipped
     if (msg.startsWith('gz:')) {
       msg = await this.inflate(msg) as string
     }
     debug(`message ${msg}`)
+
     if (msg.startsWith('[')) {
-      const tupleMsg = JSON.parse(msg) as [string, unknown]
-      const [, type, id, channel] = /^(.+):(.+?)(?:\/(.+))?$/.exec(tupleMsg[0])!
-      const event = { channel: channel ?? type, id, type, data: tupleMsg[1] }
-      this.emit(tupleMsg[0], event)
-      this.emit(event.channel, event)
-      this.emit('message', event)
-    } else {
-      const [channel, ...data] = msg.split(' ')
-      const event: {
-        type: 'server'
-        channel: string
-        data: string[] | { status: string, token: string } | { [channel: string]: string }
-      } = { type: 'server', channel, data }
-      if (channel === 'auth') {
-        event.data = { status: data[0], token: data[1] }
+      const msgData = JSON.parse(msg) as [string, unknown]
+      const [, type, id, path = ''] = /^(.+):(.+?)(?:\/(.+))?$/.exec(msgData[0])!
+      const event = {
+        type,
+        id,
+        path,
+        data: msgData[1]
       }
-      if (['protocol', 'time', 'package'].includes(channel)) {
-        event.data = { [channel]: data[0] }
-      }
-      this.emit(channel, event)
+      this.emit(msgData[0], event)
+      this.emit(path, event)
       this.emit('message', event)
+      return
     }
+
+    const [path, ...data] = msg.split(' ')
+    const event: {
+      type: 'server'
+      path: string
+      data: string[] | { status: string, token: string } | { [path: string]: string }
+    } = { type: 'server', path, data }
+    if (path === 'auth') {
+      event.data = { status: data[0], token: data[1] }
+    }
+    if (['protocol', 'time', 'package'].includes(path)) {
+      event.data = { [path]: data[0] }
+    }
+    this.emit(path, event)
+    this.emit('message', event)
   }
 
   private async inflate(data: string): Promise<unknown> {
@@ -281,7 +292,7 @@ export class Socket extends EventEmitter {
   /**
    * Enable/disable gzip compression/deflation of messages from the server.
    *
-   * Regardless of whether this is enabled or not, {@link Socket} will
+   * Regardless of whether this is enabled or not, {@link ScreepsSocketClient} will
    * automatically inflate any compressed messages before notifying subscribers.
    * @param enabled `true` to enable compression; `false` to disable it
    */
@@ -296,9 +307,9 @@ export class Socket extends EventEmitter {
    * to be sent when the connection is established.
    *
    * This should only be called directly if the desired functionality is not
-   * already implemented as another method on {@link Socket}. If you have a
-   * use case for calling `send` directly, please consider submitting a PR
-   * to add the feature to {@link Socket}.
+   * already implemented as another method on {@link ScreepsSocketClient}.
+   * If you have a use case for calling `send` directly, please consider
+   * submitting a PR to add the feature to {@link ScreepsSocketClient}.
    * @param data the message to send
    */
   send(data: string | WebSocket.RawData) {
@@ -317,9 +328,9 @@ export class Socket extends EventEmitter {
   private async auth(token: string) {
     return await new Promise<void>((resolve, reject) => {
       this.send(`auth ${token}`)
-      this.once('auth', (ev) => {
-        const { data } = ev as AuthEvent
-        if (data.status === 'ok') {
+      this.once('auth', (event: ServerAuthEvent) => {
+        const { data } = event
+        if (data.status === ServerAuthStatus.OK) {
           this.authed = true
           this.emit('token', data.token)
           this.emit('authed')
@@ -328,7 +339,7 @@ export class Socket extends EventEmitter {
           }
           resolve()
         } else {
-          reject(new Error('socket auth failed'))
+          reject(new Error('WebSocket API authentication failed'))
         }
       })
     })
@@ -341,10 +352,10 @@ export class Socket extends EventEmitter {
    *  This can be left undefined to resubscribe to an event using a
    *  previously-registered callback.
    */
-  // TODO: Add overloads with stronger cb type restrictions for known path types
-  async subscribe(event: string, cb?: (...args: unknown[]) => void) {
+  // TODO: Add overloads with stronger cb type restrictions for known event type/path combos
+  async subscribe<E extends SocketEvent>(event: string, cb?: (event: E) => void) {
     if (!event) return
-    const userID = await this.api.userID()
+    const userID = (await this.api.me())._id
     if (!(/^(\w+):(.+?)$/.exec(event))) {
       event = `user:${userID}/${event}`
     }
@@ -364,9 +375,10 @@ export class Socket extends EventEmitter {
    * @param event The name of the event (ex: 'console', 'room:ROOM_NAME')
    * @param cb The callback to unsubscribe.
    */
-  async unsubscribe(event: string, cb?: (...args: unknown[]) => void) {
+  // TODO: Add overloads with stronger cb type restrictions for known event type/path combos
+  async unsubscribe<E extends SocketEvent>(event: string, cb?: (event: E) => void) {
     if (!event) return
-    const userID = await this.api.userID()
+    const userID = (await this.api.me())._id
     if (!(/^(\w+):(.+?)$/.exec(event))) {
       event = `user:${userID}/${event}`
     }
@@ -376,12 +388,5 @@ export class Socket extends EventEmitter {
     this.emit('unsubscribe', event)
     if (this.__subs[event]) this.__subs[event]--
     if (cb) this.off(event, cb)
-  }
-}
-
-interface AuthEvent {
-  data: {
-    status: string
-    token: string
   }
 }

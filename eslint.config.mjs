@@ -1,33 +1,34 @@
 // @ts-check
 // https://typescript-eslint.io/users/configs/
 
-import { defineConfig } from 'eslint/config';
 import eslint from '@eslint/js'
 import pluginJs from '@eslint/js'
 import stylistic from '@stylistic/eslint-plugin'
+import { defineConfig, globalIgnores } from 'eslint/config'
+import jsdoc from 'eslint-plugin-jsdoc'
 import tseslint from 'typescript-eslint'
 
 export default defineConfig(
+  globalIgnores([
+    'dist/',
+    'docs/',
+    'examples/',
+    'site/',
+    'test/'
+  ]),
   {
-    plugins: {
-      '@stylistic': stylistic,
-      '@typescript-eslint': tseslint.plugin
-    },
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
+        allowDefaultProject: [
+          'eslint.config.mjs',
+          'rollup.config.mjs'
+        ],
+        tsconfigRootDir: import.meta.dirname
+      }
     },
-    ignores: [
-      'dist/**/*.ts',
-      'dist/**',
-      'test/**',
-      '**/*.mjs',
-      'eslint.config.mjs',
-    ],
-    files: ['**/*.{js,mjs,cjs,ts}'],
+    files: ['**/*.ts']
   },
   pluginJs.configs.recommended,
   eslint.configs.recommended,
@@ -36,6 +37,16 @@ export default defineConfig(
   ...tseslint.configs.stylisticTypeChecked,
   stylistic.configs.customize({ jsx: false }),
   {
+    plugins: {
+      jsdoc
+    },
+    extends: ['jsdoc/recommended-tsdoc-error'],
+    ignores: ['bin/*.ts']
+  },
+  {
+    plugins: {
+      jsdoc
+    },
     rules: {
       '@stylistic/brace-style': ['error', '1tbs'],
       '@stylistic/comma-dangle': ['error', 'never'],
@@ -51,9 +62,25 @@ export default defineConfig(
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/prefer-nullish-coalescing': [
         'error',
-        { 'ignorePrimitives': { 'number': true } }
+        { ignorePrimitives: { number: true } }
       ],
       '@typescript-eslint/restrict-template-expressions': 'off',
-    },
+      'jsdoc/check-indentation': [
+        'error',
+        { allowIndentedSections: true }
+      ],
+      'jsdoc/require-returns': [
+        'error',
+        {
+          checkGetters: false,
+          forceReturnsWithAsync: false,
+          publicOnly: true
+        }
+      ]
+    }
   },
+  {
+    files: ['**/*.{js,mjs,cjs}'],
+    extends: [tseslint.configs.disableTypeChecked]
+  }
 )

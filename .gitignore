@@ -3,6 +3,7 @@
 node_modules
 auth.js
 dist
+docs
 npm-debug.log
 
 screeps.json

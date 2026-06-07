@@ -1,0 +1,28 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts"],
+  "projectDocuments": [
+    "guides/*.md",
+    "examples/index.md"
+  ],
+  "outputs": [
+    {
+      "name": "html",
+      "path": "./docs",
+      "options": {
+        "markdownLinkExternal": true,
+        "sourceLinkExternal": true,
+        "navigationLinks": {
+          "Github": "http://github.com/screepers/node-screeps-api",
+          "npm": "https://www.npmjs.com/package/screeps-api"
+        },
+        "useFirstParagraphOfCommentAsSummary": true
+      }
+    }
+  ],
+  "externalSymbolLinkMappings": {
+    "axios": {
+      "AxiosResponse": "axios.rest/pages/advanced/response-schema"
+    }
+  }
+}

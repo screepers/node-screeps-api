@@ -1,5 +1,9 @@
-# Web sockets endpoints list
-
+---
+title: WebSocket API Endpoints
+group: Guides
+category:
+- WebSocket API
+---
 Currently known endpoints are listed below.
  * This list is clearly not exhaustive and comes from empirical observations.
  * If you want to add more data, feel free to make a pull request.
@@ -13,36 +17,12 @@ Note that adding a shard to a server not expecting it may cause an error.
 
 ## Subscribing to web sockets endpoints
 
- * Make sure you are authenticated (you should have called `api.auth(...).then(...)` first).
- * Connect the socket and wait for connection establishment using `api.socket.connect().then(...)`.
+ * Connect the socket and wait for connection establishment using `api.socket.connect()`.
  * You can then subscribe to different endpoints using `api.socket.subscribe()`.
  * The server will then send periodic events with requested information.
 
 Complete example:
-```javascript
-const { ScreepsAPI } = require('screeps-api');
-
-try {
-	// Setup
-    const api = new ScreepsAPI();
-    await api.auth("your_email", "your_password"); // authenticate
-    await api.socket.connect(); // connect socket
-
-    // Subscribe to 'cpu' endpoint and get events
-    api.socket.subscribe('cpu');
-    api.socket.on('cpu', event => {
-        console.log(event.data.cpu) // cpu used last tick
-    });
-
-    // You can also put a callback to subscribe()
-    api.socket.subscribe('console', event => {
-        event.data.messages.log // List of console.log output for tick
-    })
-} catch(err) {
-	console.log(err);
-}
-```
-
+{@includeCode ../examples/socket-demo.ts}
 
 ## code
 

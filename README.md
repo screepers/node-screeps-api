@@ -5,99 +5,56 @@
 [![License](https://img.shields.io/npm/l/screeps-api.svg)](https://npmjs.com/package/screeps-api)
 [![Version](https://img.shields.io/npm/v/screeps-api.svg)](https://npmjs.com/package/screeps-api)
 [![Downloads](https://img.shields.io/npm/dw/screeps-api.svg)](https://npmjs.com/package/screeps-api)
+[![Docs](https://img.shields.io/badge/API-Docs-green)](https://screepers.github.io/node-screeps-api/)
 [![Test Status](https://github.com/screepers/node-screeps-api/actions/workflows/test.yml/badge.svg)](https://github.com/screepers/node-screeps-api/actions/workflows/test.yml)
 [![Lint Status](https://github.com/screepers/node-screeps-api/actions/workflows/lint.yml/badge.svg)](https://github.com/screepers/node-screeps-api/actions/workflows/lint.yml)
 
 ![npm](https://nodei.co/npm/screeps-api.png "NPM")
 
-## Notice on authentication
+## Application Usage
 
-As of 12/29/2017 Screeps now uses auth tokens obtained via your screeps account settings.
-User/pass auth will stop working February 1, 2018!
-[Screeps Announcement](http://blog.screeps.com/2017/12/auth-tokens/)
+As of v1.0, all endpoint methods are asynchronous.
 
-## CLI Usage
-
-As of 1.7.0, a small CLI program (`screeps-api`) is included.
-
-Server config is specified via a `.screeps.yml` file conforming to the [Unified Credentials File format](https://github.com/screepers/screepers-standards/blob/master/SS3-Unified_Credentials_File.md)
-
-```
-screeps-api
-
-  Usage:  [options] [command]
-
-  Options:
-
-    -V, --version                output the version number
-    --server <server>            Server config to use (default: main)
-    -h, --help                   output usage information
-
-  Commands:
-
-    raw <cmd> [args...]          Execute raw API call
-    memory [options] [path]      Get Memory contents
-    segment [options] <segment>  Get segment contents. Use 'all' to get all)
-    download [options]           Download code
-    upload [options] <files...>  Upload code
-
-```
-
-
-## API Usage
-
-As of 1.0, all functions return Promises
-
-```javascript
-const { ScreepsAPI } = require('screeps-api');
-const fs = require('fs');
+```typescript
+import { ScreepsHttpClient } from 'screeps-api'
+import fs from 'node:fs'
 
 // Supports @tedivm's [Unified Credentials File format](https://github.com/screepers/screepers-standards/blob/34bd4e6e5c8250fa0794d915d9f78d3c45326076/SS3-Unified_Credentials_File.md) (Pending [screepers-standard PR #8](https://github.com/screepers/screepers-standards/pull/8))
-const api = await ScreepsAPI.fromConfig('main', 'appName')
+const api = await ScreepsHttpClient.fromConfig('main', { client: 'appName' })
 // This loads the server config 'main' and the configs section 'appName' if it exists
 // config section can be accessed like this:
-// If making a CLI app, its suggested to have a `--server` argument for selection
 console.log(api.appConfig.myConfigVar)
+// If making a CLI app, its suggested to have a `--server` argument for selection
 
-// All options are optional
-const api = new ScreepsAPI({
-  token: 'Your Token from Account/Auth Tokens'
-  protocol: 'https',
-  hostname: 'screeps.com',
-  port: 443,
-  path: '/' // Do no include '/api', it will be added automatically
-});
+// HTTP API
 
-// You can overwrite parameters if needed
-api.auth('screeps@email.com','notMyPass',{
-  protocol: 'https',
-  hostname: 'screeps.com',
-  port: 443,
-  path: '/' // Do no include '/api', it will be added automatically
-})
-
-// If you want to point to the screeps PTR (Public Test Realm),
-// you can set the 'path' option to '/ptr' and it will work fine.
-
-// Dump Memory
-api.memory.get()
+// Dump entire Memory object to a file
+api.userMemoryGet()
   .then(memory => {
     fs.writeFileSync('memory.json', JSON.stringify(memory))
   })
-  .catch(err => console.error(err));
+  .catch(console.error)
 
-
-// Dump Memory Path
-api.memory.get('rooms.W0N0')
-  .then(memory => {
+// Dump a subset of Memory to a file
+api.userMemoryGet('rooms.W0N0')
+  .then((memory) => {
     fs.writeFileSync('memory.rooms.W0N0.json', JSON.stringify(memory))
   })
-  .catch(err => console.error(err));
+  .catch(console.error)
 
 // Get user info
-api.me().then((user)=>console.log(user))
+api.authMe().then((user) => console.log(user))
 
-// Socket API
+// Download and upload code
+api.userCodeGet('default').then((data) => console.log('code', data))
+api.userCodeSet({
+  branch: 'default',
+  modules: {
+    main: 'module.exports.loop = function(){ ... }'
+  }
+})
+
+// WebSocket API
 
 api.socket.connect()
 // Events have the structure of:
@@ -106,11 +63,11 @@ api.socket.connect()
 //   id: 'E3N3', // Only on certain events
 //   data: { ... }
 // }
-api.socket.on('connected',()=>{
+api.socket.on('connected', () => {
 	// Do stuff after connected
 })
-api.socket.on('auth',(event)=>{
-	event.data.status contains either 'ok' or 'failed'
+api.socket.on('auth', (event) => {
+	event.data.status // contains either 'ok' or 'failed'
 	// Do stuff after auth
 })
 
@@ -118,10 +75,11 @@ api.socket.on('auth',(event)=>{
 // connected disconnected message auth time protocol package subscribe unsubscribe console
 
 // Subscribtions can be queued even before the socket connects or auths,
-// although you may want to subscribe from the connected or auth callback to better handle reconnects
+// although you may want to subscribe from the connected or auth callback
+// to better handle reconnects
 
 api.socket.subscribe('console')
-api.socket.on('console',(event)=>{
+api.socket.on('console', (event) => {
 	event.data.messages.log // List of console.log output for tick
 })
 
@@ -132,51 +90,42 @@ api.socket.subscribe('console', (event)=>{
 })
 
 // More common examples
-api.socket.subscribe('cpu',(event)=>console.log('cpu',event.data))
-api.code.get('default').then(data=>console.log('code',data))
-api.code.set('default',{
-	main: 'module.exports.loop = function(){ ... }'
+api.socket.subscribe('cpu', (event) => console.log('cpu', event.data))
+api.socket.subscribe('memory/stats', (event) => {
+	console.log('stats', event.data)
 })
-api.socket.subscribe('memory/stats',(event)=>{
-	console.log('stats',event.data)
-})
-api.socket.subscribe('memory/rooms.E0N0',(event)=>{
-	console.log('E0N0 Memory',event.data)
+api.socket.subscribe('memory/rooms.E0N0', (event) => {
+	console.log('E0N0 Memory', event.data)
 })
 ```
 
-## Endpoint documentation
+## CLI Usage
 
-Server endpoints are listed in the `docs` folder:
- * [Endpoints.md](/docs/Endpoints.md) for direct access
- * [Websocket_endpoints.md](/docs/Websocket_endpoints.md) for web socket endpoints
-Those lists are currently not exhaustive.
+As of v1.7, a small CLI program (`screeps-api`) is included.
 
-## Debugging
+Server/auth credentials are located using `ScreepsConfigManager.loadConfig()`.
 
-`node-screeps-api` uses the [Debug](https://www.npmjs.com/package/debug) package to expose diagnostic information. Debug output is divided into several namespaces:
-* `screepsApi:http`: HTTP requests
-* `screepsApi.ratelimit`: HTTP API rate limit state
-* `screepsApi.ratelimitexceeded`: HTTP API endpoint rate limit exceeded events
-* `screepsApi.socket`: Socket API events/messages
+```
+$ screeps-api
+Usage: screeps-api [options] [command]
 
-Multiple namespaces can be specified by providing a comma-delimited list (ex: `screepsApi:http,screepsApi:ratelimit`). All namespaces can be specified by providing `screepsApi:*`.
+Options:
+  -V, --version                   output the version number
+  -h, --help                      display help for command
 
-To enable debug output in Node, set the `DEBUG` environment variable to the
-namespace(s) you want to enable. Here is an example that uses the CLI in bash:
-```sh
-DEBUG=screepsApi.http,screepsApi.ratelimit screeps-api raw --server main auth.me
+Commands:
+  call [options] <cmd> [args...]  Call an API endpoint method on ScreepsHttpClient
+  memory [options] [path]         Read from or write to Memory
+  segment [options] <segments>    Read or write RawMemory segments
+  download [options] <>           Download code and WASM binaries
+  upload [options] <files...>     Upload code and WASM binaries
+  help [command]                  display help for command
 ```
 
-These environment variables work when invoking your own apps as well.
+## Endpoint Documentation
 
-You can also enable/disable debug logs dynamically using `ScreepsApi.debug()`:
-```ts
-const api = ScreepsApi.fromConfig('main', 'appName')
+Check the [docs](https://screepers.github.io/node-screeps-api/) for a detailed list of supported endpoints:
+* HTTP API: [`ScreepsHttpClient`](https://screepers.github.io/node-screeps-api/docs/classes/index.ScreepsHttpClient.html)
+* WebSocket API: [`ScreepsSocketClient`](https://screepers.github.io/node-screeps-api/docs/classes/index.ScreepsSocketClient.html) for web socket endpoints
 
-// Enable debug logging for HTTP requests and rate limits:
-api.debug({ http: true, rateLimit: true })
-
-// Diable all debug logging
-api.debug()
-```
+Please note that the listed endpoints and WebSocket events are not exhaustive.
