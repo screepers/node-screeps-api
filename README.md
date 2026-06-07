@@ -151,3 +151,31 @@ Server endpoints are listed in the `docs` folder:
  * [Endpoints.md](/docs/Endpoints.md) for direct access
  * [Websocket_endpoints.md](/docs/Websocket_endpoints.md) for web socket endpoints
 Those lists are currently not exhaustive.
+
+## Debugging
+
+`node-screeps-api` uses the [Debug](https://www.npmjs.com/package/debug) package to expose diagnostic information. Debug output is divided into several namespaces:
+* `screepsApi:http`: HTTP requests
+* `screepsApi.ratelimit`: HTTP API rate limit state
+* `screepsApi.socket`: Socket API events/messages
+
+Multiple namespaces can be specified by providing a comma-delimited list (ex: `screepsApi:http,screepsApi:ratelimit`). All namespaces can be specified by providing `screepsApi:*`.
+
+To enable debug output in Node, set the `DEBUG` environment variable to the
+namespace(s) you want to enable. Here is an example that uses the CLI in bash:
+```sh
+DEBUG=screepsApi.http,screepsApi.ratelimit screeps-api raw --server main auth.me
+```
+
+These environment variables work when invoking your own apps as well.
+
+You can also enable/disable debug logs dynamically using `ScreepsApi.debug()`:
+```ts
+const api = ScreepsApi.fromConfig('main', 'appName')
+
+// Enable debug logging for HTTP requests and rate limits:
+api.debug({ http: true, rateLimit: true })
+
+// Diable all debug logging
+api.debug()
+```

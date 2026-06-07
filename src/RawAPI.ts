@@ -869,6 +869,25 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
       toReset: reset - Math.floor(Date.now() / 1000)
     }
   }
+
+  /**
+   * Enable or disable debug logging.
+   * @param opts if undefined, disables debug logs for all namespaces.
+   *  Otherwise, enables the specified namespaces and disables all others.
+   * @see {@link Api.DebugOptions}
+   */
+  debug(opts?: Api.DebugOptions): void {
+    if (!opts) {
+      Debug.enable('')
+      return
+    }
+
+    const namespaces = Object.entries(opts)
+      .filter((entry: [string, unknown]) => !!entry[1])
+      .map((entry: [string, unknown]) => `screepsapi:${entry[0]}`)
+      .join()
+    Debug.enable(namespaces)
+  }
 }
 
 type RateLimitResponse = AxiosResponse<unknown, unknown, {
@@ -876,3 +895,17 @@ type RateLimitResponse = AxiosResponse<unknown, unknown, {
   'x-ratelimit-remaining': number
   'x-ratelimit-reset': number
 }>
+
+declare global {
+  namespace Api {
+    /** Options to use with {@link ScreepsAPI.debug} */
+    interface DebugOptions {
+      /** Enable debug logs for HTTP API requests */
+      http?: boolean
+      /** Enable debug logs for HTTP API rate limit state */
+      ratelimit?: boolean
+      /** Enable debug logs for WebSocket API events and messages */
+      socket?: boolean
+    }
+  }
+}
