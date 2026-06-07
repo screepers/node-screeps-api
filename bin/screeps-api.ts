@@ -136,21 +136,27 @@ interface SegmentOptions extends CommandOptions {
   shard?: string
 }
 
-commandBase('segment', '<segment>')
-  .description(`Get segment contents. Use 'all' to get all)`)
+commandBase('segment', '<segments>')
+  .description(`Read or write RawMemory segments.
+
+Reads/downloads segment data by default. <segments> should be a comma-delimited
+list of all segment IDs that should be fetched (or 'all' to get all segments).
+
+If --set <file> is used, <segments> must be the ID of a single segment.
+  `)
   .option('--set <file>', 'Sets the segment content to the contents of file')
   .option('-s --shard <shard>', 'Shard to read from')
   .option('-d --dir <dir>', 'Directory to save in. Empty files are not written. (defaults to outputing in console)')
   .action(async function (segment: number | string, opts: SegmentOptions) {
     const api = await init(opts)
     if (opts.set) {
-      if (segment === 'all') {
-        console.error('Cannot set all segments at once')
+      if (segment === 'all' || segment.toString().includes(',')) {
+        console.error('Cannot set multiple segments at once')
         this.help({ error: true }) // prints to stderr and exits with error code
       }
       const data = await readFile(opts.set, 'utf8')
-      await api.memory.segment.set(segment, data, opts.shard)
-      await out('Segment Set')
+      await api.memory.segment.set(segment, JSON.parse(data), opts.shard)
+      await out('Segment uploaded')
     } else {
       if (segment === 'all') {
         segment = Array.from({ length: 100 }, (_v, k) => k).join(',')
@@ -160,13 +166,16 @@ commandBase('segment', '<segment>')
       const segments = data
       if (dir) {
         if (Array.isArray(segments)) {
-          await Promise.all(segments.map(async (d: string, i: number) => {
+          await Promise.all(segments.map(async (d: string | null, i: number) => {
             return d && await writeFile(path.join(dir, `segment_${i}`), d)
           }))
-        } else {
+          await out(`Segments ${segment} downloaded`)
+        } else if (segments) {
           await writeFile(path.join(dir, `segment_${segment}`), segments)
+          await out(`Segment ${segment} downloaded`)
+        } else {
+          await out(`Segment ${segment} was null`)
         }
-        await out('Segments Saved')
       } else {
         await out(segments)
       }
