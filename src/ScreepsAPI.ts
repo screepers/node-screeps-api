@@ -2,31 +2,56 @@ import { ConfigManager, DEFAULT_CLIENT_CONFIG } from './ConfigManager'
 import { RawAPI } from './RawAPI'
 import { Socket } from './Socket'
 
-interface RateLimit {
-  limit: number
-  period: 'minute' | 'hour' | 'day'
-  remaining: number
-  reset: number
-  toReset: number
+declare global {
+  namespace Api {
+    /**
+     * Rate limit state for an individual HTTP API endpoint.
+     * This can be read via {@link ScreepsAPI.rateLimit}
+     */
+    interface RateLimit {
+      limit: number
+      period: 'minute' | 'hour' | 'day'
+      remaining: number
+      reset: number
+      toReset: number
+    }
+  }
 }
 
 type RateLimits = {
-  global: RateLimit
+  global: Api.RateLimit
 } & {
-  [method in Api.HttpMethod]: { [path: string]: RateLimit }
+  [method in Api.HttpMethod]: {
+    [path: string]: Api.RateLimit
+  }
 }
 
 const configManager = new ConfigManager()
 
+/**
+ * Provides access to the Screeps HTTP API.
+ *
+ * Instances should typically be initialized via {@link ScreepsAPI.fromConfig},
+ * but the constructor can also be called directly if you prefer to handle
+ * loading the credentials and configuration options yourself.
+ *
+ * {@include ../docs/rate-limits.md}
+ * @see {@link raw} for a list of all known/implemented endpoints.
+ * @see {@link Socket} for the WebSocket API client (accessible via {@link ScreepsAPI.socket})
+ */
 export class ScreepsAPI extends RawAPI {
   /**
    * Search for a config/credential file and initializes the client from the first file found.
-   * If a valid config is loaded and email/password auth is being used, authenticate automatically.
-   * The client can also be initialized by passing a configuration object directly to the constructor.
    *
-   * @param serverName the property name of the server object to use from the config file
-   * @param opts see {@link Api.LoadConfigOptions}
-   * @throws if the selected config file is invalid or if no config files are found
+   * Authentication will occur automatically if email/password credentials
+   * are provided in lieu of an API token.
+   *
+   * Alternatively, the client can be initialized by passing a configuration
+   * object directly to the constructor.
+   * @param serverName The property name of the server object to use from the config file
+   * @param opts See {@link Api.LoadConfigOptions}
+   * @returns A configured and authenticated {@link ScreepsAPI} instance
+   * @throws {Error} if the selected config file is invalid or if no config files are found
    */
   static async fromConfig(serverName: string, opts?: Api.LoadConfigOptions): Promise<ScreepsAPI> {
     const config = await configManager.getConfig(serverName, opts)
@@ -107,6 +132,13 @@ export class ScreepsAPI extends RawAPI {
     return this.rateLimits[method][path] || this.rateLimits.global
   }
 
+  /**
+   * Generate an URL that can be opened in a browser to reset rate limits
+   * for all endpoints.
+   *
+   * The generated URL is specific to the API token currently in use.
+   * @throws {Error} if no API token is available.
+   */
   get rateLimitResetUrl() {
     if (!this.token) throw new Error('API token not found')
     return `https://screeps.com/a/#!/account/auth-tokens/noratelimit?token=${this.token.slice(
@@ -115,7 +147,13 @@ export class ScreepsAPI extends RawAPI {
     )}`
   }
 
-  async me(): Promise<Exclude<typeof this._user, undefined>> {
+  /**
+   * Fetch and memoize information about the authenticated user.
+   * @returns If using an API token with full permissions, this returns
+   * {@link Api.AuthMeResponse}. Otherwise, it returns
+   * {@link Api.UserFindResponse.user}.
+   */
+  async me(): Promise<Api.AuthMeResponse | Api.UserFindResponse['user']> {
     if (this._user) return this._user
     const tokenInfo = await this.tokenInfo()
     if (tokenInfo.full) {
@@ -129,8 +167,9 @@ export class ScreepsAPI extends RawAPI {
   }
 
   /**
-   * Fetch permissions and other information about the API token
-   * currently being used by this client
+   * Fetch and memoize permissions and other information about the API token
+   * currently being used by this client.
+   * @returns The "token" field from {@link Api.AuthQueryTokenResponse}
    */
   async tokenInfo(): Promise<Api.TokenInfo> {
     if (!this.token) {
@@ -152,51 +191,66 @@ export class ScreepsAPI extends RawAPI {
     return this._tokenInfo
   }
 
+  /**
+   * Fetch and memoize the authenticated user's ID
+   * @returns the current user's ID string
+   */
   async userID() {
     const user = await this.me()
     return user._id
   }
 
+  /** @inheritdoc */
   get history() {
     return this.raw.history
   }
 
+  /** @inheritdoc */
   get authmod() {
     return this.raw.authmod
   }
 
+  /** @inheritdoc */
   get version() {
     return this.raw.version
   }
 
+  /** @inheritdoc */
   get time() {
     return this.raw.game.time
   }
 
+  /** @inheritdoc */
   get leaderboard() {
     return this.raw.leaderboard
   }
 
+  /** @inheritdoc */
   get market() {
     return this.raw.game.market
   }
 
+  /** @inheritdoc */
   get registerUser() {
     return this.raw.register.submit
   }
 
+  /** @inheritdoc */
   get code() {
     return this.raw.user.code
   }
 
+  /** @inheritdoc */
   get memory() {
     return this.raw.user.memory
   }
 
+  /** @inheritdoc */
   get segment() {
     return this.raw.user.memory.segment
   }
 
+  /** @inheritdoc */
   get console() {
     return this.raw.user.console
   }

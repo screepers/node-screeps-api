@@ -2,20 +2,54 @@ import Debug from 'debug'
 import { EventEmitter } from 'node:events'
 import { setTimeout } from 'node:timers/promises'
 import { URL } from 'node:url'
+import utils from 'node:util'
 import WebSocket from 'ws'
+import zlib from 'zlib'
 import { ScreepsAPI } from './ScreepsAPI'
 
 const debug = Debug('screepsapi:socket')
 
-interface SocketOptions {
-  reconnect: boolean
-  resubscribe: boolean
-  keepAlive: boolean
-  maxRetries: number
-  maxRetryDelay: number
+const inflateAsync = utils.promisify(zlib.inflate)
+
+declare global {
+  namespace Api {
+    /**
+     * Configuration options for {@link Socket}.
+     * These are provided when calling {@link Socket.connect}.
+     * @see {@link SOCKET_DEFAULTS} for default values
+     */
+    export interface SocketOptions {
+      /**
+       * If enabled, {@link Socket} will call {@link reconnect} automatically
+       * when disconnected.
+       */
+      reconnect: boolean
+      /**
+       * If enabled, all previous subscriptions will be recreated
+       * after successfully reconnecting.
+       */
+      resubscribe: boolean
+      /**
+       * If enabled, ping the server periodically to prevent the connection
+       * from being closed.
+       */
+      keepAlive: boolean
+      /**
+       * The maximum number of connection attempts to make before
+       * throwing an error in {@link Socket.reconnect}.
+       */
+      maxRetries: number
+      /**
+       * The maximum delay (in milliseconds) before a retry attempt
+       * in {@link Socket.reconnect}.
+       */
+      maxRetryDelay: number
+    }
+  }
 }
 
-const DEFAULTS: SocketOptions = {
+/** Default {@link Api.SocketOptions} used by {@link Socket.connect} */
+export const SOCKET_DEFAULTS: Readonly<Api.SocketOptions> = {
   reconnect: true,
   resubscribe: true,
   keepAlive: true,
@@ -23,23 +57,47 @@ const DEFAULTS: SocketOptions = {
   maxRetryDelay: 60 * 1000 // in milli-seconds
 }
 
+/**
+ * Provides access to the Screeps WebSocket API.
+ *
+ * {@include ../docs/Websocket_endpoints.md}
+ * @see {@link ScreepsAPI} for the HTTP API client
+ */
 export class Socket extends EventEmitter {
   api: ScreepsAPI
-  opts: SocketOptions
+  opts: Api.SocketOptions
   ws?: WebSocket
   authed = false
   connected = false
   reconnecting = false
 
   private keepAliveInter?: NodeJS.Timeout
+  /**
+   * Pending messages to send once connected/authenticated.
+   * @hidden
+   */
   private __queue: (string | WebSocket.RawData)[] = []
+  /**
+   * Pending subscriptions to request once connected/authenticated
+   * @hidden
+   */
   private __subQueue: (string | WebSocket.RawData)[] = []
-  private __subs: { [path: string]: number } = {}
+  /**
+   * The number of subscriber callbacks by event type
+   * @hidden
+   */
+  private __subs: { [event: string]: number } = {}
 
+  /**
+   * Initializes a new WebSocket API client. Do not call this directly.
+   * Instead, use the instance from {@link ScreepsAPI.socket}.
+   * @param api The HTTP client instance with which config and auth credentials
+   *  should be shared
+   */
   constructor(api: ScreepsAPI) {
     super()
     this.api = api
-    this.opts = Object.assign({}, DEFAULTS)
+    this.opts = Object.assign({}, SOCKET_DEFAULTS)
     this.on('error', console.error)
     this.reset()
     this.on('auth', (ev: AuthEvent) => {
@@ -49,31 +107,39 @@ export class Socket extends EventEmitter {
         }
         clearInterval(this.keepAliveInter)
         if (this.opts.keepAlive) {
-          this.keepAliveInter = setInterval(() => this.ws?.ping(1), 10000)
+          this.keepAliveInter = setInterval(() => this.ws?.ping(1), 10_000)
         }
       }
     })
   }
 
-  reset() {
+  /** Initialize (or re-initialize) all client state */
+  private reset() {
     this.authed = false
     this.connected = false
     this.reconnecting = false
     clearInterval(this.keepAliveInter)
     delete this.keepAliveInter
-    this.__queue = [] // pending messages  (to send once authenticated)
-    this.__subQueue = [] // pending subscriptions (to request once authenticated)
-    this.__subs = {} // number of callbacks for each subscription
+    this.__queue = []
+    this.__subQueue = []
+    this.__subs = {}
   }
 
-  async connect(opts = {}) {
-    Object.assign(this.opts, opts)
+  /**
+   * Connect to the server and immediately attempt to authenticate.
+   *
+   * If successful, any queued messages will be sent automatically.
+   * @param opts WebSocket API client options. See {@link Api.SocketOptions}.
+   * @throws {Error} if an API token is not available due to missing auth credentials
+   */
+  async connect(opts?: Partial<Api.SocketOptions>) {
+    Object.assign(this.opts, opts ?? {})
     if (!this.api.token) {
       await this.api.auth(
         new Error('No token! Call api.auth() before connecting the socket!')
       )
     }
-    return await new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       const baseURL = this.api.config.server.url.replace('http', 'ws')
       const wsurl = new URL('socket/websocket', baseURL)
       this.ws = new WebSocket(wsurl)
@@ -114,6 +180,16 @@ export class Socket extends EventEmitter {
     })
   }
 
+  /**
+   * Reconnect to the server using current client settings.
+   *
+   * Upon success, all previous subscriptions will be reestablished
+   * (if {@link Api.SocketOptions.resubscribe} is enabled).
+   *
+   * Up to {@link Api.SocketOptions.maxRetries} connections will be attempted
+   * with exponential backoff.
+   * @throws {Error} if the maximum number of retry attempts is exceeded
+   */
   async reconnect() {
     if (this.reconnecting) {
       return
@@ -147,20 +223,28 @@ export class Socket extends EventEmitter {
     }
   }
 
+  /** Close the connection and clear all queued messages. */
   disconnect() {
-    if (!this.ws) return
     debug('disconnect')
     clearInterval(this.keepAliveInter)
-    this.ws.removeAllListeners() // remove listeners first or we may trigger reconnection & Co.
-    this.ws.terminate()
+    if (this.ws) {
+      // Remove listeners first or we may trigger reconnection / etc
+      this.ws.removeAllListeners()
+      this.ws.terminate()
+    }
     this.reset()
     this.emit('disconnected')
   }
 
-  async handleMessage(rawMsg: string | { data: string }) {
+  /**
+   * Process an incoming message (normalize/inflate message data, etc),
+   * then emit events to notify the relevant subscribers.
+   * @param rawMsg The raw message content sent by the server
+   */
+  private async handleMessage(rawMsg: string | { data: string }) {
     let msg = typeof rawMsg === 'object' ? rawMsg.data : rawMsg // Handle ws/browser difference
     if (msg.startsWith('gz:')) {
-      msg = await this.api.inflate(msg) as string
+      msg = await this.inflate(msg) as string
     }
     debug(`message ${msg}`)
     if (msg.startsWith('[')) {
@@ -188,10 +272,35 @@ export class Socket extends EventEmitter {
     }
   }
 
-  gzip(bool: boolean) {
-    this.send(`gzip ${bool ? 'on' : 'off'}`)
+  private async inflate(data: string): Promise<unknown> {
+    const buf = Buffer.from(data.slice(3), 'base64')
+    const ret = await inflateAsync(buf)
+    return JSON.parse(ret.toString())
   }
 
+  /**
+   * Enable/disable gzip compression/deflation of messages from the server.
+   *
+   * Regardless of whether this is enabled or not, {@link Socket} will
+   * automatically inflate any compressed messages before notifying subscribers.
+   * @param enabled `true` to enable compression; `false` to disable it
+   */
+  gzip(enabled: boolean) {
+    this.send(`gzip ${enabled ? 'on' : 'off'}`)
+  }
+
+  /**
+   * Send a message to the server.
+   *
+   * If the client is not currently connected, the message will be queued
+   * to be sent when the connection is established.
+   *
+   * This should only be called directly if the desired functionality is not
+   * already implemented as another method on {@link Socket}. If you have a
+   * use case for calling `send` directly, please consider submitting a PR
+   * to add the feature to {@link Socket}.
+   * @param data the message to send
+   */
   send(data: string | WebSocket.RawData) {
     if (!this.connected || !this.ws) {
       this.__queue.push(data)
@@ -200,7 +309,12 @@ export class Socket extends EventEmitter {
     }
   }
 
-  async auth(token: string) {
+  /**
+   * Authenticate to the server. This is called automatically after a
+   * connection is successfully established.
+   * @param token the API token with which to authenticate
+   */
+  private async auth(token: string) {
     return await new Promise<void>((resolve, reject) => {
       this.send(`auth ${token}`)
       this.once('auth', (ev) => {
@@ -220,32 +334,48 @@ export class Socket extends EventEmitter {
     })
   }
 
-  async subscribe(path: string, cb?: (...args: unknown[]) => void) {
-    if (!path) return
+  /**
+   * Subscribe to an event type.
+   * @param event The name of the event (ex: 'console', 'room:ROOM_NAME')
+   * @param cb The callback to trigger when a relevant message is received.
+   *  This can be left undefined to resubscribe to an event using a
+   *  previously-registered callback.
+   */
+  // TODO: Add overloads with stronger cb type restrictions for known path types
+  async subscribe(event: string, cb?: (...args: unknown[]) => void) {
+    if (!event) return
     const userID = await this.api.userID()
-    if (!(/^(\w+):(.+?)$/.exec(path))) {
-      path = `user:${userID}/${path}`
+    if (!(/^(\w+):(.+?)$/.exec(event))) {
+      event = `user:${userID}/${event}`
     }
     if (this.authed) {
-      this.send(`subscribe ${path}`)
+      this.send(`subscribe ${event}`)
     } else {
-      this.__subQueue.push(`subscribe ${path}`)
+      this.__subQueue.push(`subscribe ${event}`)
     }
-    this.emit('subscribe', path)
-    this.__subs[path] = this.__subs[path] || 0
-    this.__subs[path]++
-    if (cb) this.on(path, cb)
+    this.emit('subscribe', event)
+    this.__subs[event] = this.__subs[event] || 0
+    this.__subs[event]++
+    if (cb) this.on(event, cb)
   }
 
-  async unsubscribe(path: string) {
-    if (!path) return
+  /**
+   * Unsubscribe from an event type.
+   * @param event The name of the event (ex: 'console', 'room:ROOM_NAME')
+   * @param cb The callback to unsubscribe.
+   */
+  async unsubscribe(event: string, cb?: (...args: unknown[]) => void) {
+    if (!event) return
     const userID = await this.api.userID()
-    if (!(/^(\w+):(.+?)$/.exec(path))) {
-      path = `user:${userID}/${path}`
+    if (!(/^(\w+):(.+?)$/.exec(event))) {
+      event = `user:${userID}/${event}`
     }
-    this.send(`unsubscribe ${path}`)
-    this.emit('unsubscribe', path)
-    if (this.__subs[path]) this.__subs[path]--
+    // Unsubscribe is always sent (instead of just at `this.__subs[event] <= 0)
+    // because the server handles subscriber counting already.
+    this.send(`unsubscribe ${event}`)
+    this.emit('unsubscribe', event)
+    if (this.__subs[event]) this.__subs[event]--
+    if (cb) this.off(event, cb)
   }
 }
 

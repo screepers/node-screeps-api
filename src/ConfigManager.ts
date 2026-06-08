@@ -24,6 +24,7 @@ export class ConfigManager {
 
   /**
    * Search for config files and load
+   * @param serverName the name of the server to use from the credential file
    * @param opts see {@link LoadConfigOptions}
    * @returns a valid {@link Api.Config} if one was found, or null
    */

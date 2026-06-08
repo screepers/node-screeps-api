@@ -1,33 +1,34 @@
 declare global {
-  /** node-screeps-api types */
+  /** Namespace for all public `node-screeps-api` types */
   namespace Api {
-    /** Body of a API success response */
+    /**
+     * Body of a HTTP API success response.
+     *
+     * All {@link ScreepsAPI.raw} functions will return a valid that
+     * extends this type.
+     * @see {@link Error} if an API error is thrown.
+     */
     interface Response {
       /** An API success response always contains `{ ok: 1 }` */
       ok: 1
     }
 
     /**
-     * Body of an API success response that has not been typed yet.
-     * Please consider submitting a PR to replace this type
-     * if you have a sample response body.
+     * Body of an HTTP API success response that has not been typed yet.
+     * Please consider submitting a PR to replace this with a defined type
+     * if you have a sample response body!
      */
     interface UnknownResponse extends Response {
       [propertyName: string]: unknown
     }
 
     /**
-     * Error details: either a simple error message string (ex: 'invalid'),
-     * or detailed request/response data
+     * Thrown by {@link ScreepsAPI} endpoint functions when an error response
+     * is received from an HTTP API endpoint.
      */
-    interface ErrorResponse {
-      /** The API request that caused the error */
-      config: {
-        headers: { [headerName: string]: unknown }
-        method: HttpMethod
-        params?: { [paramName: string]: unknown }
-        url: string
-      }
+    interface Error extends globalThis.Error {
+      /** Params from the API request which caused the error */
+      params: { [paramName: string]: unknown }
       /**
        * The response body (usually an HTML document
        * with an error message in the body)
@@ -40,7 +41,7 @@ declare global {
       statusText: string
     }
 
-    /** GET /api/version response */
+    /** `GET /api/version` response */
     interface VersionResponse extends Response {
       /** Client version number; undefined on non-official servers */
       package?: number
@@ -86,7 +87,7 @@ declare global {
       users: number
     }
 
-    /** GET /api/authmod response */
+    /** `GET /api/authmod` response */
     type AuthModResponse = OfficialAuthModResponse | UnofficialAuthModResponse
 
     interface OfficialAuthModResponse extends Response {
@@ -104,7 +105,7 @@ declare global {
       version: string
     }
 
-    /** GET /api/room-history response: a room history JSON file */
+    /** `GET /api/room-history` response: a room history JSON file */
     interface RoomHistoryResponse extends Response {
       /** UNIX timestamp (UTC) indicating the time at the start of the chunk */
       timestamp: number
@@ -112,6 +113,7 @@ declare global {
       room: string
       /** Number of the first tick in this chunk */
       base: number
+      /** History data indexed by tick */
       ticks: { [tick: number]: HistoryTick }
     }
 
@@ -120,28 +122,31 @@ declare global {
       [id: string]: RoomObject
     }
 
-    /** POST /api/servers/list response: a curated list of community-run servers */
+    /** `POST /api/servers/list` response: a curated list of community-run servers */
     interface ServerListResponse extends Response {
-      servers: {
-        _id: string
-        settings: {
-          host: string
-          port: string
-          pass: string
-        }
-        name: string
-        /** Usually 'active' */
-        status: string
-        likeCount: number
-      }
+      servers: Server[]
     }
 
-    /** POST /api/auth/signin response */
+    /** A server from {@link ServerListResponse} */
+    interface Server {
+      _id: string
+      settings: {
+        host: string
+        port: string
+        pass: string
+      }
+      name: string
+      /** Usually 'active' */
+      status: string
+      likeCount: number
+    }
+
+    /** `POST /api/auth/signin` response */
     interface AuthSigninResponse extends Response {
       token: string
     }
 
-    /** GET /api/auth/me response */
+    /** `GET /api/auth/me` response */
     interface AuthMeResponse extends Response {
       _id: string
       badge?: Badge
@@ -204,7 +209,7 @@ declare global {
       username: string
     }
 
-    /** GET /api/auth/query-token response */
+    /** `GET /api/auth/query-token` response */
     interface AuthQueryTokenResponse extends Response {
       _id: string
       token: TokenInfo
@@ -226,7 +231,19 @@ declare global {
       description?: string
     }
 
-    /** POST /api/game/map-stats response */
+    /**
+     * Response returned by some endpoints when an issue occurs.
+     * Despite the name and fields of this type, this is returned with
+     * an HTTP 200 status, and {@link ScreepsAPI} does not throw this
+     * as an error.
+     * @see {@link Error} for the Error type thrown when an endpoint returns
+     * an error response with a non-2xx status.
+     */
+    interface ErrorResponse extends Response {
+      error: string
+    }
+
+    /** `POST /api/game/map-stats` response */
     interface GameMapStatsResponse<S extends MapStat> extends Response {
       gameTime: number
       stats: {
@@ -267,14 +284,14 @@ declare global {
     }
 
     /**
-     * POST /api/game/gen-unique-object-name and
-     * POST /api/game/gen-unique-flag-name responses
+     * `POST /api/game/gen-unique-object-name` and
+     * `POST /api/game/gen-unique-flag-name` responses
      */
     interface GameGenUniqueNameResponse extends Response {
       name: string
     }
 
-    /** POST /api/game/create-construction response */
+    /** `POST /api/game/create-construction` response */
     interface GameCreateConstructionResponse extends Response {
       result: {
         ok: 1
@@ -295,12 +312,12 @@ declare global {
       insertedIds: string[]
     }
 
-    /** GET /api/game/time response */
+    /** `GET /api/game/time` response */
     interface GameTimeResponse extends Response {
       time: number
     }
 
-    /** GET /api/game/world-size response */
+    /** `GET /api/game/world-size` response */
     interface GameWorldSizeResponse extends Response {
       /** Width of this shard's map (in rooms) */
       width: number
@@ -308,18 +325,21 @@ declare global {
       height: number
     }
 
-    /** GET /api/game/room-decorations response */
+    /** `GET /api/game/room-decorations` response */
     interface GameRoomDecorationsResponse extends Response {
       decorations: Decorations.Instance[]
     }
 
-    /** GET /api/game/room-objects response */
+    /** `GET /api/game/room-objects` response */
     interface GameRoomObjectsResponse extends Response {
       objects: RoomObject[]
       users: Users
     }
 
-    /** GET /api/game/room-terrain response when `encoded` param is defined and non-empty */
+    /**
+     * `GET /api/game/room-terrain` response when `encoded` param is
+     * defined and non-empty
+     */
     interface GameRoomTerrainEncodedResponse extends Response {
       terrain: {
         0: {
@@ -336,7 +356,10 @@ declare global {
       }
     }
 
-    /** GET /api/game/room-terrain response when `encoded` param is undefined|null|'' */
+    /**
+     * `GET /api/game/room-terrain` response when `encoded` param
+     * is undefined|null|''
+     */
     interface GameRoomTerrainUnencodedResponse extends Response {
       /** Unlisted positions are of type `plain` */
       terrain: {
@@ -347,7 +370,7 @@ declare global {
       }[]
     }
 
-    /** GET /api/game/room-status response */
+    /** `GET /api/game/room-status` response */
     interface GameRoomStatusResponse extends Response {
       /** The room name */
       _id: string
@@ -360,7 +383,7 @@ declare global {
       status: RoomStatus
     }
 
-    /** GET /api/game/room-overview response */
+    /** `GET /api/game/room-overview` response */
     interface GameRoomOverviewResponse extends Response {
       owner: {
         badge: Badge
@@ -385,7 +408,7 @@ declare global {
       totals: { [statId in RoomStat]: number | undefined }
     }
 
-    /** GET /api/game/market/orders-index response */
+    /** `GET /api/game/market/orders-index` response */
     interface GameMarketIndexResponse extends Response {
       list: {
         _id: MarketResourceConstant
@@ -397,23 +420,23 @@ declare global {
     }
 
     /**
-     * GET /api/game/market/my-orders response
-     * Intershard orders will be listed under the `'intershard'` key
+     * `GET /api/game/market/my-orders` response
+     * Intershard orders will be listed under the `intershard` key
      */
     type GameMarketMyOrdersResponse = Response & {
       [shardName: string]: Order[]
     }
 
-    /** GET /api/game/market/orders response */
+    /** `GET /api/game/market/orders` response */
     interface GameMarketOrdersResponse extends Response {
       list: OpenOrder[]
     }
 
-    /** GET /api/game/market/stats resonse */
+    /** `GET /api/game/market/stats` resonse */
     interface GameMarketStatsResponse extends Response {
       stats: {
         _id: string
-        /** YYYY-MM-DD format */
+        /** Date to which this stats entry corresponds in YYYY-MM-DD format */
         date: string
         resourceType: MarketResourceConstant
         avgPrice: number
@@ -423,7 +446,7 @@ declare global {
       }[]
     }
 
-    /** GET /api/game/shards/info response */
+    /** `GET /api/game/shards/info` response */
     interface GameShardsInfoResponse extends Response {
       shards: {
         name: string
@@ -439,7 +462,7 @@ declare global {
       }[]
     }
 
-    /** GET /api/leaderboard/list response */
+    /** `GET /api/leaderboard/list` response */
     interface LeaderboardListResponse extends Response {
       list: LeaderboardResult[]
       /** Total number of results in this season */
@@ -447,9 +470,10 @@ declare global {
       users: Users
     }
 
-    /** GET /api/leaderboard/find response */
+    /** `GET /api/leaderboard/find` response */
     interface LeaderboardFindResponse extends Response, LeaderboardResult {}
 
+    /** A user's leaderboard result for a single season */
     interface LeaderboardResult {
       _id: string
       season: string
@@ -458,7 +482,7 @@ declare global {
       rank: number
     }
 
-    /** GET /api/leaderboard/seasons response */
+    /** `GET /api/leaderboard/seasons` response */
     interface LeaderboardSeasonsResponse extends Response {
       seasons: {
         /** YYYY-MM */
@@ -470,7 +494,15 @@ declare global {
       }[]
     }
 
-    /** GET /api/seasons/current response */
+    /**
+     * The types of leaderboard available via the
+     * {@link ScreepsAPI.raw.leaderboard} endpoints:
+     * - 'world': Control Points (as used to earn Global Control Level)
+     * - 'power': Power Processed (as used to earn Global Power Level)
+     */
+    type LeaderboardType = 'world' | 'power'
+
+    /** `GET /api/seasons/current` response */
     interface SeasonsCurrentResponse extends Response {
       /** Name of the season (ex: "Season 8") */
       title: string
@@ -488,7 +520,7 @@ declare global {
       updatedAt: string
     }
 
-    /** POST /api/user/notify-prefs response */
+    /** `POST /api/user/notify-prefs` response */
     interface UserNotifyPrefsRequest {
       disabled: boolean
       disabledOnMessages?: boolean
@@ -497,7 +529,7 @@ declare global {
       errorsInterval?: number
     }
 
-    /** GET /api/user/world-start-room response */
+    /** `GET /api/user/world-start-room` response */
     interface UserWorldStartRoomResponse extends Response {
       /**
        * Zero or one room names; if a shard name was not included in the request,
@@ -506,7 +538,7 @@ declare global {
       room: string[]
     }
 
-    /** GET /api/user/world-status response */
+    /** `GET /api/user/world-status` response */
     interface UserWorldStatusResponse extends Response {
       /**
        * - Normal: user has one or more active spawns
@@ -517,7 +549,7 @@ declare global {
       status: 'normal' | 'lost' | 'empty'
     }
 
-    /** GET /api/user/branches response */
+    /** `GET /api/user/branches` response */
     interface UserBranchesResponse extends Response {
       list: {
         _id: string
@@ -527,21 +559,37 @@ declare global {
       }[]
     }
 
-    /** GET /api/user/code response */
+    /** `GET /api/user/code` response */
     interface UserCodeGetResponse extends Response, UserCodeSetRequest {}
 
-    /** POST /api/user/code response */
+    /** `POST /api/user/code` response */
     interface UserCodeSetRequest {
+      /**
+       * The name of the branch
+       * @see {@link ScreepsAPI.raw.user.branches} to list available branches
+       */
       branch: string
-      modules: { [moduleName: string]: string | { binary: string } }
+      /** JavaScript code and WASM binaries keyed by module name */
+      modules: UserCodeModules
     }
 
-    /** GET /api/user/decorations/inventory response */
+    /** Describes a collection of code modules */
+    interface UserCodeModules {
+      /**
+       * JavaScript code or WASM binaries keyed by module name.
+       * If the value of a module is a string, it is treated as JavaScript.
+       * If the value of a module is an object with a `binary` property,
+       * the value of that property is treated as a WASM binary.
+       */
+      [moduleName: string]: string | { binary: string }
+    }
+
+    /** `GET /api/user/decorations/inventory` response */
     interface UserDecorationInventoryResponse extends Response {
       list: Decorations.Instance[]
     }
 
-    /** GET /api/user/decorations/themes response */
+    /** `GET /api/user/decorations/themes` response */
     interface UserDecorationThemesResponse extends Response {
       list: {
         _id: string
@@ -557,7 +605,7 @@ declare global {
       }[]
     }
 
-    /** GET /api/user/messages/list response */
+    /** `GET /api/user/messages/list` response */
     interface UserMessagesListResponse extends Response {
       messages: {
         /** ID of the message */
@@ -588,7 +636,7 @@ declare global {
       unread: boolean
     }
 
-    /** GET /api/user/messages/index response */
+    /** `GET /api/user/messages/index` response */
     interface UserMessagesIndexResponse extends Response {
       messages: {
         _id: string
@@ -607,25 +655,25 @@ declare global {
       outMessage: string
     }
 
-    /** GET /api/user/messages/unread-count response */
+    /** `GET /api/user/messages/unread-count` response */
     interface UserMessagesUnreadCountResponse extends Response {
       count: number
     }
 
-    /** POST /api/user/messages/mark-read response */
+    /** `POST /api/user/messages/mark-read` response */
     interface UserMessagesMarkReadResponse extends Response {
       0: number
       1: number
       2: DbModifiedResult
     }
 
-    /** GET /api/user/memory response */
+    /** `GET /api/user/memory` response */
     interface UserMemoryGetResponse extends Response {
       /** Undefined if the specified memory path does not exist */
       data?: unknown
     }
 
-    /** POST /api/user/memory response */
+    /** `POST /api/user/memory` response */
     interface UserMemorySetResponse extends Response, DbModifiedResponse {
       ops: {
         user: string
@@ -637,12 +685,22 @@ declare global {
       insertedIds: string[]
     }
 
-    /** GET /api/user/memory-segment response */
+    /** `GET /api/user/memory-segment` response */
     interface UserMemorySegmentGetResponse extends Response {
-      data: string | string[]
+      /**
+       * The contents of the requested {@link https://docs.screeps.com/api/#RawMemory.segments | RawMemory.segments}.
+       *
+       * If a single segment ID is specified, returns the contents of that segment as a string.
+       *
+       * If multiple segment IDs are specified, returns the contents of each requested segment as a string array.
+       * The order of segment data in this array matches the order of the segment IDs array from the request.
+       *
+       * `null` will be returned instead of a string for any uninitialized segment.
+       */
+      data: string | null | (string | null)[]
     }
 
-    /** GET /api/user/find response */
+    /** `GET /api/user/find` response */
     interface UserFindResponse extends Response {
       user: User & {
         /** Total control points earned by this user */
@@ -656,7 +714,7 @@ declare global {
       }
     }
 
-    /** GET /api/user/respawn-prohibited-rooms response */
+    /** `GET /api/user/respawn-prohibited-rooms` response */
     interface UserRespawnProhibitedRoomsResponse extends Response {
       /**
        * Zero or one room names; results are formatted as `${shardName}/${roomName}`
@@ -664,7 +722,7 @@ declare global {
       rooms: string[]
     }
 
-    /** GET /api/user/rooms response */
+    /** `GET /api/user/rooms` response */
     interface UserRoomsResponse extends Response {
       /** All arrays in this object will always be empty */
       reservations: { [shardName: string]: string[] }
@@ -672,7 +730,15 @@ declare global {
       shards: { [shardName: string]: string[] }
     }
 
-    /** GET /api/user/overview response */
+    /** `GET /api/user/stats` response */
+    interface UserStatsResponse extends Response {
+      stats: {
+        /** The value of each stat over the requested {@link RoomStatInterval} */
+        [statId in RoomStat]: number
+      }
+    }
+
+    /** `GET /api/user/overview` response */
     interface UserOverviewResponse extends Response {
       statsMax: number
       totals: { [statName in RoomStat]: number }
@@ -699,7 +765,7 @@ declare global {
       }
     }
 
-    /** GET /api/user/money-history response */
+    /** `GET /api/user/money-history` response */
     interface UserMoneyHistoryResponse extends Response {
       list: {
         _id: string
@@ -760,7 +826,7 @@ declare global {
       }
     }
 
-    /** POST /api/user/console response */
+    /** `POST /api/user/console` response */
     interface UserConsoleResponse extends Response {
       result: {
         ok: 1
@@ -776,16 +842,17 @@ declare global {
       insertedIds: [string]
     }
 
-    /** GET /api/user/name response */
+    /** `GET /api/user/name` response */
     interface UserNameResponse extends Response {
       username: string
     }
 
-    /** GET /api/experimental/pvp response */
+    /** `GET /api/experimental/pvp` response */
     interface ExperimentalPvpResponse extends Response {
+      /** Rooms with current/recent combat activity grouped by shard name */
       pvp: {
         [shardName: string]: {
-          /** Results sorted by {@link lastPvpTime} DESC */
+          /** Rooms sorted in descending order of {@link lastPvpTime} */
           rooms: {
             /** Name of the room */
             _id: string
@@ -798,12 +865,48 @@ declare global {
       }
     }
 
-    /** GET /api/experimental/nukes response */
+    /** `GET /api/experimental/nukes` response */
     interface ExperimentalNukesResponse extends Response {
+      /** {@link Nuke} objects grouped by shard name */
       nukes: { [shardName: string]: Nuke[] }
     }
 
-    /** GET /api/scoreboard/list response */
+    /**
+     * Response from `GET /api/warpath/battles` on a game server,
+     * or any `GET * /battles.json` endpoints on
+     * {@link https://voight-kampff.fly.dev/ | Voight-Kampff}
+     */
+    interface WarpathBattlesResponse extends Response {
+      /** ISO 8601 time at which the last scan was conducted */
+      timestamp: string
+      /** A list of conflicts indexed by shard */
+      shards: { [shardName: string]: WarpathBattle[] }
+    }
+
+    /** An individual battle from a {@link WarpathBattlesResponse} */
+    interface WarpathBattle {
+      /** Name of the room in which the battle is/was occurring */
+      room: string
+      /**
+       * Numeric string value from "0" to "5", where "5" is the
+       * highest-level conflict: https://screepspl.us/warpath/classifications/
+       */
+      classification: string
+      /** ISO 8601 time at which the conflict was first observed */
+      firstseen: string
+      /** ISO 8601 time at which the conflict was last observed */
+      lastseen: string
+      /** Tick at which the conflict was first observed */
+      firsttick: number
+      /** Tick at which the conflict was last observed */
+      lasttick: number
+      /** Username(s) of the attacking player(s) */
+      attackers: [string, ...string[]]
+      /** Username of the defending player */
+      defender: string
+    }
+
+    /** `GET /api/scoreboard/list` response */
     interface ScoreboardListResponse extends Response {
       meta: {
         /** The total number of players who have spawned on this season's map */
@@ -894,7 +997,7 @@ declare global {
     /** All HTTP methods used for Screeps API endpoints */
     type HttpMethod = 'GET' | 'POST'
 
-    /** IDs of stats that can be used with the POST /api/game/map-stats endpoint */
+    /** IDs of stats that can be used with the `POST /api/game/map-stats` endpoint */
     type MapStat
       = | 'owner0'
         | 'claim0'
@@ -1683,6 +1786,7 @@ interface _Decoration {
   __v: number
 }
 
+/** All available {@link  Flag} colors */
 export enum FlagColor {
   Red = 1,
   Purple = 2,
