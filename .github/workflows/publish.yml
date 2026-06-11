@@ -1,5 +1,6 @@
-name: Publish
+name: Publish to NPM
 on:
+  # Trigger when a new release is published on the Github repo
   release:
     types: [published]
 
