@@ -24,5 +24,6 @@
     "axios": {
       "AxiosResponse": "axios.rest/pages/advanced/response-schema"
     }
-  }
+  },
+  "alwaysCreateEntryPointModule": false
 }
