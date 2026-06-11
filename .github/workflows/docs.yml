@@ -3,10 +3,6 @@ on:
   push:
     branches:
     - master
-  # TODO: Delete after testing
-  pull_request:
-    branches:
-    - master
 
 # Prohibit concurrent workflows
 concurrency:
@@ -39,6 +35,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       pages: write
     needs: build
     steps:
