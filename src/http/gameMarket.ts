@@ -1,5 +1,5 @@
 import { OpenOrder, Order } from '../common/market'
-import { MarketResourceConstant } from '../common/resources'
+import { MarketResource } from '../common/resources'
 import { ScreepsResponse } from './base'
 
 /**
@@ -13,7 +13,7 @@ import { ScreepsResponse } from './base'
  */
 export interface GameMarketIndexResponse extends ScreepsResponse {
   list: {
-    _id: MarketResourceConstant
+    _id: MarketResource
     /** Number of open orders */
     count: number
     avgPrice: number
@@ -48,7 +48,7 @@ export interface GameMarketStatsResponse extends ScreepsResponse {
     _id: string
     /** Date to which this stats entry corresponds in YYYY-MM-DD format */
     date: string
-    resourceType: MarketResourceConstant
+    resourceType: MarketResource
     avgPrice: number
     stddevPrice: number
     volume: number

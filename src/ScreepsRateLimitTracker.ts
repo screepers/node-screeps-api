@@ -29,12 +29,18 @@ export interface RateLimitUpdate {
   reset: number
 }
 
-/** All possible time periods over which a {@link RateLimit} can apply. */
-export enum RateLimitPeriod {
-  MINUTE = 'minute',
-  HOUR = 'hour',
-  DAY = 'day'
-}
+/**
+ * All possible time periods over which a {@link RateLimit} can apply.
+ * @enum
+ */
+export const RateLimitPeriods = {
+  Minute: 'minute',
+  Hour: 'hour',
+  Day: 'day'
+} as const
+
+/** A {@link RateLimitPeriods} value */
+export type RateLimitPeriod = typeof RateLimitPeriods[keyof typeof RateLimitPeriods]
 
 /**
  * Tracks rate limit status for all HTTP API endpoints.
@@ -49,25 +55,25 @@ export class ScreepsRateLimitTracker {
   readonly POST: { [path: string]: RateLimit }
 
   constructor() {
-    this.global = makeLimit(120, RateLimitPeriod.MINUTE)
+    this.global = makeLimit(120, RateLimitPeriods.Minute)
     this.GET = {
-      '/api/game/room-terrain': makeLimit(360, RateLimitPeriod.HOUR),
-      '/api/user/code': makeLimit(60, RateLimitPeriod.HOUR),
-      '/api/user/memory': makeLimit(1440, RateLimitPeriod.DAY),
-      '/api/user/memory-segment': makeLimit(360, RateLimitPeriod.HOUR),
-      '/api/game/market/orders-index': makeLimit(60, RateLimitPeriod.HOUR),
-      '/api/game/market/orders': makeLimit(60, RateLimitPeriod.HOUR),
-      '/api/game/market/my-orders': makeLimit(60, RateLimitPeriod.HOUR),
-      '/api/game/market/stats': makeLimit(60, RateLimitPeriod.HOUR),
-      '/api/game/user/money-history': makeLimit(60, RateLimitPeriod.HOUR)
+      '/api/game/room-terrain': makeLimit(360, RateLimitPeriods.Hour),
+      '/api/user/code': makeLimit(60, RateLimitPeriods.Hour),
+      '/api/user/memory': makeLimit(1440, RateLimitPeriods.Day),
+      '/api/user/memory-segment': makeLimit(360, RateLimitPeriods.Hour),
+      '/api/game/market/orders-index': makeLimit(60, RateLimitPeriods.Hour),
+      '/api/game/market/orders': makeLimit(60, RateLimitPeriods.Hour),
+      '/api/game/market/my-orders': makeLimit(60, RateLimitPeriods.Hour),
+      '/api/game/market/stats': makeLimit(60, RateLimitPeriods.Hour),
+      '/api/game/user/money-history': makeLimit(60, RateLimitPeriods.Hour)
     }
     this.POST = {
-      '/api/user/console': makeLimit(360, RateLimitPeriod.HOUR),
-      '/api/game/map-stats': makeLimit(60, RateLimitPeriod.HOUR),
-      '/api/user/code': makeLimit(240, RateLimitPeriod.DAY),
-      '/api/user/set-active-branch': makeLimit(240, RateLimitPeriod.DAY),
-      '/api/user/memory': makeLimit(240, RateLimitPeriod.DAY),
-      '/api/user/memory-segment': makeLimit(60, RateLimitPeriod.HOUR)
+      '/api/user/console': makeLimit(360, RateLimitPeriods.Hour),
+      '/api/game/map-stats': makeLimit(60, RateLimitPeriods.Hour),
+      '/api/user/code': makeLimit(240, RateLimitPeriods.Day),
+      '/api/user/set-active-branch': makeLimit(240, RateLimitPeriods.Day),
+      '/api/user/memory': makeLimit(240, RateLimitPeriods.Day),
+      '/api/user/memory-segment': makeLimit(60, RateLimitPeriods.Hour)
     }
   }
 

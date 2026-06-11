@@ -2,13 +2,13 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 // If installed from npm, use:
 // import { ScreepsHttpClient } from 'screeps-api'
-import { ScreepsHttpClient, ServerAuthEvent, ServerAuthStatus, UserCodeEvent } from '../src'
+import { ScreepsHttpClient, ServerAuthEvent, ServerAuthStatuses, UserCodeEvent } from '../src'
 
 const api = await ScreepsHttpClient.fromConfig('main')
 api.socket.connect()
 
 api.socket.on('auth', (event: ServerAuthEvent) => {
-  if (event.data.status === ServerAuthStatus.OK) {
+  if (event.data.status === ServerAuthStatuses.Ok) {
     api.socket.subscribe('/code')
   } else {
     console.error(`WebSocket API authentication failed`)

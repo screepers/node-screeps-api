@@ -1,4 +1,4 @@
-import { IntershardResourceConstant } from '../common/resources'
+import { IntershardResource } from '../common/resources'
 import { UserCodeModules } from '../common/users'
 import { SocketEvent } from './base'
 
@@ -103,7 +103,7 @@ export type UserResourceEventData = {
   [resType in ResourceEventConstant]: number | undefined
 }
 
-export type ResourceEventConstant = IntershardResourceConstant | 'credits'
+export type ResourceEventConstant = IntershardResource | 'credits'
 
 /**
  * WebSocket event that appears to be related to the Memory inspector watch list.

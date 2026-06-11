@@ -6,7 +6,7 @@ import utils from 'node:util'
 import WebSocket from 'ws'
 import zlib from 'zlib'
 import { ScreepsHttpClient } from './ScreepsHttpClient'
-import { ServerAuthEvent, ServerAuthStatus, SocketEvent } from './socket'
+import { ServerAuthEvent, ServerAuthStatuses, SocketEvent } from './socket'
 
 const debug = Debug('screepsapi:socket')
 
@@ -103,7 +103,7 @@ export class ScreepsSocketClient extends EventEmitter {
     this.on('error', console.error)
     this.reset()
     this.on('auth', (ev: ServerAuthEvent) => {
-      if (ev.data.status === ServerAuthStatus.OK) {
+      if (ev.data.status === ServerAuthStatuses.Ok) {
         while (this.__queue.length) {
           this.emit(this.__queue.shift()! as string)
         }
@@ -338,7 +338,7 @@ export class ScreepsSocketClient extends EventEmitter {
       this.send(`auth ${token}`)
       this.once('auth', (event: ServerAuthEvent) => {
         const { data } = event
-        if (data.status === ServerAuthStatus.OK) {
+        if (data.status === ServerAuthStatuses.Ok) {
           this.authed = true
           this.emit('token', data.token)
           this.emit('authed')

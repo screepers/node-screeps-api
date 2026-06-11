@@ -19,7 +19,16 @@ export interface ServerAuthEventData {
   token: string
 }
 
-export enum ServerAuthStatus {
-  OK = 'ok',
-  FAILED = 'failed'
-}
+/**
+ * Possible outcomes of a {@link ServerAuthEvent}.
+ *
+ * Contained in {@link ServerAuthEventData}.
+ * @enum
+ */
+export const ServerAuthStatuses = {
+  Ok: 'ok',
+  Failed: 'failed'
+} as const
+
+/** A {@link ServerAuthStatuses} value */
+export type ServerAuthStatus = typeof ServerAuthStatuses[keyof typeof ServerAuthStatuses]

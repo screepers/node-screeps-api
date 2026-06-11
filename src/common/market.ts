@@ -1,4 +1,4 @@
-import { MarketResourceConstant, ResourceConstant } from './resources'
+import { MarketResource, Resource } from './resources'
 
 /**
  * Defines types/constants/enums/etc related to the
@@ -14,7 +14,7 @@ export interface Order {
   user: string
   active: boolean
   type: 'buy' | 'sell'
-  resourceType: MarketResourceConstant
+  resourceType: MarketResource
   amount: number
   remainingAmount: number
   totalAmount: number
@@ -25,7 +25,7 @@ export interface Order {
 
 /** An {@link Order} for a non-account-bound resource */
 export interface ShardOrder extends Order {
-  resourceType: ResourceConstant
+  resourceType: Resource
   roomName: string
   /** Game time at which the order was created */
   created: number
@@ -34,7 +34,7 @@ export interface ShardOrder extends Order {
 /** An active order on the in-game market */
 export interface OpenOrder {
   type: 'buy' | 'sell'
-  resourceType: MarketResourceConstant
+  resourceType: MarketResource
   amount: number
   remainingAmount: number
   price: number

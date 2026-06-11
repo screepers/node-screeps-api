@@ -2,7 +2,7 @@ import readline from 'node:readline/promises'
 import { fileURLToPath } from 'node:url'
 // If installed from npm, use:
 // import { ... } from 'screeps-api'
-import { RoomEvent, RoomObject, RoomObjectConstant, UserConsoleEvent, UserCpuEvent, UserCpuEventData } from '../src'
+import { Resources, RoomEvent, RoomObject, RoomObjectConstant, RoomObjectConstants, UserConsoleEvent, UserCpuEvent, UserCpuEventData } from '../src'
 
 // Borrow API client instance and terminal I/O from the Console example
 import { api, output, rl, stripTags, quit } from './console'
@@ -37,14 +37,13 @@ const TERRAIN_GLYPHS: Readonly<{ [code: string]: string }> = {
   '2': '.' // swamp
 }
 
-/**
- * Glyphs used to represent each {@link RoomObject} type.
- *
- * ResourceConstant values are intentionally omitted because there are too
- * many to easily represent distinctly. Instead, missing values will be
- * null-coalesced to {@link RESOURCE_GLYPH}.
- */
-const OBJECT_GLYPHS: Readonly<Partial<{ [resType in RoomObjectConstant]: string }>> = {
+/** Glyphs used to represent each {@link RoomObject} type. */
+const OBJECT_GLYPHS: Readonly<{ [resType in RoomObjectConstant]: string }> = {
+  // Assign `r` to all dropped resources
+  ...Object.values(Resources).reduce(
+    (glyphs, resType) => { glyphs[resType] = 'r' ; return glyphs },
+    {} as { [resType in RoomObjectConstant]: string },
+  ),
   creep: 'c',
   powerCreep: 'p',
   deposit: 'D',
@@ -76,9 +75,13 @@ const OBJECT_GLYPHS: Readonly<Partial<{ [resType in RoomObjectConstant]: string 
   ruin: 'X',
   tombstone: 'x'
 };
-const RESOURCE_GLYPH = 'r';
 
-const GLYPH_RENDER_ORDER: Readonly<Partial<{ [resType in RoomObjectConstant]: number }>> = {
+const GLYPH_RENDER_ORDER: Readonly<{ [resType in RoomObjectConstant]: number }> = {
+  // Assign a default value
+  ...Object.values(RoomObjectConstants).reduce(
+    (glyphs, resType) => { glyphs[resType] = 50 ; return glyphs },
+    {} as { [resType in RoomObjectConstant]: number },
+  ),
   nuke: 5,
   container: 10,
   road: 10,
@@ -107,7 +110,6 @@ const GLYPH_RENDER_ORDER: Readonly<Partial<{ [resType in RoomObjectConstant]: nu
   creep: 200,
   powerCreep: 200
 }
-const DEFAULT_GLYPH_ORDER = 50;
 
 async function changeRoom (newRoomName: string) {
   // If on an official server, normalize room names by prepending shard names
@@ -157,8 +159,8 @@ async function updateRoomObjects (event: RoomEvent) {
 
     // Assign RenderedObject properties
     const obj = objects[id]
-    obj.glyph = OBJECT_GLYPHS[obj.type] ?? RESOURCE_GLYPH
-    obj.glyphOrder = GLYPH_RENDER_ORDER[obj.type] ?? DEFAULT_GLYPH_ORDER
+    obj.glyph = OBJECT_GLYPHS[obj.type]
+    obj.glyphOrder = GLYPH_RENDER_ORDER[obj.type]
   }
 
   // // Clear old objects:
@@ -208,7 +210,6 @@ async function render () {
     await rlOut.commit()
     output.write(obj.glyph)
   }
-
 }
 
 async function renderStats () {

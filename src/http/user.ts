@@ -1,4 +1,4 @@
-import { MarketResourceConstant } from '../common/resources'
+import { MarketResource } from '../common/resources'
 import { RoomStat } from '../common/rooms'
 import { User } from '../common/users'
 import { ScreepsResponse } from './base'
@@ -37,14 +37,28 @@ export interface UserWorldStartRoomResponse extends ScreepsResponse {
  * @see {@link ScreepsHttpClient.userWorldStatus}
  */
 export interface UserWorldStatusResponse extends ScreepsResponse {
-  /**
-   * - Normal: user has one or more active spawns
-   * - Lost: user has no active spawns
-   * - Empty: user has just entered the world or respawned
-   *    and has yet to place a spawn
-   */
-  status: 'normal' | 'lost' | 'empty'
+  status: UserWorldStatus
 }
+
+/**
+ * A user's status on the server. This is used to determine whether
+ * or not they may claim a room or place a spawn directly (to spawn/respawn).
+ * @enum
+ */
+export const UserWorldStatuses = {
+  /** User has just entered the world or respawned and has yet to place a spawn */
+  Empty: 'empty',
+  /** User has one or more active spawns */
+  Normal: 'normal',
+  /**
+   * User has no active spawns and may respawn immediately
+   * (except in a room contained in {@link UserRespawnProhibitedRoomsResponse}).
+   */
+  Lost: 'lost'
+} as const
+
+/** Any {@link UserWorldStatuses} value */
+export type UserWorldStatus = typeof UserWorldStatuses[keyof typeof UserWorldStatuses]
 
 /**
  * `GET /api/user/branches` response
@@ -204,7 +218,7 @@ export interface MoneyHistoryExtendOrder {
  * {@link https://docs.screeps.com/api/#Game.market.deal | Game.market.deal()}.
  */
 export interface MoneyHistoryFillOrder {
-  resourceType: MarketResourceConstant
+  resourceType: MarketResource
   roomName?: string
   targetRoomName?: string
   /** ID of the user who created the order */
@@ -224,7 +238,7 @@ export interface MoneyHistoryFillOrder {
 export interface MoneyHistoryNewOrder {
   order: {
     type: 'buy' | 'sell'
-    resourceType: MarketResourceConstant
+    resourceType: MarketResource
     price: number
     totalAmount: number
     roomName?: string

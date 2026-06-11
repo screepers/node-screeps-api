@@ -50,10 +50,14 @@ export interface LeaderboardSeasonsResponse extends ScreepsResponse {
 /**
  * The types of leaderboard available via the leaderboard endpoints
  * (ex: {@link ScreepsHttpClient.leaderboardList})
+ * @enum
  */
-export enum LeaderboardMode {
+export const LeaderboardModes = {
   /** "Power Processed" (as used to earn Global Power Level) leaderboard */
-  Power = 'power',
+  Power: 'power',
   /** "Control Points" (as used to earn Global Control Level) leaderboard */
-  World = 'world'
-}
+  World: 'world'
+} as const
+
+/** A {@link LeaderboardModes} value */
+export type LeaderboardMode = typeof LeaderboardModes[keyof typeof LeaderboardModes]

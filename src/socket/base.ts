@@ -7,6 +7,11 @@ import { RoomObject } from '../common/rooms'
 
 /**
  * Parsed version of a message received from the server via the WebSocket API.
+ *
+ * Unless you are writing code that genuinely should be able to process any
+ * Screeps WebSocket API event, this type should not be used directly.
+ * Instead, extend the interface and define stricter types for these fields.
+ * If you do create a sub-interface, please consider submitting a PR.
  */
 export interface SocketEvent {
   type: string

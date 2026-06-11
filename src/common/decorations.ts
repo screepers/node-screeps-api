@@ -26,15 +26,21 @@ export interface DecorationInstance<P extends string = string> {
   deactivatedAt?: string
 }
 
-/** Enumerates all possible {@link Decoration.type} values */
-export enum DecorationType {
-  Badge = 'badge',
-  Creep = 'creep',
-  FloorLandscape = 'floorLandscape',
-  Graffiti = 'wallGraffiti',
-  Object = 'object',
-  WallLandscape = 'wallLandscape'
-}
+/**
+ * Enumerates all possible {@link Decoration.type} values
+ * @enum
+ */
+export const DecorationTypes = {
+  Badge: 'badge',
+  Creep: 'creep',
+  FloorLandscape: 'floorLandscape',
+  Graffiti: 'wallGraffiti',
+  Object: 'object',
+  WallLandscape: 'wallLandscape'
+} as const
+
+/** A {@link DecorationTypes} value */
+export type DecorationType = typeof DecorationTypes[keyof typeof DecorationTypes]
 
 /** Properties common to all decoration types */
 export interface DecorationBase {
@@ -103,18 +109,24 @@ export interface DecorationProperty {
   readonly: boolean
 }
 
-/** All possible {@link DecorationProperty} types */
-export enum DecorationPropertyType {
-  Boolean = 'boolean',
-  Color = 'color',
-  Number = 'number',
-  Range = 'range',
-  String = 'string'
-}
+/**
+ * All possible {@link DecorationProperty} types
+ * @enum
+ */
+export const DecorationPropertyTypes = {
+  Boolean: 'boolean',
+  Color: 'color',
+  Number: 'number',
+  Range: 'range',
+  String: 'string'
+} as const
+
+/** A {@link DecorationPropertyTypes} value */
+export type DecorationPropertyType = typeof DecorationPropertyTypes[keyof typeof DecorationPropertyTypes]
 
 /** A configurable boolean property of a {@link Decoration} */
 export interface BooleanProperty extends DecorationProperty {
-  type: DecorationPropertyType.Boolean
+  type: 'boolean'
   default: boolean
 }
 
@@ -124,14 +136,14 @@ export interface BooleanProperty extends DecorationProperty {
  * It should accept any valid web color value.
  */
 export interface ColorProperty extends DecorationProperty {
-  type: DecorationPropertyType.Color
+  type: 'color'
   /** Web color format */
   default: string
 }
 
 /** A configurable number property of a {@link Decoration} */
 export interface NumberProperty extends DecorationProperty {
-  type: DecorationPropertyType.Number
+  type: 'number'
   default: number
 }
 
@@ -140,7 +152,7 @@ export interface NumberProperty extends DecorationProperty {
  * values within a defined range.
  */
 export interface RangeProperty extends DecorationProperty {
-  type: DecorationPropertyType.Range
+  type: 'range'
   min: number
   max: number
   default: number
@@ -148,6 +160,6 @@ export interface RangeProperty extends DecorationProperty {
 
 /** A configurable string property of a {@link Decoration} */
 export interface StringProperty extends DecorationProperty {
-  type: DecorationPropertyType.String
+  type: 'string'
   default: string
 }

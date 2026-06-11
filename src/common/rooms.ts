@@ -1,10 +1,71 @@
-import { DepositResourceConstant, MineralBoostConstant, MineralCompoundConstant, MineralResourceConstant, ResourceConstant } from './resources'
+import { DepositResource, MineralBoostResource, MineralCompoundResource, MineralResource, Resource, Resources } from './resources'
 
 /**
  * Defines types/constants/enums/etc related to in-game objects that exist
  * within rooms.
  * @module
  */
+
+/**
+ * Describes all possible types of {@link Structure}s that can be built
+ * by a player and associated with a {@link ConstructionSite}
+ * @enum
+ */
+export const BuildableStructureConstants = {
+  Container: 'container',
+  Controller: 'controller',
+  Extension: 'extension',
+  Extractor: 'extractor',
+  Factory: 'factory',
+  Lab: 'lab',
+  Link: 'link',
+  Nuker: 'nuker',
+  Observer: 'observer',
+  PowerSpawn: 'powerSpawn',
+  Rampart: 'rampart',
+  Road: 'road',
+  Spawn: 'spawn',
+  Storage: 'storage',
+  Terminal: 'terminal',
+  Tower: 'tower',
+  Wall: 'constructedWall'
+} as const
+
+export type BuildableStructureConstant = typeof BuildableStructureConstants[keyof typeof BuildableStructureConstants]
+
+/**
+ * Describes all possible types of {@link Structure}s that can exist in the game world.
+ * @enum
+ */
+export const StructureConstants = {
+  ...BuildableStructureConstants,
+  InvaderCore: 'invaderCore',
+  KeeperLair: 'keeperLair',
+  Portal: 'portal',
+  PowerBank: 'powerBank'
+} as const
+
+export type StructureConstant = typeof StructureConstants[keyof typeof StructureConstants]
+
+/**
+ * Represents any possible entity that can physically exist in the game world.
+ * @enum
+ */
+export const RoomObjectConstants = {
+  ConstructionSite: 'constructionSite',
+  Creep: 'creep',
+  Deposit: 'deposit',
+  Mineral: 'mineral',
+  Nuke: 'nuke',
+  PowerCreep: 'powerCreep',
+  Source: 'source',
+  Ruin: 'ruin',
+  Tombstone: 'tombstone',
+  ...StructureConstants,
+  ...Resources
+} as const
+
+export type RoomObjectConstant = typeof RoomObjectConstants[keyof typeof RoomObjectConstants]
 
 export interface RoomObject extends Position {
   _id: string
@@ -24,45 +85,6 @@ export interface Effect {
   /** Tick at which this effect will end */
   endTime: number
 }
-
-export type RoomObjectConstant
-  = | 'constructionSite'
-    | 'creep'
-    | 'deposit'
-    | 'mineral'
-    | 'nuke'
-    | 'powerCreep'
-    | 'source'
-    | 'ruin'
-    | 'tombstone'
-    | StructureConstant
-    | ResourceConstant
-
-export type BuildableStructureConstant
-  = | 'constructedWall'
-    | 'container'
-    | 'controller'
-    | 'extension'
-    | 'extractor'
-    | 'factory'
-    | 'lab'
-    | 'link'
-    | 'nuker'
-    | 'observer'
-    | 'powerSpawn'
-    | 'rampart'
-    | 'road'
-    | 'spawn'
-    | 'storage'
-    | 'terminal'
-    | 'tower'
-
-export type StructureConstant
-  = | BuildableStructureConstant
-    | 'invaderCore'
-    | 'keeperLair'
-    | 'portal'
-    | 'powerBank'
 
 // Creeps
 
@@ -101,22 +123,27 @@ export interface Creep extends AnyCreep {
     name: BodyPartConstant
     hits: number
     $name: string
-    boost?: MineralBoostConstant
+    boost?: MineralBoostResource
   }[]
   fatigue: number
 }
 
-/** Possible body part types that may be added to a {@link Creep} */
-export enum BodyPartConstant {
-  ATTACK = 'attack',
-  CARRY = 'carry',
-  CLAIM = 'claim',
-  HEAL = 'heal',
-  MOVE = 'move',
-  RANGED_ATTACK = 'rangedAttack',
-  TOUGH = 'tough',
-  WORK = 'work'
-}
+/**
+ * Possible body part types that may be added to a {@link Creep}
+ * @enum
+ */
+export const BodyPartConstants = {
+  Attack: 'attack',
+  Carry: 'carry',
+  Claim: 'claim',
+  Heal: 'heal',
+  Move: 'move',
+  RangedAttack: 'rangedAttack',
+  Tough: 'tough',
+  Work: 'work'
+} as const
+
+export type BodyPartConstant = typeof BodyPartConstants[keyof typeof BodyPartConstants]
 
 /**
  * Power Creeps are immortal "heroes" that are tied to your account and
@@ -150,10 +177,16 @@ export interface PowerCreep extends AnyCreep {
   shard: string
 }
 
-/** Enumeration of all known classes of {@link PowerCreep}s */
-export enum PowerCreepClass {
-  OPERATOR = 'operator'
-}
+/**
+ * A {@link PowerCreep} archetype. Each has a unique set of powers.
+ * @enum
+ */
+export const PowerCreepClasses = {
+  Operator: 'operator'
+} as const
+
+/** A {@link PowerCreepClasses} value */
+export type PowerCreepClass = typeof PowerCreepClasses[keyof typeof PowerCreepClasses]
 
 // Structures
 
@@ -263,7 +296,7 @@ export interface StructureInvaderCore extends Structure, HasHits, HasOwner {
   decayTime?: number
   /** Tick at which this L1+ core and its stronghold will activate */
   deployTime?: number | null
-  depositType?: DepositResourceConstant
+  depositType?: DepositResource
   level: number
   /** Tick at which this L1+ core will deploy another L0 core */
   nextExpandTime?: number
@@ -299,7 +332,7 @@ export interface StructureLab extends
   Structure,
   HasHits,
   HasOwner,
-  HasRestrictedStore<'energy' | MineralResourceConstant | MineralCompoundConstant>
+  HasRestrictedStore<'energy' | MineralResource | MineralCompoundResource>
 {
   type: 'lab'
   actionLog: {
@@ -500,7 +533,7 @@ export interface Deposit extends RoomObject {
   cooldownTime: number
   /** Tick at which this object will disappear */
   decayTime: number
-  depositType: DepositResourceConstant
+  depositType: DepositResource
   /** Amount harvested from this deposit */
   harvested: number
 }
@@ -515,7 +548,7 @@ export interface Mineral extends RoomObject {
   type: 'mineral'
   density: 1 | 2 | 3 | 4
   mineralAmount: number
-  mineralType: MineralResourceConstant
+  mineralType: MineralResource
   /** Tick at which this resource will be refilled */
   nextRegenerationTime: number
 }
@@ -627,12 +660,12 @@ export interface Store {
 
 /** A {@link RoomObject} with a general-purpose {@link Store}. */
 export interface HasStore {
-  store: { [resType in ResourceConstant]: number | undefined }
+  store: { [resType in Resource]: number | undefined }
   storeCapacity: number
 }
 
 /** A {@link RoomObject} with a limited {@link Store} */
-export interface HasRestrictedStore<R extends ResourceConstant> {
+export interface HasRestrictedStore<R extends Resource> {
   store: { [resType in R]: number }
   /**
    * Capacities should not be null, except on minerals in a lab
@@ -678,63 +711,87 @@ export interface Flag {
   y: number
 }
 
-/** {@link Flag} colors */
-export enum FlagColor {
-  Red = 1,
-  Purple = 2,
-  Blue = 3,
-  Cyan = 4,
-  Green = 5,
-  Yellow = 6,
-  Orange = 7,
-  Brown = 8,
-  Grey = 9,
-  White = 10
-}
+/**
+ * {@link Flag} colors
+ * @enum
+ */
+export const FlagColors = {
+  Red: 1,
+  Purple: 2,
+  Blue: 3,
+  Cyan: 4,
+  Green: 5,
+  Yellow: 6,
+  Orange: 7,
+  Brown: 8,
+  Grey: 9,
+  White: 10
+} as const
 
-/** @see https://docs.screeps.com/api/#Game.map.getRoomStatus */
-export enum RoomStatus {
-  Closed = 'closed',
-  Normal = 'normal',
-  Novice = 'novice',
-  Respawn = 'respawn'
-}
+/** A {@link FlagColors} value */
+export type FlagColor = typeof FlagColors[keyof typeof FlagColors]
 
-/** Stats that are tracked for each user on a room-level basis */
-export enum RoomStat {
+/**
+ * @see https://docs.screeps.com/api/#Game.map.getRoomStatus
+ * @enum
+ */
+export const RoomStatuses = {
+  Closed: 'closed',
+  Normal: 'normal',
+  Novice: 'novice',
+  Respawn: 'respawn'
+} as const
+
+/** A {@link RoomStatuses} value */
+export type RoomStatus = typeof RoomStatuses[keyof typeof RoomStatuses]
+
+/**
+ * Stats that are tracked for each user on a room-level basis
+ * @enum
+ */
+export const RoomStats = {
   /**
    * Total body part count of a user's creeps that died violently.
    *
    * Creeps that expired, were recycled, or called `Creep.suicide()`
    * are not counted.
    */
-  CreepsLost = 'creepsLost',
+  CreepsLost: 'creepsLost',
   /** Total body part count of creeps spawned by a user */
-  CreepsProduced = 'creepsProduced',
+  CreepsProduced: 'creepsProduced',
   /** Total energy a user spent on `Creep.build()` and `Creep.repair()` actions */
-  EnergyConstruction = 'energyConstruction',
+  EnergyConstruction: 'energyConstruction',
   /**
    * Global Control Level (GCL) progress a user gained via `Creep.upgrade()`
    * actions. This includes the effects of any upgrade boosts.
    */
-  EnergyControl = 'energyControl',
+  EnergyControl: 'energyControl',
   /** Total energy a user spent spawning and renewing creeps */
-  EnergyCreeps = 'energyCreeps',
+  EnergyCreeps: 'energyCreeps',
   /**
    * Total energy removed from a {@link Source} via `Creep.harvest()`
    * (includes boosts)
    */
-  EnergyHarvested = 'energyHarvested',
+  EnergyHarvested: 'energyHarvested',
   /**
    * Global Power Level (GPL) progress earned by a user via
    * `PowerSpawn.processPower()`
    */
-  PowerProcessed = 'powerProcessed'
-}
+  PowerProcessed: 'powerProcessed'
+} as const
 
-/** A time interval (in minutes) that can be used to query room stats */
-export enum RoomStatInterval {
-  HOUR = 8,
-  DAY = 180,
-  WEEK = 1440
-}
+/** A {@link RoomStats} value */
+export type RoomStat = typeof RoomStats[keyof typeof RoomStats]
+
+/**
+ * A time interval (in minutes) that can be used to query room stats
+ * @enum
+ */
+export const RoomStatIntervals = {
+  Hour: 8,
+  Day: 180,
+  Week: 1440
+} as const
+
+/** A {@link RoomStatIntervals} value */
+export type RoomStatInterval = typeof RoomStatIntervals[keyof typeof RoomStatIntervals]

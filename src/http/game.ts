@@ -1,5 +1,5 @@
 import { DecorationInstance } from '../common/decorations'
-import { BuildableStructureConstant, RoomObject, RoomObjectConstant, RoomStat, RoomStatInterval, RoomStatus } from '../common/rooms'
+import { BuildableStructureConstant, RoomObject, RoomObjectConstant, RoomStat, RoomStatInterval, RoomStats, RoomStatus } from '../common/rooms'
 import { UserBadge, Users } from '../common/users'
 import { ScreepsResponse } from './base'
 
@@ -9,10 +9,24 @@ import { ScreepsResponse } from './base'
  */
 
 /**
+ * Stats that can be used with the `POST /api/game/map-stats` endpoint
+ * @enum
+ */
+export const MapStats = {
+  /** Owner's username and Room Control Level (RCL) */
+  Owner: 'owner0',
+  /** Whether or not a room can be claimed */
+  Claim: 'claim0',
+  ...RoomStats
+} as const
+
+export type MapStat = typeof MapStats[keyof typeof MapStats]
+
+/**
  * `POST /api/game/map-stats` response
  * @see {@link ScreepsHttpClient.gameMapStats}
  */
-export interface GameMapStatsResponse<S extends MapOrRoomStat = MapStat.Claim> extends ScreepsResponse {
+export interface GameMapStatsResponse<S extends MapStat = 'owner0'> extends ScreepsResponse {
   gameTime: number
   stats: {
     [roomName: string]: GameMapStatsRoom & {
@@ -163,18 +177,22 @@ export interface UnencodedRoomTerrain {
   x: number
   y: number
   /** Plain terrain is represented as an omission */
-  type: Exclude<RoomTerrain, RoomTerrain.Plain>
+  type: Exclude<RoomTerrain, 'plain'>
 }
 
 /**
  * Room terrain types in a human-readable format
  * @see {@link UnencodedRoomTerrain} and {@link GameRoomTerrainUnencodedResponse}
+ * @enum
  */
-export enum RoomTerrain {
-  Plain = 'plain',
-  Swamp = 'swamp',
-  Wall = 'wall'
-}
+export const RoomTerrainTypes = {
+  Plain: 'plain',
+  Swamp: 'swamp',
+  Wall: 'wall'
+} as const
+
+/** A {@link RoomTerrainTypes} value */
+export type RoomTerrain = typeof RoomTerrainTypes[keyof typeof RoomTerrainTypes]
 
 /**
  * `GET /api/game/room-status` response
@@ -219,14 +237,3 @@ export interface GameRoomOverviewResponse extends ScreepsResponse {
   /** Total values for each non-zero stat (stats with 0 totals are undefined) */
   totals: { [statId in RoomStat]: number | undefined }
 }
-
-/** Stats that can only be used with the `POST /api/game/map-stats` endpoint */
-export enum MapStat {
-  /** Owner's username and Room Control Level (RCL) */
-  Owner = 'owner0',
-  /** Whether or not a room can be claimed */
-  Claim = 'claim0'
-}
-
-/** Stats that can be used with the `POST /api/game/map-stats` endpoint */
-export type MapOrRoomStat = MapStat | RoomStat

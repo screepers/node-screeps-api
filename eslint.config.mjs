@@ -69,6 +69,10 @@ export default defineConfig(
         'error',
         { allowIndentedSections: true }
       ],
+      'jsdoc/check-tags': [
+        'error',
+        { definedTags: ['enum'] }
+      ],
       'jsdoc/require-returns': [
         'error',
         {

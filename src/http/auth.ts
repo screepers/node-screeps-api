@@ -1,6 +1,7 @@
-import { IntershardResourceConstant } from '../common/resources'
+import { IntershardResource } from '../common/resources'
 import { UserBadge, CpuShardLimits } from '../common/users'
 import { ScreepsResponse } from './base'
+import { UserNotifyPrefsRequest } from './user'
 
 /**
  * Used with HTTP API endpoints on the `/api/auth` path
@@ -43,13 +44,7 @@ export interface AuthMeResponse extends ScreepsResponse {
   lastTweetTime?: number
   /** Player's current credit balance; use this instead of {@link credits} */
   money: number
-  notifyPrefs: {
-    sendOnline?: boolean
-    errorsInterval?: boolean
-    disabledOnMessages?: boolean
-    disabled?: boolean
-    interval?: unknown
-  }
+  notifyPrefs: UserNotifyPrefsRequest
   /** True if password authentication is configured */
   password?: boolean
   /** Lifetime power processed by this player */
@@ -65,7 +60,7 @@ export interface AuthMeResponse extends ScreepsResponse {
    */
   powerExperimentationTime?: number
   /** Intrashard / account-bound resource types and amounts owned */
-  resources: { [resType in IntershardResourceConstant]: number | undefined; }
+  resources: { [resType in IntershardResource]: number | undefined; }
   restrictedAccessUntil: unknown
   /** Steam SSO account data */
   steam?: {

@@ -5,11 +5,17 @@ import { RoomObject } from '../common/rooms'
  * @module
  */
 
-/** HTTP request methods/verbs used with Screeps API endpoints */
-export enum ScreepsHttpMethod {
-  GET = 'GET',
-  POST = 'POST'
-}
+/**
+ * HTTP request methods/verbs used with Screeps API endpoints
+ * @enum
+ */
+export const ScreepsHttpMethods = {
+  Get: 'GET',
+  Post: 'POST'
+} as const
+
+/** A {@link ScreepsHttpMethods} value */
+export type ScreepsHttpMethod = typeof ScreepsHttpMethods[keyof typeof ScreepsHttpMethods]
 
 /**
  * Body of a HTTP API success response.
