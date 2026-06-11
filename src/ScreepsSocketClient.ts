@@ -12,6 +12,8 @@ const debug = Debug('screepsapi:socket')
 
 const inflateAsync = utils.promisify(zlib.inflate)
 
+const decoder = new TextDecoder('utf-8', { fatal: true })
+
 /**
  * Configuration options for {@link ScreepsSocketClient}.
  * These are provided when calling {@link ScreepsSocketClient.connect}.
@@ -175,7 +177,7 @@ export class ScreepsSocketClient extends EventEmitter {
         this.emit('error', err)
         reject(err)
       })
-      this.ws.on('message', data => void this.handleMessage(data as unknown as string))
+      this.ws.on('message', data => void this.handleMessage(data))
     })
   }
 
@@ -240,11 +242,16 @@ export class ScreepsSocketClient extends EventEmitter {
    * then emit events to notify the relevant subscribers.
    * @param rawMsg The raw message content sent by the server
    */
-  private async handleMessage(rawMsg: string | { data: string }) {
+  private async handleMessage(rawMsg: WebSocket.Data | { data: string }) {
+    // Decode buffers to UTF-8 strings
+    const decodedMsg = ((rawMsg instanceof ArrayBuffer || rawMsg instanceof Buffer)
+      ? decoder.decode(rawMsg)
+      : rawMsg) as string | { data: string }
+
     // Normalize message contents across ws/browser APIs
-    let msg = typeof rawMsg === 'object' && ('data' in rawMsg)
-      ? rawMsg.data
-      : rawMsg
+    let msg = typeof decodedMsg === 'object' && ('data' in decodedMsg)
+      ? decodedMsg.data
+      : decodedMsg
 
     // Decompress message if gzipped
     if (msg.startsWith('gz:')) {
@@ -323,7 +330,7 @@ export class ScreepsSocketClient extends EventEmitter {
   /**
    * Authenticate to the server. This is called automatically after a
    * connection is successfully established.
-   * @param token the API token with which to authenticate
+   * @param token The API token with which to authenticate
    */
   private async auth(token: string) {
     return await new Promise<void>((resolve, reject) => {
@@ -347,46 +354,62 @@ export class ScreepsSocketClient extends EventEmitter {
 
   /**
    * Subscribe to an event type.
-   * @param event The name of the event (ex: 'console', 'room:ROOM_NAME')
+   * @param eventSpec The name of the event (ex: `console`, `room:${roomName}`).
+   *  Non-colon-delimited strings will be prefixed with `user:${yourUserId}`.
    * @param cb The callback to trigger when a relevant message is received.
    *  This can be left undefined to resubscribe to an event using a
    *  previously-registered callback.
    */
   // TODO: Add overloads with stronger cb type restrictions for known event type/path combos
-  async subscribe<E extends SocketEvent>(event: string, cb?: (event: E) => void) {
-    if (!event) return
-    const userID = (await this.api.me())._id
-    if (!(/^(\w+):(.+?)$/.exec(event))) {
-      event = `user:${userID}/${event}`
+  async subscribe<E extends SocketEvent>(eventSpec: string, cb?: (event: E) => void) {
+    if (!eventSpec) {
+      debug('subscribe() called with no event')
+      return
     }
+    eventSpec = await this.normalizeEvent(eventSpec)
+
     if (this.authed) {
-      this.send(`subscribe ${event}`)
+      this.send(`subscribe ${eventSpec}`)
     } else {
-      this.__subQueue.push(`subscribe ${event}`)
+      this.__subQueue.push(`subscribe ${eventSpec}`)
     }
-    this.emit('subscribe', event)
-    this.__subs[event] = this.__subs[event] || 0
-    this.__subs[event]++
-    if (cb) this.on(event, cb)
+    this.emit('subscribe', eventSpec)
+    this.__subs[eventSpec] ||= 0
+    this.__subs[eventSpec]++
+    if (cb) this.on(eventSpec, cb)
   }
 
   /**
    * Unsubscribe from an event type.
-   * @param event The name of the event (ex: 'console', 'room:ROOM_NAME')
-   * @param cb The callback to unsubscribe.
+   * @param eventSpec The type of event to subscribe to (ex: 'console', 'room:ROOM_NAME').
+   *  Non-colon-delimited strings will be prefixed with `user:${yourUserId}`.
+   * @param cb The callback to unregister. Regardless of whether or not a callback
+   *  is provided, the `unsubscribe` message will be sent.
    */
   // TODO: Add overloads with stronger cb type restrictions for known event type/path combos
-  async unsubscribe<E extends SocketEvent>(event: string, cb?: (event: E) => void) {
-    if (!event) return
-    const userID = (await this.api.me())._id
-    if (!(/^(\w+):(.+?)$/.exec(event))) {
-      event = `user:${userID}/${event}`
+  async unsubscribe<E extends SocketEvent>(eventSpec: string, cb?: (event: E) => void) {
+    if (!eventSpec) {
+      debug('unsubscribe() called with no event')
+      return
     }
+    eventSpec = await this.normalizeEvent(eventSpec)
+
     // Unsubscribe is always sent (instead of just at `this.__subs[event] <= 0)
     // because the server handles subscriber counting already.
-    this.send(`unsubscribe ${event}`)
-    this.emit('unsubscribe', event)
-    if (this.__subs[event]) this.__subs[event]--
-    if (cb) this.off(event, cb)
+    this.send(`unsubscribe ${eventSpec}`)
+    this.emit('unsubscribe', eventSpec)
+    if (+this.__subs[eventSpec] > 0) this.__subs[eventSpec]--
+    if (cb) this.off(eventSpec, cb)
+  }
+
+  private async normalizeEvent(eventSpec: string): Promise<string> {
+    // If event string looks like a fully-formed event type/ID spec, do nothing
+    if (/^(\w+):(.+?)$/.exec(eventSpec)) {
+      return eventSpec
+    }
+
+    // Otherwise, prepend user and user ID
+    const userId = (await this.api.me())._id
+    return `user:${userId}/${eventSpec}`
   }
 }
