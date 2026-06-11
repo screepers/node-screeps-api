@@ -1,12 +1,12 @@
 ---
 title: Examples
-group: Examples
+category: Examples
 children:
 - ./console.md
 - ./download-code.md
 - ./download-memory.md
 - ./socket-demo.md
-- ./text-client.md
+- ./terminal-client.md
 ---
 **Warning:** These examples may be outdated and plain broken.
 

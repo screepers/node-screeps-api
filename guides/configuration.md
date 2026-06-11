@@ -1,8 +1,6 @@
 ---
 title: Configuration and Credential Files
-group: Guides
-category:
-- Configuration
+category: Guides
 ---
 This guide provides an overview of how to load credentials and configuration options for {@link ScreepsHttpClient} and {@link ScreepsSocketClient}.
 

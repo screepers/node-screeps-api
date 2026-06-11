@@ -1,8 +1,6 @@
 ---
 title: HTTP API Rate Limits
-group: Guides
-category:
-- HTTP API
+category: Guides
 ---
 A global rate limit of 120 requests per minute (2 requests per second) applies
 to requests made to any endpoint. Requests that fail due to this rate limit

@@ -1,10 +1,6 @@
 ---
 title: Debugging
-group: Guides
-category:
-- Configuration
-- HTTP API
-- WebSocket API
+category: Guides
 ---
 ## Event Logging
 

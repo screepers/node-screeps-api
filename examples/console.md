@@ -1,10 +1,6 @@
 ---
 title: Interact with the Console
-group: Examples
-category:
-- Console
-- HTTP API
-- WebSocket API
+category: Examples
 ---
 This example uses the WebSocket API to stream console output and the HTTP API
 to evaluate expressions on the console.

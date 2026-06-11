@@ -1,8 +1,5 @@
 ---
 title: WebSocket API Demo
-group: Examples
-category:
-- Console
-- WebSocket API
+category: Examples
 ---
 {@includeCode socket-demo.ts}

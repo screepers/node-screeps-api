@@ -1,8 +1,6 @@
 ---
 title: WebSocket API Endpoints
-group: Guides
-category:
-- WebSocket API
+category: Guides
 ---
 Currently known endpoints are listed below.
  * This list is clearly not exhaustive and comes from empirical observations.

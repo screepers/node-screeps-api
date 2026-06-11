@@ -1,9 +1,6 @@
 ---
 title: Official and Unofficial Servers
-group: Guides
-category:
-- HTTP API
-- WebSocket API
+category: Guides
 ---
 Screeps servers can be loosely grouped into two categories:
 

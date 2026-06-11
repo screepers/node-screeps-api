@@ -1,9 +1,6 @@
 ---
 title: Monitor Code Changes
-group: Examples
-category:
-- Code
-- WebSocket API
+category: Examples
 ---
 This example uses the WebSocket API to monitor changes to the user's code.
 

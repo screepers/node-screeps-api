@@ -1,10 +1,6 @@
 ---
 title: v2 Migration Guide
-group: Guides
-category:
-- Configuration
-- HTTP API
-- WebSocket API
+category: Guides
 ---
 This guide provides an overview of how to migrate your application to `node-screeps-api` v2 from v1.
 

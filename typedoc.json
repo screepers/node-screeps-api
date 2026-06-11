@@ -2,7 +2,7 @@
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": ["src/index.ts"],
   "projectDocuments": [
-    "guides/*.md",
+    "guides/index.md",
     "examples/index.md"
   ],
   "outputs": [
