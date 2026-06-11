@@ -126,6 +126,6 @@ Commands:
 
 Check the [docs](https://screepers.github.io/node-screeps-api/) for a detailed list of supported endpoints:
 * HTTP API: [`ScreepsHttpClient`](https://screepers.github.io/node-screeps-api/docs/classes/index.ScreepsHttpClient.html)
-* WebSocket API: [`ScreepsSocketClient`](https://screepers.github.io/node-screeps-api/docs/classes/index.ScreepsSocketClient.html) for web socket endpoints
+* WebSocket API: [`ScreepsSocketClient`](https://screepers.github.io/node-screeps-api/docs/classes/index.ScreepsSocketClient.html)
 
 Please note that the listed endpoints and WebSocket events are not exhaustive.

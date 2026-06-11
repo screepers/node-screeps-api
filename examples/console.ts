@@ -2,26 +2,46 @@ import readline from 'node:readline'
 import util from 'node:util'
 // If installed from npm, use:
 // import { ScreepsHttpClient } from 'screeps-api'
-import { ScreepsHttpClient, ServerAuthEvent, ServerAuthStatus } from '../src'
+import { ScreepsHttpClient, ServerAuthEvent, ServerAuthStatus, UserConsoleEvent } from '../src'
+
+// Run this with DEBUG=screepsapi:socket to enable debug logging
+
+// Load server/app names from env vars
+const serverName = process.env.SCREEPS_SERVER ?? 'main'
+const appName = process.env.SCREEPS_APP ?? 'example'
+const api = await ScreepsHttpClient.fromConfig(serverName, { client: appName })
+
 
 const input = process.stdin
 const output = process.stdout
 const rl = readline.createInterface({
   input,
   output,
-  prompt: 'Screeps> '
+  prompt: `${api.appConfig.defaultShard ?? ''}> `
 })
 
-const api = await ScreepsHttpClient.fromConfig('main')
+// Monkeypatch console to work with readline.Interface
+const rlLog = function (...args: unknown[]) {
+  const t = Math.ceil((rl.line.length + 3) / process.stdout.columns)
+  const text = util.format.apply(console, args)
+  output.write('\n\x1B[' + t + 'A\x1B[0J')
+  output.write(text + '\n')
+  output.write(new Array(t).join('\n\x1B[E'))
+  rl.prompt(true)
+}
 
-function start () {
-  return new Promise((_resolve, _reject) => {
-    run()
-    api.socket.on('connected', () => {
-      console.log('start')
-      rl.prompt()
-    })
-  })
+console.log = rlLog
+console.debug = rlLog
+console.info = rlLog
+console.warn = rlLog
+console.error = rlLog
+
+/**
+ * Strip HTML tags from a string to make it more readable.
+ * This is not suitable for sanitizing untrusted input.
+ */
+function stripTags (text: string): string {
+  return text.replaceAll(/<\s*?\/?\s*?\w+?(?:[\w\s=]+?'[^>]*'?|[\w\s=]+?"[^>]*"?|[\w\s=]+?`[^>]*`?|[\w\s]+?)*>/g, '')
 }
 
 function quit () {
@@ -29,54 +49,42 @@ function quit () {
   process.exit()
 }
 
-function run () {
-  rl.on('line', (line) => {
-    line = line.trim()
-    if (line == 'exit') {
-      quit()
-    }
-    api.userConsole(line)
-  })
+rl.on('line', (line) => {
+  line = line.trim()
+  if (line == 'exit') {
+    quit()
+  }
 
-  rl.on('close', quit)
+  api.userConsole(line).catch(console.error)
+})
 
-  api.socket.on('auth', (event: ServerAuthEvent) => {
-    if (event.data.status === ServerAuthStatus.OK) {
-      api.socket.subscribe('/console')
-      console.log('Console connected')
-    } else {
-      console.error(`WebSocket API authentication failed`)
-    }
-  })
+rl.on('close', quit)
+rl.on('SIGINT', quit)
 
-  api.on('console', (msg) => {
-    let [_user, data] = msg
-    if (data.messages) data.messages.log.forEach((l: string) => console.log(l))
-    if (data.messages) data.messages.results.forEach((l: string) => console.log('>', l))
-    if (data.error) console.log(data.error.red)
-  })
-}
+api.socket.on('connected', () => {
+  console.log('Console connected')
+  rl.prompt()
+})
 
-// Console fix
-var fu = function (_type: unknown, args: unknown[]) {
-  var t = Math.ceil((rl.line.length + 3) / process.stdout.columns)
-  var text = util.format.apply(console, args)
-  output.write('\n\x1B[' + t + 'A\x1B[0J')
-  output.write(text + '\n')
-  output.write(new Array(t).join('\n\x1B[E'))
-}
+api.socket.on('auth', (event: ServerAuthEvent) => {
+  if (event.data.status === ServerAuthStatus.OK) {
+    api.socket.subscribe('/console')
+    console.log('Console authenticated')
+  } else {
+    console.error(`WebSocket API authentication failed`)
+  }
+})
 
-console.log = function (...args: unknown[]) {
-  fu('log', args)
-}
-console.warn = function (...args: unknown[]) {
-  fu('warn', args)
-}
-console.info = function (...args: unknown[]) {
-  fu('info', args)
-}
-console.error = function (...args: unknown[]) {
-  fu('error', args)
-}
+api.socket.subscribe('console', (event: UserConsoleEvent) => {
+  const { messages, error, shard } = event.data
+  const shardTag = shard ? `[${shard}]` : undefined
 
-start()
+  if (error) console.error(shardTag, error)
+  if (!messages) return
+
+  messages.log.forEach((msg: string) => console.log(shardTag, stripTags(msg)))
+  messages.results.forEach((msg: string) => console.log('<', msg))
+})
+
+console.debug('Console connecting')
+api.socket.connect()
