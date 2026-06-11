@@ -9,7 +9,7 @@
 [![Test Status](https://github.com/screepers/node-screeps-api/actions/workflows/test.yml/badge.svg)](https://github.com/screepers/node-screeps-api/actions/workflows/test.yml)
 [![Lint Status](https://github.com/screepers/node-screeps-api/actions/workflows/lint.yml/badge.svg)](https://github.com/screepers/node-screeps-api/actions/workflows/lint.yml)
 
-![npm](https://nodei.co/npm/screeps-api.png "NPM")
+[![npm](https://nodei.co/npm/screeps-api.png)](https://npmjs.com/package/screeps-api)
 
 ## Application Usage
 
@@ -103,7 +103,7 @@ api.socket.subscribe('memory/rooms.E0N0', (event) => {
 
 As of v1.7, a small CLI program (`screeps-api`) is included.
 
-Server/auth credentials are located using `ScreepsConfigManager.loadConfig()`.
+Server/auth credentials are located using `ScreepsConfigManager.loadConfig()`. All commands aside from `help` accept a `--server <name>` option to specify the name of the server to use from your config file.
 
 ```
 $ screeps-api
@@ -129,3 +129,35 @@ Check the [docs](https://screepers.github.io/node-screeps-api/) for a detailed l
 * WebSocket API: [`ScreepsSocketClient`](https://screepers.github.io/node-screeps-api/docs/classes/index.ScreepsSocketClient.html)
 
 Please note that the listed endpoints and WebSocket events are not exhaustive.
+
+## Development
+
+This project uses the `yarn` package manager. To ensure you're using the correct version instead of v1.x:
+
+```sh
+set corepack enable
+yarn install
+# You may need to run the command after installing Yarn for the first time
+# in order to install dependencies
+yarn install
+```
+
+### Configuration
+
+The [documentation](https://screepers.github.io/node-screeps-api/documents/Configuration_and_Credential_Files.html) goes into detail on how to set up configuration, but the simplest way to get started is to copy a `screeps.yaml` or `screeps.json` file to the repo root directory.
+
+### Running Scripts
+
+`tsx` is used to execute TypeScript scripts without performing a full build to transpile them:
+
+```sh
+# Run an example script
+yarn exec tsx examples/console.ts
+
+# Run the screeps-api CLI tool
+yarn exec tsx bin/screeps-api.ts call version
+
+# package.json defines a cli script to make testing the CLI more convenient.
+# The following command is functionally identical to the previous one:
+yarn cli call version
+```
