@@ -250,10 +250,11 @@ export class ScreepsConfigManager {
       const appConfigs = (parsed as ScreepsYamlConfig).configs
       const appConfig = appConfigs?.[appName]
 
-      if (typeof appConfig !== 'object') {
+      if (typeof appConfig === 'object') {
         Object.assign(client, appConfig)
       } else {
-        debug(`Could not find client config "${appName}"; using defaults`)
+        const appNames = Object.keys(appConfigs ?? {}).join(', ')
+        debug(`Could not find client config "${appName}"; using defaults; clients defined in this config: ${appNames}`)
       }
 
       return client
