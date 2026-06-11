@@ -5,8 +5,8 @@ import { EventEmitter } from 'node:events'
 import { setTimeout } from 'node:timers/promises'
 import utils from 'node:util'
 import zlib from 'zlib'
-import { RateLimit, RateLimitTracker } from './RateLimitTracker'
 import { DEFAULT_CLIENT_CONFIG, LoadConfigOptions, ScreepsClientConfig, ScreepsConfigManager, ScreepsHttpConfig, ScreepsRawServerConfig, ScreepsServerConfig } from './ScreepsConfigManager'
+import { RateLimit, ScreepsRateLimitTracker } from './ScreepsRateLimitTracker'
 import { ScreepsSocketClient } from './ScreepsSocketClient'
 import { BuildableStructureConstant, CpuShardLimits, FlagColor, MarketResourceConstant, RoomStat, RoomStatInterval, UserBadge, UserCodeModules } from './common'
 import * as Http from './http'
@@ -211,7 +211,7 @@ export class ScreepsHttpClient extends EventEmitter {
   }
 
   appConfig: ScreepsClientConfig
-  readonly rateLimits: RateLimitTracker
+  readonly rateLimits: ScreepsRateLimitTracker
   readonly socket: ScreepsSocketClient
 
   /**
@@ -255,7 +255,7 @@ export class ScreepsHttpClient extends EventEmitter {
     this._token = config.server.token
     this._http = axios.create({ baseURL: config.server.url })
 
-    this.rateLimits = new RateLimitTracker()
+    this.rateLimits = new ScreepsRateLimitTracker()
 
     this.socket = new ScreepsSocketClient(this)
   }

@@ -7,7 +7,7 @@ const debugRateLimit = Debug('screepsapi:ratelimit')
  * Rate limit state for an individual HTTP API endpoint.
  *
  * This relevant state for a given endpoint can be looked up via
- * {@link RateLimitTracker.find}.
+ * {@link ScreepsRateLimitTracker.find}.
  */
 export interface RateLimit extends RateLimitUpdate {
   /** Time period to which the {@link limit} applies. */
@@ -43,7 +43,7 @@ export enum RateLimitPeriod {
  * {@link ScreepsHttpClient.rateLimits}.
  * @document ../guides/rate-limits.md
  */
-export class RateLimitTracker {
+export class ScreepsRateLimitTracker {
   readonly global: RateLimit
   readonly GET: { [path: string]: RateLimit }
   readonly POST: { [path: string]: RateLimit }
