@@ -62,6 +62,7 @@ export const DEFAULT_SOCKET_CONFIG = {
 /**
  * Provides access to the Screeps WebSocket API.
  * @document ../guides/websocket.md
+ * @hideconstructor
  * @see {@link ScreepsHttpClient} for the HTTP API client
  */
 export class ScreepsSocketClient extends EventEmitter {
