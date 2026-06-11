@@ -63,9 +63,66 @@ export const DEFAULT_SOCKET_CONFIG = {
  * Provides access to the Screeps WebSocket API.
  * @document ../guides/websocket.md
  * @hideconstructor
+ * @showGroups
  * @see {@link ScreepsHttpClient} for the HTTP API client
  */
 export class ScreepsSocketClient extends EventEmitter {
+  /**
+   * Sent after a connection is established and authentication has been attempted.
+   * @event {@link ServerAuthEvent} The response to the authentication request
+   */
+  static readonly AUTH = 'auth'
+
+  /**
+   * Sent after successful authentication to the server.
+   * @event undefined
+   */
+  static readonly AUTHED = 'authed'
+
+  /**
+   * Sent after a connection is established, but before authentication.
+   * @event undefined
+   */
+  static readonly CONNECTED = 'connected'
+
+  /**
+   * Sent after a connection is established, but before automatic reconnection
+   * is attempted.
+   * @event undefined
+   */
+  static readonly DISCONNECTED = 'disconnected'
+
+  /**
+   * Sent when an error is emitted by the WebSocket library.
+   * @event unknown - An error value or object
+   */
+  static readonly ERROR = 'error'
+
+  /**
+   * Sent when any message is received from the server.
+   * @event {@link SocketEvent} The received message after it has been parsed
+   *  into an event object
+   */
+  static readonly MESSAGE = 'message'
+
+  /**
+   * Sent after subscribing to an event on the server.
+   * @event string - The subscribed event type
+   */
+  static readonly SUBSCRIBE = 'subscribe'
+
+  /**
+   * Sent when a new API authentication token has been obtained.
+   * @event string - The API auth token
+   */
+  static readonly TOKEN = 'token'
+
+  /**
+   * Sent after unsubscribing from an event on the server.
+   * @event string - The unsubscribed event type
+   */
+  static readonly UNSUBSCRIBE = 'unsubscribe'
+
   api: ScreepsHttpClient
   opts: ScreepsSocketConfig
   ws?: WebSocket
@@ -151,31 +208,31 @@ export class ScreepsSocketClient extends EventEmitter {
         if (this.opts.resubscribe) {
           this.__subQueue.push(...Object.keys(this.__subs))
         }
-        debug('connected')
-        this.emit('connected')
+        debug(ScreepsSocketClient.CONNECTED)
+        this.emit(ScreepsSocketClient.CONNECTED)
         resolve(this.auth(this.api.token!))
       })
       this.ws.on('close', () => {
         clearInterval(this.keepAliveInter)
         this.authed = false
         this.connected = false
-        debug('disconnected')
-        this.emit('disconnected')
+        debug(ScreepsSocketClient.DISCONNECTED)
+        this.emit(ScreepsSocketClient.DISCONNECTED)
         if (this.opts.reconnect) {
           this.reconnect().catch(() => { /* error emitted in reconnect() */ })
         }
       })
       this.ws.on('error', (err) => {
         this.ws?.terminate()
-        this.emit('error', err)
-        debug(`error ${err}`)
+        this.emit(ScreepsSocketClient.ERROR, err)
+        debug(`${ScreepsSocketClient.ERROR} ${err}`)
         if (!this.connected) {
           reject(err)
         }
       })
       this.ws.on('unexpected-response', (req, res) => {
         const err = new Error(`WS Unexpected Response: ${res.statusCode} ${res.statusMessage}`)
-        this.emit('error', err)
+        this.emit(ScreepsSocketClient.ERROR, err)
         reject(err)
       })
       this.ws.on('message', data => void this.handleMessage(data))
@@ -190,7 +247,9 @@ export class ScreepsSocketClient extends EventEmitter {
    *
    * Up to {@link ScreepsSocketConfig.maxRetries} connections will be attempted
    * with exponential backoff.
-   * @throws {@link node!Error | Error} if the maximum number of retry attempts is exceeded
+   * @throws {@link node!Error | Error} if the maximum number of retry attempts is exceeded.
+   *  The same error instance will also be fired as an {@link ScreepsSocketClient.ERROR}
+   *  event payload.
    */
   async reconnect() {
     if (this.reconnecting) {
@@ -217,7 +276,7 @@ export class ScreepsSocketClient extends EventEmitter {
       const err = new Error(`Reconnection failed after ${this.opts.maxRetries} retries`)
       this.reconnecting = false
       debug('reconnect failed')
-      this.emit('error', err)
+      this.emit(ScreepsSocketClient.ERROR, err)
       throw err
     } else {
       // Resume existing subscriptions on the new socket
@@ -235,7 +294,7 @@ export class ScreepsSocketClient extends EventEmitter {
       this.ws.terminate()
     }
     this.reset()
-    this.emit('disconnected')
+    this.emit(ScreepsSocketClient.DISCONNECTED)
   }
 
   /**
@@ -271,7 +330,7 @@ export class ScreepsSocketClient extends EventEmitter {
       }
       this.emit(msgData[0], event)
       this.emit(path, event)
-      this.emit('message', event)
+      this.emit(ScreepsSocketClient.MESSAGE, event)
       return
     }
 
@@ -288,7 +347,7 @@ export class ScreepsSocketClient extends EventEmitter {
       event.data = { [path]: data[0] }
     }
     this.emit(path, event)
-    this.emit('message', event)
+    this.emit(ScreepsSocketClient.MESSAGE, event)
   }
 
   private async inflate(data: string): Promise<unknown> {
@@ -340,8 +399,8 @@ export class ScreepsSocketClient extends EventEmitter {
         const { data } = event
         if (data.status === ServerAuthStatuses.Ok) {
           this.authed = true
-          this.emit('token', data.token)
-          this.emit('authed')
+          this.emit(ScreepsSocketClient.TOKEN, data.token)
+          this.emit(ScreepsSocketClient.AUTHED)
           while (this.__subQueue.length) {
             this.send(this.__subQueue.shift()!)
           }
@@ -374,7 +433,7 @@ export class ScreepsSocketClient extends EventEmitter {
     } else {
       this.__subQueue.push(`subscribe ${eventSpec}`)
     }
-    this.emit('subscribe', eventSpec)
+    this.emit(ScreepsSocketClient.SUBSCRIBE, eventSpec)
     this.__subs[eventSpec] ||= 0
     this.__subs[eventSpec]++
     if (cb) this.on(eventSpec, cb)
@@ -398,7 +457,7 @@ export class ScreepsSocketClient extends EventEmitter {
     // Unsubscribe is always sent (instead of just at `this.__subs[event] <= 0)
     // because the server handles subscriber counting already.
     this.send(`unsubscribe ${eventSpec}`)
-    this.emit('unsubscribe', eventSpec)
+    this.emit(ScreepsSocketClient.UNSUBSCRIBE, eventSpec)
     if (+this.__subs[eventSpec] > 0) this.__subs[eventSpec]--
     if (cb) this.off(eventSpec, cb)
   }
