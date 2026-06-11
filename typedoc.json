@@ -10,6 +10,7 @@
       "name": "html",
       "path": "./docs",
       "options": {
+        "favicon": "https://icon.horse/icon/screeps.com",
         "markdownLinkExternal": true,
         "sourceLinkExternal": true,
         "navigationLinks": {
