@@ -102,7 +102,7 @@ export class ScreepsConfigManager {
    * @param serverName the name of the server to use from the credential file
    * @param opts see {@link LoadConfigOptions}
    * @returns a valid {@link ScreepsHttpConfig} if one was found
-   * @throws {Error} if a file exists but the contents are invalid/malformed
+   * @throws {@link node!Error | Error} if a file exists but the contents are invalid/malformed
    */
   async loadConfig(
     serverName: string,

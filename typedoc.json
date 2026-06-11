@@ -20,10 +20,16 @@
       }
     }
   ],
+  "alwaysCreateEntryPointModule": false,
   "externalSymbolLinkMappings": {
     "axios": {
-      "AxiosResponse": "axios.rest/pages/advanced/response-schema"
+      "AxiosResponse": "https://axios.rest/pages/advanced/response-schema"
+    },
+    "node": {
+      "Error": "https://nodejs.org/docs/latest-v24.x/api/errors.html#class-error"
     }
   },
-  "alwaysCreateEntryPointModule": false
+  "preservedTypeAnnotationTags": [
+    "@throws"
+  ]
 }

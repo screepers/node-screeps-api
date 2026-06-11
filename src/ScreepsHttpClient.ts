@@ -194,7 +194,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * @param serverName The property name of the server object to use from the config file
    * @param opts See {@link LoadConfigOptions}
    * @returns A configured and authenticated {@link ScreepsHttpClient} instance
-   * @throws {Error} if the selected config file is invalid or if no config files are found
+   * @throws {@link node!Error | Error} if the selected config file is invalid or if no config files are found
    */
   static async fromConfig(serverName: string, opts?: LoadConfigOptions): Promise<ScreepsHttpClient> {
     const config = await configManager.loadConfig(serverName, opts)
@@ -299,9 +299,9 @@ export class ScreepsHttpClient extends EventEmitter {
    * @param tick Tick for which history should be fetched
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
-   * @throws {ScreepsApiError} if history is unsupported or the requested chunk is missing
+   * @throws {@link ScreepsApiError} if history is unsupported or the requested chunk is missing
    * - HTTP 500: this is an unofficial server that does not record room history
    * - HTTP 404: the requested history chunk does not exist
    * @see {@link version} returns the history chunk size to expect
@@ -328,7 +328,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * This endpoint does not require authentication.
    *
    * Endpoint: `POST /api/servers/list`
-   * @throws {Error} HTTP 404 if used on an unofficial server
+   * @throws {@link ScreepsApiError} HTTP 404 if used on an unofficial server
    * @category Endpoints: /servers
    */
   serversList(): Promise<Http.ServerListResponse> {
@@ -380,7 +380,7 @@ export class ScreepsHttpClient extends EventEmitter {
    *
    * Endpoint: `GET /api/auth/query-token`
    * @param token The API token for which permissions should be queried
-   * @throws {Error} if the token is invalid / not recognized.
+   * @throws {@link ScreepsApiError} if the token is invalid / not recognized.
    * @see {@link ScreepsHttpClient.token} for the API token currently in use by this client
    * @category Endpoints: /auth
    */
@@ -461,7 +461,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * @param statName The type of stat to fetch. See {@link Http.MapStat}.
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -487,7 +487,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * @param type The type of object for which to generate the name (ex: "flag" or "spawn")
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -509,9 +509,9 @@ export class ScreepsHttpClient extends EventEmitter {
    * @param name The name to check
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server.
-   *  Also throws an error if the object name is already in use.
+   * @throws {@link ScreepsApiError} if the object name is already in use.
    * @category Endpoints: /game
    */
   gameCheckUniqueObjectName(type: string, name: string, shard?: string): Promise<Http.ScreepsResponse> {
@@ -536,7 +536,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * @param name An optional name to assign to the placed spawn
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -567,7 +567,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * @returns A generic MongoDB upsert response:
    * - If the name is new, `result.upserted[0]._id` is the game id of the created flag
    * - If not, this moves the flag and the response does not contain the ID (but the ID doesn't change)
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -596,7 +596,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * Endpoint: `POST /api/game/gen-unique-flag-name`
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -618,7 +618,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * @param name The name to check
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server.
    *  Also throws an error if the flag name is already in use.
    * @category Endpoints: /game
@@ -639,7 +639,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * @param secondaryColor The color of the right side of the flag
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -663,7 +663,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * @param name The name of the flag to remove
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -687,7 +687,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * @param intent JSON string describing the target(s) of the intent (for actions like 'heal' or 'build')
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @example remove flag: name = "remove", intent = {}
    * @example destroy structure: _id = "room", name = "destroyStructure", intent = [ {id: <structure id>, roomName, <room name>, user: <user id>} ]
@@ -728,7 +728,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    *  This should be undefined unless `structureType` is 'spawn'.
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -755,7 +755,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param enabled `true` to enable notifications, or `false` to disable notifications
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -791,7 +791,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param boosted If `true`, the invader will be spawned with boosted parts.
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -821,7 +821,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param _id The ID of the invader creep to remove
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -839,7 +839,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * Endpoint: `GET /api/game/time`
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -857,7 +857,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * Endpoint: `GET /api/game/world-size`
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -876,7 +876,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param room The name of the room
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -895,7 +895,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param room The name of the room
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -914,7 +914,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param room The name of the room
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @see {@link gameRoomTerrainUnencoded} for an alternative response format
    * @category Endpoints: /game
@@ -934,7 +934,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param room The name of the room
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @see {@link gameRoomTerrain} for an alternative response format
    * @category Endpoints: /game
@@ -954,7 +954,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param room The name of the room
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -977,7 +977,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * - 1440: 24 hours each; 8 days total
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game
    */
@@ -1001,7 +1001,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * Endpoint: `GET /api/game/market/orders-index`
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game/market
    */
@@ -1043,7 +1043,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param resourceType Any {@link MarketResourceConstant | resource type}
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /game/market
    */
@@ -1131,7 +1131,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * when a seasonal world competition is active or about to start.
    *
    * Endpoint: `GET /api/seasons/current`
-   * @throws {ScreepsApiError} HTTP 404 if called on an unofficial server
+   * @throws {@link ScreepsApiError} HTTP 404 if called on an unofficial server
    * @returns Metadata on the current season, or null if a seasonal world
    *  competition is not active or about to start
    * @category Endpoints: /seasons
@@ -1146,7 +1146,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * Endpoint: `POST /api/user/activate-ptr`
    * @returns an {@link Http.ScreepsResponse} on PTR, or an {@link Http.ScreepsErrorResponse}
    *  (`{ error: 'not ptr' }`) on official servers that are not PTR.
-   * @throws {ScreepsApiError} HTTP 404 on unofficial servers
+   * @throws {@link ScreepsApiError} HTTP 404 on unofficial servers
    * @category Endpoints: /user
    */
   userActivatePtr(): Promise<Http.ScreepsResponse | Http.ScreepsErrorResponse> {
@@ -1416,7 +1416,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    *  If undefined/empty, returns the entire Memory object.
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /user/memory
    */
@@ -1439,7 +1439,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    *  completely replace the previous value.
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /user/memory
    */
@@ -1460,7 +1460,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    *  specified in a single string by separating the IDs with commas.
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @example
    * // Fetch a single segment
@@ -1499,7 +1499,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    *  serialized on the server side.
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /user/memory/segment
    */
@@ -1661,7 +1661,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param expression The JavaScript expression to evaluate.
    * @param shard The name of the shard to use (ignored by unofficial servers).
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
-   * @throws {Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
+   * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
    * @category Endpoints: /user
    */
@@ -2000,7 +2000,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * for all endpoints.
    *
    * The generated URL is specific to the API token currently in use.
-   * @throws {Error} if no API token is available.
+   * @throws {@link node!Error | Error} if no API token is available.
    */
   get rateLimitResetUrl() {
     if (!this.token) throw new Error('API token not found')

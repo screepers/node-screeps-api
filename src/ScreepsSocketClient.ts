@@ -131,7 +131,7 @@ export class ScreepsSocketClient extends EventEmitter {
    *
    * If successful, any queued messages will be sent automatically.
    * @param opts WebSocket API client options. See {@link ScreepsSocketConfig}.
-   * @throws {Error} if an API token is not available due to missing auth credentials
+   * @throws {@link node!Error | Error} if an API token is not available due to missing auth credentials
    */
   async connect(opts?: Partial<ScreepsSocketConfig>) {
     Object.assign(this.opts, opts ?? {})
@@ -189,7 +189,7 @@ export class ScreepsSocketClient extends EventEmitter {
    *
    * Up to {@link ScreepsSocketConfig.maxRetries} connections will be attempted
    * with exponential backoff.
-   * @throws {Error} if the maximum number of retry attempts is exceeded
+   * @throws {@link node!Error | Error} if the maximum number of retry attempts is exceeded
    */
   async reconnect() {
     if (this.reconnecting) {
