@@ -1,5 +1,5 @@
 ---
-title: Configuration / Credential Files
+title: Configuration and Credential Files
 group: Guides
 category:
 - Configuration

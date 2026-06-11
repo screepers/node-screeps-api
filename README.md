@@ -17,7 +17,7 @@ As of v1.0, all endpoint methods are asynchronous.
 
 ```typescript
 import { ScreepsHttpClient } from 'screeps-api'
-import fs from 'node:fs'
+import { writeFile } from 'node:fs/promises'
 
 // Supports @tedivm's [Unified Credentials File format](https://github.com/screepers/screepers-standards/blob/34bd4e6e5c8250fa0794d915d9f78d3c45326076/SS3-Unified_Credentials_File.md) (Pending [screepers-standard PR #8](https://github.com/screepers/screepers-standards/pull/8))
 const api = await ScreepsHttpClient.fromConfig('main', { client: 'appName' })
@@ -31,19 +31,19 @@ console.log(api.appConfig.myConfigVar)
 // Dump entire Memory object to a file
 api.userMemoryGet()
   .then(memory => {
-    fs.writeFileSync('memory.json', JSON.stringify(memory))
+    writeFile('memory.json', JSON.stringify(memory), { encoding: 'utf-8' })
   })
   .catch(console.error)
 
 // Dump a subset of Memory to a file
 api.userMemoryGet('rooms.W0N0')
   .then((memory) => {
-    fs.writeFileSync('memory.rooms.W0N0.json', JSON.stringify(memory))
+    writeFile('memory.rooms.W0N0.json', JSON.stringify(memory), { encoding: 'utf-8' })
   })
   .catch(console.error)
 
 // Get user info
-api.authMe().then((user) => console.log(user))
+api.authMe().then(console.log)
 
 // Download and upload code
 api.userCodeGet('default').then((data) => console.log('code', data))
