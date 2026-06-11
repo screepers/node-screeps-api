@@ -3,6 +3,10 @@ on:
   push:
     branches:
     - master
+  # TODO: Delete after testing
+  pull_request:
+    branches:
+    - master
 
 # Prohibit concurrent workflows
 concurrency:
@@ -15,7 +19,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      pages: write
     steps:
     - uses: actions/checkout@v6
     - run: corepack enable
@@ -35,6 +38,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
     needs: build
     steps:
     - id: deployment
