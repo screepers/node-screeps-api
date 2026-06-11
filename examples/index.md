@@ -6,6 +6,7 @@ children:
 - ./download-code.md
 - ./download-memory.md
 - ./socket-demo.md
+- ./text-client.md
 ---
 **Warning:** These examples may be outdated and plain broken.
 

@@ -150,13 +150,30 @@ export interface GameRoomTerrainEncodedResponse extends ScreepsResponse {
  * @see {@link ScreepsHttpClient.gameRoomTerrainUnencoded}
  */
 export interface GameRoomTerrainUnencodedResponse extends ScreepsResponse {
-  /** Unlisted positions are of type `plain` */
-  terrain: {
-    room: string
-    x: number
-    y: number
-    type: 'swamp' | 'wall'
-  }[]
+  /** Omitted positions are of type `plain` */
+  terrain: UnencodedRoomTerrain[]
+}
+
+/**
+ * Non-plain terrain data for a single room position
+ * @see {@link GameRoomTerrainUnencodedResponse}
+ */
+export interface UnencodedRoomTerrain {
+  room: string
+  x: number
+  y: number
+  /** Plain terrain is represented as an omission */
+  type: Exclude<RoomTerrain, RoomTerrain.Plain>
+}
+
+/**
+ * Room terrain types in a human-readable format
+ * @see {@link UnencodedRoomTerrain} and {@link GameRoomTerrainUnencodedResponse}
+ */
+export enum RoomTerrain {
+  Plain = 'plain',
+  Swamp = 'swamp',
+  Wall = 'wall'
 }
 
 /**

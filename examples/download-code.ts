@@ -5,6 +5,7 @@ import path from 'node:path'
 import { ScreepsHttpClient, ServerAuthEvent, ServerAuthStatus, UserCodeEvent } from '../src'
 
 const api = await ScreepsHttpClient.fromConfig('main')
+api.socket.connect()
 
 api.socket.on('auth', (event: ServerAuthEvent) => {
   if (event.data.status === ServerAuthStatus.OK) {
