@@ -2011,7 +2011,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
   /**
    * Fetch and memoize information about the authenticated user.
    * @returns If using an API token with full permissions, {@link Http.AuthMeResponse}.
-   *  Otherwise the result it {@link Http.UserInfo}.
+   *  Otherwise the result is {@link Http.UserInfo}.
    */
   async me(): Promise<Http.AuthMeResponse | Http.UserInfo> {
     if (this._user) return this._user
