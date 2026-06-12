@@ -84,9 +84,18 @@ export interface UserFindResponse extends ScreepsResponse {
 
 /** A result from {@link UserFindResponse} */
 export interface UserInfo extends User {
-  /** Total control points earned by this user */
-  gcl: number
-  /** Total power processed by this user */
+  /**
+   * Total Global Control Level (GCL) progress/points earned by this user.
+   *
+   * Undefined if the user has no GCL progress/points.
+   */
+  gcl?: number
+  /**
+   * Total power processed by this user; used to determine the user's
+   * Global Power Level (GPL).
+   *
+   * Undefined if the user has never processed power.
+   */
   power?: number
   /** User's linked Steam account (if public) */
   steam?: {
