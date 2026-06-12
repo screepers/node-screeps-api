@@ -1,15 +1,10 @@
 import { DepositResource, MineralBoostResource, MineralCompoundResource, MineralResource, Resource, Resources } from './resources'
 
 /**
- * Defines types/constants/enums/etc related to in-game objects that exist
- * within rooms.
- * @module
- */
-
-/**
  * Describes all possible types of {@link Structure}s that can be built
  * by a player and associated with a {@link ConstructionSite}
  * @enum
+ * @category Common - Rooms
  */
 export const BuildableStructureConstants = {
   Container: 'container',
@@ -31,11 +26,16 @@ export const BuildableStructureConstants = {
   Wall: 'constructedWall'
 } as const
 
+/**
+ * A {@link BuildableStructureConstants} value
+ * @category Common - Rooms
+ */
 export type BuildableStructureConstant = typeof BuildableStructureConstants[keyof typeof BuildableStructureConstants]
 
 /**
  * Describes all possible types of {@link Structure}s that can exist in the game world.
  * @enum
+ * @category Common - Rooms
  */
 export const StructureConstants = {
   ...BuildableStructureConstants,
@@ -45,11 +45,16 @@ export const StructureConstants = {
   PowerBank: 'powerBank'
 } as const
 
+/**
+ * A {@link StructureConstants} value
+ * @category Common - Rooms
+ */
 export type StructureConstant = typeof StructureConstants[keyof typeof StructureConstants]
 
 /**
  * Represents any possible entity that can physically exist in the game world.
  * @enum
+ * @category Common - Rooms
  */
 export const RoomObjectConstants = {
   ConstructionSite: 'constructionSite',
@@ -65,8 +70,16 @@ export const RoomObjectConstants = {
   ...Resources
 } as const
 
+/**
+ * A {@link RoomObjectConstants} value
+ * @category Common - Rooms
+ */
 export type RoomObjectConstant = typeof RoomObjectConstants[keyof typeof RoomObjectConstants]
 
+/**
+ * An entity that exists within the game world
+ * @category Common - Rooms
+ */
 export interface RoomObject extends Position {
   _id: string
   type: RoomObjectConstant
@@ -76,7 +89,10 @@ export interface RoomObject extends Position {
   effects?: { [index: number]: Effect } | null
 }
 
-/** A temporary status effect applied to a {@link RoomObject} */
+/**
+ * A temporary status effect applied to a {@link RoomObject}
+ * @category Common - Rooms
+ */
 export interface Effect {
   /** An effect ID */
   effect: number
@@ -88,7 +104,10 @@ export interface Effect {
 
 // Creeps
 
-/** Common properties of {@link Creep}s and {@link PowerCreep}s */
+/**
+ * Common properties of {@link Creep}s and {@link PowerCreep}s
+ * @category Common - Rooms
+ */
 export interface AnyCreep extends RoomObject, HasHits, HasOwner, HasStore {
   type: 'creep' | 'powerCreep'
   name: string
@@ -101,6 +120,7 @@ export interface AnyCreep extends RoomObject, HasHits, HasOwner, HasStore {
  * attack another creeps, and perform other actions.
  *
  * https://docs.screeps.com/api/#Creep
+ * @category Common - Rooms
  */
 export interface Creep extends AnyCreep {
   type: 'creep'
@@ -131,6 +151,7 @@ export interface Creep extends AnyCreep {
 /**
  * Possible body part types that may be added to a {@link Creep}
  * @enum
+ * @category Common - Rooms
  */
 export const BodyPartConstants = {
   Attack: 'attack',
@@ -143,6 +164,10 @@ export const BodyPartConstants = {
   Work: 'work'
 } as const
 
+/**
+ * A {@link BodyPartConstants} value
+ * @category Common - Rooms
+ */
 export type BodyPartConstant = typeof BodyPartConstants[keyof typeof BodyPartConstants]
 
 /**
@@ -150,6 +175,7 @@ export type BodyPartConstant = typeof BodyPartConstants[keyof typeof BodyPartCon
  * can be respawned in any {@link StructurePowerSpawn | PowerSpawn} after death.
  *
  * https://docs.screeps.com/api/#PowerCreep
+ * @category Common - Rooms
  */
 export interface PowerCreep extends AnyCreep {
   type: 'powerCreep'
@@ -180,12 +206,16 @@ export interface PowerCreep extends AnyCreep {
 /**
  * A {@link PowerCreep} archetype. Each has a unique set of powers.
  * @enum
+ * @category Common - Rooms
  */
 export const PowerCreepClasses = {
   Operator: 'operator'
 } as const
 
-/** A {@link PowerCreepClasses} value */
+/**
+ * A {@link PowerCreepClasses} value
+ * @category Common - Rooms
+ */
 export type PowerCreepClass = typeof PowerCreepClasses[keyof typeof PowerCreepClasses]
 
 // Structures
@@ -194,6 +224,7 @@ export type PowerCreepClass = typeof PowerCreepClasses[keyof typeof PowerCreepCl
  * The base prototype object of all structures.
  *
  * https://docs.screeps.com/api/#Structure
+ * @category Common - Rooms
  */
 export interface Structure extends RoomObject {
   type: StructureConstant
@@ -204,6 +235,7 @@ export interface Structure extends RoomObject {
  * A small container that can be used to store resources.
  *
  * https://docs.screeps.com/api/#StructureContainer
+ * @category Common - Rooms
  */
 export interface StructureContainer extends Structure, HasHits, HasStore {
   type: 'container'
@@ -215,6 +247,7 @@ export interface StructureContainer extends Structure, HasHits, HasStore {
  * Claim this structure to take control over the room.
  *
  * https://docs.screeps.com/api/#StructureController
+ * @category Common - Rooms
  */
 export interface StructureController extends Structure, HasOwner {
   type: 'controller'
@@ -249,6 +282,7 @@ export interface StructureController extends Structure, HasOwner {
  * Contains energy which can be spent on spawning bigger creeps.
  *
  * https://docs.screeps.com/api/#StructureExtension
+ * @category Common - Rooms
  */
 export interface StructureExtension extends Structure, HasHits, HasOwner, HasRestrictedStore<'energy'> {
   type: 'extension'
@@ -259,6 +293,7 @@ export interface StructureExtension extends Structure, HasHits, HasOwner, HasRes
  * Allows creeps to harvest a mineral deposit.
  *
  * https://docs.screeps.com/api/#StructureExtractor
+ * @category Common - Rooms
  */
 export interface StructureExtractor extends Structure, HasHits, HasOwner {
   type: 'extractor'
@@ -269,6 +304,7 @@ export interface StructureExtractor extends Structure, HasHits, HasOwner {
  * Produces trade commodities from base minerals and other commodities.
  *
  * https://docs.screeps.com/api/#StructureFactory
+ * @category Common - Rooms
  */
 export interface StructureFactory extends Structure, HasHits, HasOwner, HasStore {
   type: 'extractor'
@@ -283,6 +319,7 @@ export interface StructureFactory extends Structure, HasHits, HasOwner, HasStore
  * This NPC structure is a control center of NPC Strongholds, and also rules all invaders in the sector.
  *
  * https://docs.screeps.com/api/#StructureInvaderCore
+ * @category Common - Rooms
  */
 export interface StructureInvaderCore extends Structure, HasHits, HasOwner {
   type: 'invaderCore'
@@ -316,6 +353,7 @@ export interface StructureInvaderCore extends Structure, HasHits, HasOwner {
  * Non-player structure. Spawns NPC Source Keepers that guards energy sources and minerals in some rooms.
  *
  * https://docs.screeps.com/api/#StructureKeeperLair
+ * @category Common - Rooms
  */
 export interface StructureKeeperLair extends Structure {
   type: 'keeperLair'
@@ -327,6 +365,7 @@ export interface StructureKeeperLair extends Structure {
  * Produces mineral compounds from base minerals, boosts and unboosts creeps.
  *
  * https://docs.screeps.com/api/#StructureLab
+ * @category Common - Rooms
  */
 export interface StructureLab extends
   Structure,
@@ -348,6 +387,7 @@ export interface StructureLab extends
  * Remotely transfers energy to another Link in the same room.
  *
  * https://docs.screeps.com/api/#StructureLink
+ * @category Common - Rooms
  */
 export interface StructureLink extends Structure, HasHits, HasOwner, HasRestrictedStore<'energy'> {
   type: 'link'
@@ -361,6 +401,7 @@ export interface StructureLink extends Structure, HasHits, HasOwner, HasRestrict
  * Launches a nuke to another room dealing huge damage to the landing area.
  *
  * https://docs.screeps.com/api/#StructureNuker
+ * @category Common - Rooms
  */
 export interface StructureNuker extends Structure, HasHits, HasOwner, HasRestrictedStore<'energy' | 'G'> {
   type: 'nuker'
@@ -371,6 +412,7 @@ export interface StructureNuker extends Structure, HasHits, HasOwner, HasRestric
  * Provides visibility into a distant room from your script.
  *
  * https://docs.screeps.com/api/#StructureObserver
+ * @category Common - Rooms
  */
 export interface StructureObserver extends Structure, HasHits, HasOwner {
   type: 'observer'
@@ -381,6 +423,7 @@ export interface StructureObserver extends Structure, HasHits, HasOwner {
  * A non-player structure. Instantly teleports your creeps to a distant room acting as a room exit tile.
  *
  * https://docs.screeps.com/api/#StructurePortal
+ * @category Common - Rooms
  */
 export interface StructurePortal extends Structure {
   type: 'portal'
@@ -397,13 +440,19 @@ export interface StructurePortal extends Structure {
   decayTime?: number
 }
 
-/** Destination of an intershard {@link StructurePortal} */
+/**
+ * Destination of an intershard {@link StructurePortal}
+ * @category Common - Rooms
+ */
 export interface IntershardDestination {
   room: string
   shard: string
 }
 
-/** Destination of an intrashard {@link StructurePortal} */
+/**
+ * Destination of an intrashard {@link StructurePortal}
+ * @category Common - Rooms
+ */
 export interface IntrashardDestination {
   room: string
   x: number
@@ -414,6 +463,7 @@ export interface IntrashardDestination {
  * Non-player structure. Contains power resource which can be obtained by destroying the structure.
  *
  * https://docs.screeps.com/api/#StructurePowerBank
+ * @category Common - Rooms
  */
 export interface StructurePowerBank extends Structure, HasHits {
   type: 'powerBank'
@@ -428,6 +478,7 @@ export interface StructurePowerBank extends Structure, HasHits {
  * Processes power into your account, and spawns power creeps with special unique powers.
  *
  * https://docs.screeps.com/api/#StructurePowerSpawn
+ * @category Common - Rooms
  */
 export interface StructurePowerSpawn extends Structure, HasHits, HasOwner, HasRestrictedStore<'energy' | 'power'> {
   type: 'powerSpawn'
@@ -437,6 +488,7 @@ export interface StructurePowerSpawn extends Structure, HasHits, HasOwner, HasRe
  * Blocks movement of hostile creeps, and defends your creeps and structures on the same tile.
  *
  * https://docs.screeps.com/api/#StructureRampart
+ * @category Common - Rooms
  */
 export interface StructureRampart extends Structure, HasHits, HasOwner {
   type: 'rampart'
@@ -448,6 +500,7 @@ export interface StructureRampart extends Structure, HasHits, HasOwner {
  * Decreases movement cost to 1. Using roads allows creating creeps with less MOVE body parts.
  *
  * https://docs.screeps.com/api/#StructureRoad
+ * @category Common - Rooms
  */
 export interface StructureRoad extends Structure, HasHits {
   type: 'road'
@@ -459,6 +512,7 @@ export interface StructureRoad extends Structure, HasHits {
  * Spawn is your colony center. This structure can create, renew, and recycle creeps.
  *
  * https://docs.screeps.com/api/#StructureSpawn
+ * @category Common - Rooms
  */
 export interface StructureSpawn extends Structure, HasHits, HasOwner, HasRestrictedStore<'energy'> {
   type: 'spawn'
@@ -477,6 +531,7 @@ export interface StructureSpawn extends Structure, HasHits, HasOwner, HasRestric
  * A structure that can store huge amount of resource units.
  *
  * https://docs.screeps.com/api/#StructureStorage
+ * @category Common - Rooms
  */
 export interface StructureStorage extends Structure, HasHits, HasOwner, HasStore {
   type: 'storage'
@@ -486,6 +541,7 @@ export interface StructureStorage extends Structure, HasHits, HasOwner, HasStore
  * Sends any resources to a Terminal in another room.
  *
  * https://docs.screeps.com/api/#StructureTerminal
+ * @category Common - Rooms
  */
 export interface StructureTerminal extends Structure, HasHits, HasOwner, HasStore {
   type: 'terminal'
@@ -496,6 +552,7 @@ export interface StructureTerminal extends Structure, HasHits, HasOwner, HasStor
  * Remotely attacks or heals creeps, or repairs structures. Can be targeted to any object in the room.
  *
  * https://docs.screeps.com/api/#StructureTower
+ * @category Common - Rooms
  */
 export interface StructureTower extends Structure, HasHits, HasOwner, HasRestrictedStore<'energy'> {
   type: 'tower'
@@ -512,6 +569,7 @@ export interface StructureTower extends Structure, HasHits, HasOwner, HasRestric
  * A site of a structure which is currently under construction.
  *
  * https://docs.screeps.com/api/#ConstructionSite
+ * @category Common - Rooms
  */
 export interface ConstructionSite extends RoomObject {
   type: 'constructionSite'
@@ -526,6 +584,7 @@ export interface ConstructionSite extends RoomObject {
  * Can be harvested by creeps with a WORK body part.
  *
  * https://docs.screeps.com/api/#Deposit
+ * @category Common - Rooms
  */
 export interface Deposit extends RoomObject {
   type: 'deposit'
@@ -543,6 +602,7 @@ export interface Deposit extends RoomObject {
  * the {@link StructureExtractor | extractor} structure.
  *
  * https://docs.screeps.com/api/#Mineral
+ * @category Common - Rooms
  */
 export interface Mineral extends RoomObject {
   type: 'mineral'
@@ -557,6 +617,7 @@ export interface Mineral extends RoomObject {
  * A nuke landing position. This object cannot be removed or modified.
  *
  * https://docs.screeps.com/api/#Nuke
+ * @category Common - Rooms
  */
 export interface Nuke extends RoomObject {
   type: 'nuke'
@@ -570,6 +631,7 @@ export interface Nuke extends RoomObject {
  * An energy source object. Can be harvested by creeps with a `WORK` body part.
  *
  * https://docs.screeps.com/api/#Source
+ * @category Common - Rooms
  */
 export interface Source extends RoomObject {
   type: 'source'
@@ -586,6 +648,7 @@ export interface Source extends RoomObject {
  * A destroyed structure. This is a walkable object.
  *
  * https://docs.screeps.com/api/#Ruin
+ * @category Common - Rooms
  */
 export interface Ruin extends RoomObject, HasOwner {
   type: 'ruin'
@@ -607,6 +670,7 @@ export interface Ruin extends RoomObject, HasOwner {
  * A remnant of dead creeps. This is a walkable object.
  *
  * https://docs.screeps.com/api/#Tombstone
+ * @category Common - Rooms
  */
 export interface Tombstone extends RoomObject, HasOwner {
   type: 'tombstone'
@@ -624,20 +688,27 @@ export interface Tombstone extends RoomObject, HasOwner {
 
 /**
  * A say action performed by a {@link Creep} or {@link PowerCreep}
+ * @category Common - Rooms
  */
 export interface SayAction {
   isPublic: boolean
   message: string
 }
 
-/** A {@link RoomObject} that can be damaged/destroyed */
+/**
+ * A {@link RoomObject} that can be damaged/destroyed
+ * @category Common - Rooms
+ */
 export interface HasHits {
   hits: number
   hitsMax: number
   notifyWhenAttacked: boolean
 }
 
-/** A {@link RoomObject} with an owner. The owner could be an NPC. */
+/**
+ * A {@link RoomObject} with an owner. The owner could be an NPC.
+ * @category Common - Rooms
+ */
 export interface HasOwner {
   /**
    * ID of the user who owns this object.
@@ -653,18 +724,25 @@ export interface HasOwner {
  * An object that can contain resources in its cargo.
  *
  * https://docs.screeps.com/api/#Store
+ * @category Common - Rooms
  */
 export interface Store {
   [resType: string]: number | undefined
 }
 
-/** A {@link RoomObject} with a general-purpose {@link Store}. */
+/**
+ * A {@link RoomObject} with a general-purpose {@link Store}.
+ * @category Common - Rooms
+ */
 export interface HasStore {
   store: { [resType in Resource]: number | undefined }
   storeCapacity: number
 }
 
-/** A {@link RoomObject} with a limited {@link Store} */
+/**
+ * A {@link RoomObject} with a limited {@link Store}
+ * @category Common - Rooms
+ */
 export interface HasRestrictedStore<R extends Resource> {
   store: { [resType in R]: number }
   /**
@@ -677,6 +755,7 @@ export interface HasRestrictedStore<R extends Resource> {
 /**
  * Indicates the position of an object within a known room
  * (which is why a room name field isn't included).
+ * @category Common - Rooms
  */
 export interface Position {
   x: number
@@ -686,6 +765,7 @@ export interface Position {
 /**
  * Indicates a start and end position within the same known room
  * (which is why a room name field isn't included).
+ * @category Common - Rooms
  */
 export interface StartEndPositions {
   x1: number
@@ -700,6 +780,7 @@ export interface StartEndPositions {
  *
  * While this interface seems to conform to {@link RoomObject}, it is not
  * included in results from {@link ScreepsHttpClient.gameRoomObjects}.
+ * @category Common - Rooms
  */
 export interface Flag {
   /** Unlike other `_id` fields, values are formatted as `flag_${name}` */
@@ -714,6 +795,7 @@ export interface Flag {
 /**
  * {@link Flag} colors
  * @enum
+ * @category Common - Rooms
  */
 export const FlagColors = {
   Red: 1,
@@ -728,12 +810,16 @@ export const FlagColors = {
   White: 10
 } as const
 
-/** A {@link FlagColors} value */
+/**
+ * A {@link FlagColors} value
+ * @category Common - Rooms
+ */
 export type FlagColor = typeof FlagColors[keyof typeof FlagColors]
 
 /**
  * @see https://docs.screeps.com/api/#Game.map.getRoomStatus
  * @enum
+ * @category Common - Rooms
  */
 export const RoomStatuses = {
   Closed: 'closed',
@@ -742,12 +828,16 @@ export const RoomStatuses = {
   Respawn: 'respawn'
 } as const
 
-/** A {@link RoomStatuses} value */
+/**
+ * A {@link RoomStatuses} value
+ * @category Common - Rooms
+ */
 export type RoomStatus = typeof RoomStatuses[keyof typeof RoomStatuses]
 
 /**
  * Stats that are tracked for each user on a room-level basis
  * @enum
+ * @category Common - Rooms
  */
 export const RoomStats = {
   /**
@@ -780,12 +870,16 @@ export const RoomStats = {
   PowerProcessed: 'powerProcessed'
 } as const
 
-/** A {@link RoomStats} value */
+/**
+ * A {@link RoomStats} value
+ * @category Common - Rooms
+ */
 export type RoomStat = typeof RoomStats[keyof typeof RoomStats]
 
 /**
  * A time interval (in minutes) that can be used to query room stats
  * @enum
+ * @category Common - Rooms
  */
 export const RoomStatIntervals = {
   Hour: 8,
@@ -793,5 +887,8 @@ export const RoomStatIntervals = {
   Week: 1440
 } as const
 
-/** A {@link RoomStatIntervals} value */
+/**
+ * A {@link RoomStatIntervals} value
+ * @category Common - Rooms
+ */
 export type RoomStatInterval = typeof RoomStatIntervals[keyof typeof RoomStatIntervals]

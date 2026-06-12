@@ -4,8 +4,8 @@
   "alwaysCreateEntryPointModule": false,
   "entryPoints": ["src/index.ts"],
   "projectDocuments": [
-    "guides/index.md",
-    "examples/index.md",
+    "guides/*.md",
+    "examples/*.md",
   ],
   // Output
   "outputs": [
@@ -16,6 +16,9 @@
   ],
   "favicon": "https://www.google.com/s2/favicons?sz=64&domain=screeps.com",
   "markdownLinkExternal": true,
+  "navigation": {
+    "includeCategories": true,
+  },
   "navigationLinks": {
     "Github": "http://github.com/screepers/node-screeps-api",
     "npm": "https://www.npmjs.com/package/screeps-api",
@@ -35,4 +38,11 @@
     "@event",
     "@throws",
   ],
+  // Organization
+  "categorizeByGroup": false,
+  "categoryOrder": [
+    "Guides",
+    "Examples",
+    "*",
+  ]
 }

@@ -1,13 +1,9 @@
 import { ScreepsResponse } from './base'
 
 /**
- * Used with HTTP API endpoints on the `/api/game/shards` path
- * @module
- */
-
-/**
  * `GET /api/game/shards/info` response
  * @see {@link ScreepsHttpClient.gameShardsInfo}
+ * @category HTTP API - Game/Shards
  */
 export interface GameShardsInfoResponse extends ScreepsResponse {
   shards: {

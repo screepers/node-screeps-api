@@ -4,13 +4,9 @@ import { UserBadge, Users } from '../common/users'
 import { ScreepsResponse } from './base'
 
 /**
- * Used with HTTP API endpoints on the `/api/game` path
- * @module
- */
-
-/**
  * Stats that can be used with the `POST /api/game/map-stats` endpoint
  * @enum
+ * @category HTTP API - Game
  */
 export const MapStats = {
   /** Owner's username and Room Control Level (RCL) */
@@ -20,11 +16,16 @@ export const MapStats = {
   ...RoomStats
 } as const
 
+/**
+ * A {@link MapStats} value
+ * @category HTTP API - Game
+ */
 export type MapStat = typeof MapStats[keyof typeof MapStats]
 
 /**
  * `POST /api/game/map-stats` response
  * @see {@link ScreepsHttpClient.gameMapStats}
+ * @category HTTP API - Game
  */
 export interface GameMapStatsResponse<S extends MapStat = 'owner0'> extends ScreepsResponse {
   gameTime: number
@@ -40,7 +41,10 @@ export interface GameMapStatsResponse<S extends MapStat = 'owner0'> extends Scre
   users: Users
 }
 
-/** A single room result from {@link GameMapStatsResponse} */
+/**
+ * A single room result from {@link GameMapStatsResponse}
+ * @category HTTP API - Game
+ */
 export interface GameMapStatsRoom {
   own?: {
     user: string
@@ -51,7 +55,11 @@ export interface GameMapStatsRoom {
   status: RoomStatus
 }
 
-/** A player signature on a room controller */
+/**
+ * A player signature on a room controller
+ * @see {@link GameMapStatsRoom}
+ * @category HTTP API - Game
+ */
 export interface Sign {
   user: string
   text: string
@@ -59,7 +67,11 @@ export interface Sign {
   datetime: number
 }
 
-/** A system signature on a room / room controller */
+/**
+ * A system signature on a room / room controller
+ * @see {@link GameMapStatsRoom}
+ * @category HTTP API - Game
+ */
 export interface SystemSign {
   text: string
   time: number
@@ -72,6 +84,7 @@ export interface SystemSign {
  * `POST /api/game/gen-unique-object-name` responses
  * @see {@link ScreepsHttpClient.gameGenUniqueFlagName}
  * @see {@link ScreepsHttpClient.gameGenUniqueObjectName}
+ * @category HTTP API - Game
  */
 export interface GameGenUniqueNameResponse extends ScreepsResponse {
   name: string
@@ -80,6 +93,7 @@ export interface GameGenUniqueNameResponse extends ScreepsResponse {
 /**
  * `POST /api/game/create-construction` response
  * @see {@link ScreepsHttpClient.gameCreateConstruction}
+ * @category HTTP API - Game
  */
 export interface GameCreateConstructionResponse extends ScreepsResponse {
   result: {
@@ -104,6 +118,7 @@ export interface GameCreateConstructionResponse extends ScreepsResponse {
 /**
  * `GET /api/game/time` response
  * @see {@link ScreepsHttpClient.gameTime}
+ * @category HTTP API - Game
  */
 export interface GameTimeResponse extends ScreepsResponse {
   time: number
@@ -112,6 +127,7 @@ export interface GameTimeResponse extends ScreepsResponse {
 /**
  * `GET /api/game/world-size` response
  * @see {@link ScreepsHttpClient.gameWorldSize}
+ * @category HTTP API - Game
  */
 export interface GameWorldSizeResponse extends ScreepsResponse {
   /** Width of this shard's map (in rooms) */
@@ -123,6 +139,7 @@ export interface GameWorldSizeResponse extends ScreepsResponse {
 /**
  * `GET /api/game/room-decorations` response
  * @see {@link ScreepsHttpClient.gameRoomDecorations}
+ * @category HTTP API - Game
  */
 export interface GameRoomDecorationsResponse extends ScreepsResponse {
   decorations: DecorationInstance[]
@@ -131,6 +148,7 @@ export interface GameRoomDecorationsResponse extends ScreepsResponse {
 /**
  * `GET /api/game/room-objects` response
  * @see {@link ScreepsHttpClient.gameRoomObjects}
+ * @category HTTP API - Game
  */
 export interface GameRoomObjectsResponse extends ScreepsResponse {
   objects: RoomObject[]
@@ -141,6 +159,7 @@ export interface GameRoomObjectsResponse extends ScreepsResponse {
  * `GET /api/game/room-terrain` response when `encoded` param is
  * defined and non-empty
  * @see {@link ScreepsHttpClient.gameRoomTerrain}
+ * @category HTTP API - Game
  */
 export interface GameRoomTerrainEncodedResponse extends ScreepsResponse {
   terrain: {
@@ -162,6 +181,7 @@ export interface GameRoomTerrainEncodedResponse extends ScreepsResponse {
  * `GET /api/game/room-terrain` response when the `encoded` param is
  * undefined or empty (`undefined`, `null`, `''`, etc)
  * @see {@link ScreepsHttpClient.gameRoomTerrainUnencoded}
+ * @category HTTP API - Game
  */
 export interface GameRoomTerrainUnencodedResponse extends ScreepsResponse {
   /** Omitted positions are of type `plain` */
@@ -171,6 +191,7 @@ export interface GameRoomTerrainUnencodedResponse extends ScreepsResponse {
 /**
  * Non-plain terrain data for a single room position
  * @see {@link GameRoomTerrainUnencodedResponse}
+ * @category HTTP API - Game
  */
 export interface UnencodedRoomTerrain {
   room: string
@@ -184,6 +205,7 @@ export interface UnencodedRoomTerrain {
  * Room terrain types in a human-readable format
  * @see {@link UnencodedRoomTerrain} and {@link GameRoomTerrainUnencodedResponse}
  * @enum
+ * @category HTTP API - Game
  */
 export const RoomTerrainTypes = {
   Plain: 'plain',
@@ -191,12 +213,16 @@ export const RoomTerrainTypes = {
   Wall: 'wall'
 } as const
 
-/** A {@link RoomTerrainTypes} value */
+/**
+ * A {@link RoomTerrainTypes} value
+ * @category HTTP API - Game
+ */
 export type RoomTerrain = typeof RoomTerrainTypes[keyof typeof RoomTerrainTypes]
 
 /**
  * `GET /api/game/room-status` response
  * @see {@link ScreepsHttpClient.gameRoomStatus}
+ * @category HTTP API - Game
  */
 export interface GameRoomStatusResponse extends ScreepsResponse {
   /** The room name */
@@ -213,6 +239,7 @@ export interface GameRoomStatusResponse extends ScreepsResponse {
 /**
  * `GET /api/game/room-overview` response
  * @see {@link ScreepsHttpClient.gameRoomOverview}
+ * @category HTTP API - Game
  */
 export interface GameRoomOverviewResponse extends ScreepsResponse {
   owner: {

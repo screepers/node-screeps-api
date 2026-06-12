@@ -2,13 +2,9 @@ import { Nuke } from '../common/rooms'
 import { ScreepsResponse } from './base'
 
 /**
- * Used with HTTP API endpoints on the `/api/experimental` path
- * @module
- */
-
-/**
  * `GET /api/experimental/pvp` response
  * @see {@link ScreepsHttpClient.experimentalPvp}
+ * @category HTTP API - Experimental
  */
 export interface ExperimentalPvpResponse extends ScreepsResponse {
   /** Rooms with current/recent combat activity grouped by shard name */
@@ -30,6 +26,7 @@ export interface ExperimentalPvpResponse extends ScreepsResponse {
 /**
  * `GET /api/experimental/nukes` response
  * @see {@link ScreepsHttpClient.experimentalNukes}
+ * @category HTTP API - Experimental
  */
 export interface ExperimentalNukesResponse extends ScreepsResponse {
   /** {@link Nuke} objects grouped by shard name */

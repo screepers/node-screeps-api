@@ -67,4 +67,4 @@ const messages = await api.userMessagesIndex()
 
 ## WebSocket API
 
-The {@link ScreepsSocketClient | WebSocket API client} is largely unchanged. Check out the [examples](../examples/index.md).
+The {@link ScreepsSocketClient | WebSocket API client} is largely unchanged. Check out the Examples section of the documentation.

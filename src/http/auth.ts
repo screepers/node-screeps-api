@@ -4,13 +4,9 @@ import { ScreepsResponse } from './base'
 import { UserNotifyPrefsRequest } from './user'
 
 /**
- * Used with HTTP API endpoints on the `/api/auth` path
- * @module
- */
-
-/**
  * `POST /api/auth/signin` response
  * @see {@link ScreepsHttpClient.authSignin}
+ * @category HTTP API - Auth
  */
 export interface AuthSigninResponse extends ScreepsResponse {
   token: string
@@ -19,6 +15,7 @@ export interface AuthSigninResponse extends ScreepsResponse {
 /**
  * `GET /api/auth/me` response
  * @see {@link ScreepsHttpClient.authMe}
+ * @category HTTP API - Auth
  */
 export interface AuthMeResponse extends ScreepsResponse {
   _id: string
@@ -79,13 +76,17 @@ export interface AuthMeResponse extends ScreepsResponse {
 /**
  * `GET /api/auth/query-token` response
  * @see {@link ScreepsHttpClient.authQueryToken}
+ * @category HTTP API - Auth
  */
 export interface AuthQueryTokenResponse extends ScreepsResponse {
   _id: string
   token: AuthQueryTokenResult
 }
 
-/** Information about an API auth token from a {@link AuthQueryTokenResponse} */
+/**
+ * Information about an API auth token from a {@link AuthQueryTokenResponse}
+ * @category HTTP API - Auth
+ */
 export interface AuthQueryTokenResult {
   /**
    * If true, this token can be used to authenticate to all API endpoints.

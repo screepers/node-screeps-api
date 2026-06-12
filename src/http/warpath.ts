@@ -1,15 +1,11 @@
 import { ScreepsResponse } from './base'
 
 /**
- * Used with HTTP API endpoints on the `/api/warpath` path
- * @module
- */
-
-/**
  * Response from `GET /api/warpath/battles` on a game server,
  * or any `GET * /battles.json` endpoints on
  * {@link https://voight-kampff.fly.dev/ | Voight-Kampff}
  * @see {@link ScreepsHttpClient.warpathBattles}
+ * @category HTTP API - Warpath
  */
 export interface WarpathBattlesResponse extends ScreepsResponse {
   /** ISO 8601 time at which the last scan was conducted */
@@ -18,7 +14,10 @@ export interface WarpathBattlesResponse extends ScreepsResponse {
   shards: { [shardName: string]: WarpathBattle[] }
 }
 
-/** An individual battle from {@link WarpathBattlesResponse} */
+/**
+ * An individual battle from {@link WarpathBattlesResponse}
+ * @category HTTP API - Warpath
+ */
 export interface WarpathBattle {
   /** Name of the room in which the battle is/was occurring */
   room: string

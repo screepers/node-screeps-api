@@ -1,11 +1,9 @@
 import { SocketEvent } from './base'
 
 /**
- * Defines types/constants/enums/etc for `server` {@link SocketEvent}s
- * @module
+ * WebSocket event for authentication responses.
+ * @category WebSocket API - Server
  */
-
-/** WebSocket event for authentication responses. */
 export interface ServerAuthEvent extends SocketEvent {
   type: 'server'
   id: undefined
@@ -13,7 +11,10 @@ export interface ServerAuthEvent extends SocketEvent {
   data: ServerAuthEventData
 }
 
-/** Payload of a {@link ServerAuthEvent} */
+/**
+ * Payload of a {@link ServerAuthEvent}
+ * @category WebSocket API - Server
+ */
 export interface ServerAuthEventData {
   status: ServerAuthStatus
   token: string
@@ -24,11 +25,15 @@ export interface ServerAuthEventData {
  *
  * Contained in {@link ServerAuthEventData}.
  * @enum
+ * @category WebSocket API - Server
  */
 export const ServerAuthStatuses = {
   Ok: 'ok',
   Failed: 'failed'
 } as const
 
-/** A {@link ServerAuthStatuses} value */
+/**
+ * A {@link ServerAuthStatuses} value
+ * @category WebSocket API - Server
+ */
 export type ServerAuthStatus = typeof ServerAuthStatuses[keyof typeof ServerAuthStatuses]

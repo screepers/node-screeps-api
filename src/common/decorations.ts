@@ -2,12 +2,9 @@ import { RoomObjectConstant } from './rooms'
 import { UserBadgeSvgs } from './users'
 
 /**
- * Defines types/constants/enums/etc related to decorations (cosmetic effects
- * that can be applied to rooms and room objects).
- * @module
+ * An instance of a {@link Decoration} that is owned by a user
+ * @category Common - Decorations
  */
-
-/** An instance of a {@link Decoration} that is owned by a user */
 export interface DecorationInstance<P extends string = string> {
   _id: string
   /** The owner's user ID */
@@ -29,6 +26,7 @@ export interface DecorationInstance<P extends string = string> {
 /**
  * Enumerates all possible {@link Decoration.type} values
  * @enum
+ * @category Common - Decorations
  */
 export const DecorationTypes = {
   Badge: 'badge',
@@ -39,10 +37,16 @@ export const DecorationTypes = {
   WallLandscape: 'wallLandscape'
 } as const
 
-/** A {@link DecorationTypes} value */
+/**
+ * A {@link DecorationTypes} value
+ * @category Common - Decorations
+ */
 export type DecorationType = typeof DecorationTypes[keyof typeof DecorationTypes]
 
-/** Properties common to all decoration types */
+/**
+ * Properties common to all decoration types
+ * @category Common - Decorations
+ */
 export interface DecorationBase {
   _id: string
   name: string
@@ -71,6 +75,7 @@ export interface DecorationBase {
 /**
  * Represents a single premium user {@link UserBadge}.
  * {@link DecorationInstance}s of each badge can be earned by users via pixelization.
+ * @category Common - Decorations
  */
 export interface BadgeDecoration extends DecorationBase {
   type: 'badge'
@@ -82,6 +87,7 @@ export interface BadgeDecoration extends DecorationBase {
  * {@link DecorationInstance | instances} of each decoration can be earned
  * by users via pixelization.
  * @param P An optional union of {@link DecorationProperty.label} names for this decoration
+ * @category Common - Decorations
  */
 export interface Decoration<P extends string> extends DecorationBase {
   type: Exclude<DecorationType, 'badge'>
@@ -102,7 +108,10 @@ export interface Decoration<P extends string> extends DecorationBase {
   restricted?: boolean
 }
 
-/** A configurable property of a {@link Decoration} */
+/**
+ * A configurable property of a {@link Decoration}
+ * @category Common - Decorations
+ */
 export interface DecorationProperty {
   type: DecorationPropertyType
   label: boolean
@@ -112,6 +121,7 @@ export interface DecorationProperty {
 /**
  * All possible {@link DecorationProperty} types
  * @enum
+ * @category Common - Decorations
  */
 export const DecorationPropertyTypes = {
   Boolean: 'boolean',
@@ -121,10 +131,16 @@ export const DecorationPropertyTypes = {
   String: 'string'
 } as const
 
-/** A {@link DecorationPropertyTypes} value */
+/**
+ * A {@link DecorationPropertyTypes} value
+ * @category Common - Decorations
+ */
 export type DecorationPropertyType = typeof DecorationPropertyTypes[keyof typeof DecorationPropertyTypes]
 
-/** A configurable boolean property of a {@link Decoration} */
+/**
+ * A configurable boolean property of a {@link Decoration}
+ * @category Common - Decorations
+ */
 export interface BooleanProperty extends DecorationProperty {
   type: 'boolean'
   default: boolean
@@ -134,6 +150,7 @@ export interface BooleanProperty extends DecorationProperty {
  * A configurable color property of a {@link Decoration}.
  *
  * It should accept any valid web color value.
+ * @category Common - Decorations
  */
 export interface ColorProperty extends DecorationProperty {
   type: 'color'
@@ -141,7 +158,10 @@ export interface ColorProperty extends DecorationProperty {
   default: string
 }
 
-/** A configurable number property of a {@link Decoration} */
+/**
+ * A configurable number property of a {@link Decoration}
+ * @category Common - Decorations
+ */
 export interface NumberProperty extends DecorationProperty {
   type: 'number'
   default: number
@@ -150,6 +170,7 @@ export interface NumberProperty extends DecorationProperty {
 /**
  * A configurable number property of a {@link Decoration} that only accepts
  * values within a defined range.
+ * @category Common - Decorations
  */
 export interface RangeProperty extends DecorationProperty {
   type: 'range'
@@ -158,7 +179,10 @@ export interface RangeProperty extends DecorationProperty {
   default: number
 }
 
-/** A configurable string property of a {@link Decoration} */
+/**
+ * A configurable string property of a {@link Decoration}
+ * @category Common - Decorations
+ */
 export interface StringProperty extends DecorationProperty {
   type: 'string'
   default: string

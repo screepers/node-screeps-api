@@ -12,13 +12,19 @@ import { BuildableStructureConstant, CpuShardLimits, FlagColor, FlagColors, Mark
 import * as Http from './http'
 import { ScreepsHttpMethod, ScreepsHttpMethods } from './http'
 
-/** Fired when rate limit state is updated */
+/**
+ * Fired when rate limit state is updated
+ * @category HTTP API
+ */
 export interface RateLimitEvent extends RateLimit {
   method: ScreepsHttpMethod
   path: string
 }
 
-/** Options to use with {@link ScreepsHttpClient.debug} */
+/**
+ * Options to use with {@link ScreepsHttpClient.debug}
+ * @category HTTP API
+ */
 export interface DebugOptions {
   /** Enable debug logs for ScreepsConfigManager */
   config?: boolean
@@ -45,7 +51,22 @@ const debugRateLimitExceeded = Debug('screepsapi:ratelimitexceeded')
 
 const gunzipAsync = utils.promisify(zlib.gunzip)
 
+/**
+ * The expected number of ticks in a {@link ScreepsRoomHistoryResponse} from an official server.
+ *
+ * **NOTE:** The actual number of ticks is returned by
+ * {@link ScreepsVersionResponse | ScreepsVersionResponse.serverData.historyChunkSize}
+ * @category HTTP API
+ */
 export const OFFICIAL_HISTORY_INTERVAL = 100
+
+/**
+ * The expected number of ticks in a {@link ScreepsRoomHistoryResponse} from an unofficial server.
+ *
+ * **NOTE:** The actual number of ticks is returned by
+ * {@link ScreepsVersionResponse | ScreepsVersionResponse.serverData.historyChunkSize}
+ * @category HTTP API
+ */
 export const PRIVATE_HISTORY_INTERVAL = 20
 
 /**
@@ -80,12 +101,11 @@ export const PRIVATE_HISTORY_INTERVAL = 20
  * // To access the `GET /api/auth/me` endpoint:
  * const me = await Http.authMe()
  * @document ../guides/rate-limits.md
- * @showCategories
+ * @category HTTP API
  * @categoryDescription Endpoints: /
  * Top-level API endpoints
  * @categoryDescription Endpoints: /auth
  * Endpoints for authenticating to the server or checking authentication status
- * @categoryDescription Endpoints: /
  * @categoryDescription Endpoints: /experimental
  * Endpoints that are not yet considered stable. Their request parameters
  * and response formats are subject to change without warning (even more so than
@@ -152,7 +172,6 @@ export class ScreepsHttpClient extends EventEmitter {
    *
    * Payload:
    * @event boolean Whether or not the client is now authenticated
-   * @category Events
    */
   static readonly AUTH = 'auth'
 
@@ -161,7 +180,6 @@ export class ScreepsHttpClient extends EventEmitter {
    *
    * Payload:
    * @event {@link RateLimitEvent} The latest rate limit state
-   * @category Events
    */
   static readonly RATE_LIMIT = 'rateLimit'
 
@@ -170,7 +188,6 @@ export class ScreepsHttpClient extends EventEmitter {
    *
    * Payload:
    * @event {@link AxiosResponse} The HTTP response
-   * @category Events
    */
   static readonly RESPONSE = 'response'
 
@@ -179,7 +196,6 @@ export class ScreepsHttpClient extends EventEmitter {
    *
    * Payload:
    * @event string The new API token
-   * @category Events
    */
   static readonly TOKEN = 'token'
 
@@ -195,6 +211,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * @param opts See {@link LoadConfigOptions}
    * @returns A configured and authenticated {@link ScreepsHttpClient} instance
    * @throws {@link node!Error | Error} if the selected config file is invalid or if no config files are found
+   * @group none
    */
   static async fromConfig(serverName: string, opts?: LoadConfigOptions): Promise<ScreepsHttpClient> {
     const config = await configManager.loadConfig(serverName, opts)
@@ -238,6 +255,9 @@ export class ScreepsHttpClient extends EventEmitter {
   private _tokenInfo?: Http.AuthQueryTokenResult
   private _user?: Http.AuthMeResponse | Http.UserInfo
 
+  /**
+   * @group none
+   */
   constructor(config: ScreepsHttpConfig)
   constructor(serverConfig: ScreepsServerConfig | ScreepsRawServerConfig)
   constructor(config: ScreepsHttpConfig | ScreepsServerConfig | ScreepsRawServerConfig) {
@@ -2054,6 +2074,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
 /**
  * Thrown by {@link ScreepsHttpClient} endpoint methods when a HTTP 4xx/5xx
  * response is received from an endpoint.
+ * @category HTTP API
  */
 export class ScreepsApiError extends Error {
   /**

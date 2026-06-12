@@ -1,13 +1,9 @@
 import { ScreepsResponse } from './base'
 
 /**
- * Used with HTTP API endpoints on the `/api/seasons` path
- * @module
- */
-
-/**
  * `GET /api/seasons/current` response
  * @see {@link ScreepsHttpClient.seasonsCurrent}
+ * @category HTTP API - Seasons
  */
 export interface SeasonsCurrentResponse extends ScreepsResponse {
   /** Name of the season (ex: "Season 8") */

@@ -1,13 +1,8 @@
 /**
- * Defines types/constants/enums/etc related to resources
- * (including account-bound resources)
- * @module
- */
-
-/**
  * Resources that can be combined in a {@link StructureFactory} to create
  * commodities, which can then be sold to NPCs for a high price.
  * @enum
+ * @category Common - Resources
  */
 export const DepositResources = {
   Biomass: 'Biomass',
@@ -16,13 +11,17 @@ export const DepositResources = {
   Mist: 'Mist'
 } as const
 
-/** A {@link DepositResources} value */
+/**
+ * A {@link DepositResources} value
+ * @category Common - Resources
+ */
 export type DepositResource = typeof DepositResources[keyof typeof DepositResources]
 
 /**
  * Resources that can be combined in a {@link StructureLab} to create
  * {@link MineralBoostResource}s.
  * @enum
+ * @category Common - Resources
  */
 export const MineralResources = {
   Hydrogen: 'Hydrogen',
@@ -34,13 +33,17 @@ export const MineralResources = {
   Zynthium: 'Zynthium'
 } as const
 
-/** A {@link MineralResources} value */
+/**
+ * A {@link MineralResources} value
+ * @category Common - Resources
+ */
 export type MineralResource = typeof MineralResources[keyof typeof MineralResources]
 
 /**
  * Resources created in a {@link StructureLab} that can be used to improve
  * the performance of {@link Creep} parts.
  * @enum
+ * @category Common - Resources
  */
 export const MineralBoostResources = {
   UtriumHydride: 'UH',
@@ -75,12 +78,16 @@ export const MineralBoostResources = {
   CatalyzedGhodiumAlkalide: 'XGHO2'
 } as const
 
-/** A {@link MineralBoostResources} value */
+/**
+ * A {@link MineralBoostResources} value
+ * @category Common - Resources
+ */
 export type MineralBoostResource = typeof MineralBoostResources[keyof typeof MineralBoostResources]
 
 /**
  * A {@link MineralCompoundResource} that cannot be used as a boost.
  * @enum
+ * @category Common - Resources
  */
 export const MineralBaseCompoundResources = {
   Ghodium: 'G',
@@ -89,12 +96,16 @@ export const MineralBaseCompoundResources = {
   UtriumLemergite: 'UL'
 } as const
 
-/** A {@link MineralBaseCompoundResources} value */
+/**
+ * A {@link MineralBaseCompoundResources} value
+ * @category Common - Resources
+ */
 export type MineralBaseCompoundResource = typeof MineralBaseCompoundResources[keyof typeof MineralBaseCompoundResources]
 
 /**
  * A resource that was formed from the combination of two or more
  * {@link MineralResource}s in a {@link StructureLab}.
+ * @category Common - Resources
  */
 export type MineralCompoundResource = MineralBaseCompoundResource | MineralBoostResource
 
@@ -103,6 +114,7 @@ export type MineralCompoundResource = MineralBaseCompoundResource | MineralBoost
  *
  * {@link MineralResources}, {@link MineralBaseCompoundResources}, and {@link MineralBoostResources}
  * @enum
+ * @category Common - Resources
  */
 export const MineralBasedResources = {
   ...MineralResources,
@@ -110,13 +122,16 @@ export const MineralBasedResources = {
   ...MineralBoostResources
 }
 
-/** A {@link MineralBasedResources} value */
+/**
+ * A {@link MineralBasedResources} value
+ * @category Common - Resources
+ */
 export type MineralBasedResource = typeof MineralBasedResources[keyof typeof MineralBasedResources]
 
 /**
- * A non-account bound resource that must be manifested somewhere in the
- * game world in order to exist.
+ * An {@link https://docs.screeps.com/resources.html | in-game resource}
  * @enum
+ * @category Common - Resources
  */
 export const Resources = {
   Energy: 'energy',
@@ -164,7 +179,10 @@ export const Resources = {
   ...MineralBoostResources
 } as const
 
-/** A {@link Resources} value */
+/**
+ * A {@link Resources} value
+ * @category Common - Resources
+ */
 export type Resource = typeof Resources[keyof typeof Resources]
 
 /**
@@ -173,6 +191,7 @@ export type Resource = typeof Resources[keyof typeof Resources]
  * They are not tied to any particular in-game room/position,
  * and they may be traded or consumed anywhere.
  * @enum
+ * @category Common - Resources
  */
 export const IntershardResources = {
   AccessKey: 'accessKey',
@@ -180,17 +199,24 @@ export const IntershardResources = {
   Pixel: 'pixel'
 } as const
 
-/** A {@link IntershardResources} value */
+/**
+ * A {@link IntershardResources} value
+ * @category Common - Resources
+ */
 export type IntershardResource = typeof IntershardResources[keyof typeof IntershardResources]
 
 /**
  * A resource that can be traded on the in-game market.
  * @enum
+ * @category Common - Resources
  */
 export const MarketResources = {
   ...Resources,
   ...IntershardResources
 } as const
 
-/** A {@link MarketResources} value */
+/**
+ * A {@link MarketResources} value
+ * @category Common - Resources
+ */
 export type MarketResource = typeof MarketResources[keyof typeof MarketResources]

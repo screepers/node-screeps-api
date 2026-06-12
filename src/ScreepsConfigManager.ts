@@ -5,12 +5,22 @@ import process from 'node:process'
 import URL from 'node:url'
 import { parse } from 'yaml'
 
-/** Default value of {@link ScreepsRawServerConfig | ScreepsRawServerConfig.hostname} */
+/**
+ * Default value of {@link ScreepsRawServerConfig | ScreepsRawServerConfig.hostname}
+ * @category Common
+ */
 export const DEFAULT_SERVER_HOST = 'screeps.com'
-/** Default value of {@link ScreepsRawServerConfig | ScreepsRawServerConfig.path} */
+
+/**
+ * Default value of {@link ScreepsRawServerConfig | ScreepsRawServerConfig.path}
+ * @category Common
+ */
 export const DEFAULT_SERVER_PATH = '/'
 
-/** Defaults for {@link ScreepsClientConfig} */
+/**
+ * Defaults for {@link ScreepsClientConfig}
+ * @category Common
+ */
 export const DEFAULT_CLIENT_CONFIG = {
   retry429Global: true,
   retry429InitDelay: 60_000, // 1 minute
@@ -36,6 +46,7 @@ const debug = Debug('screepsapi:config')
  * format as well as the {@link ScreepsJsonConfig | screeps.json format}
  * used by many Screeps code upload tools.
  * @document ../guides/configuration.md
+ * @category Common
  */
 export class ScreepsConfigManager {
   private _defaultPaths?: readonly string[]
@@ -265,7 +276,10 @@ export class ScreepsConfigManager {
   }
 }
 
-/** Configuration and options for {@link ScreepsHttpClient} */
+/**
+ * Configuration and options for {@link ScreepsHttpClient}
+ * @category Common
+ */
 export interface ScreepsHttpConfig {
   /** @see {@link ScreepsAppConfig} */
   client: ScreepsAppConfig
@@ -282,7 +296,10 @@ export interface ScreepsHttpConfig {
   parsed?: ScreepsJsonConfig | ScreepsYamlConfig
 }
 
-/** Options used by {@link ScreepsConfigManager.loadConfig} */
+/**
+ * Options used by {@link ScreepsConfigManager.loadConfig}
+ * @category Common
+ */
 export interface LoadConfigOptions {
   /**
    * Specifies the path of the screeps YAML or JSON credential file to use.
@@ -300,6 +317,7 @@ export interface LoadConfigOptions {
 /**
  * Normalized configuration for a single Screeps World server
  * @see {@link ScreepsRawServerConfig} for the pre-normalized schema
+ * @category Common
  */
 export interface ScreepsServerConfig {
   url: string
@@ -311,6 +329,7 @@ export interface ScreepsServerConfig {
 /**
  * User-configurable options for {@link ScreepsHttpClient}
  * @see {@link DEFAULT_CLIENT_CONFIG} for default values
+ * @category Common
  */
 export interface ScreepsClientConfig {
   /**
@@ -344,10 +363,14 @@ export interface ScreepsClientConfig {
 /**
  * An extension of {@link ScreepsClientConfig} that may contain properties
  * intended for the app using {@link ScreepsHttpClient}.
+ * @category Common
  */
 export type ScreepsAppConfig = ScreepsClientConfig & { [propertyName: string]: unknown }
 
-/** Server configuration schema from {@link ScreepsJsonConfig}/{@link ScreepsYamlConfig} */
+/**
+ * Server configuration schema from {@link ScreepsJsonConfig}/{@link ScreepsYamlConfig}
+ * @category Common
+ */
 export interface ScreepsRawServerConfig {
   token?: string
   email?: string
@@ -368,6 +391,7 @@ export interface ScreepsRawServerConfig {
 /**
  * Format of a Screeps Unified Credentials File:
  * https://github.com/screepers/screepers-standards/blob/3877e86f38caed9891ef6270aa9690df556e6c22/SS3-Unified_Credentials_File.md
+ * @category Common
  */
 export interface ScreepsYamlConfig {
   servers: { [serverName: string]: ScreepsRawServerConfig | undefined }
@@ -377,6 +401,7 @@ export interface ScreepsYamlConfig {
 /**
  * Format of a Screeps JSON credentials file:
  * https://github.com/screepers/screeps-typescript-starter/blob/master/screeps.sample.json
+ * @category Common
  */
 export interface ScreepsJsonConfig {
   [serverName: string]: ScreepsRawServerConfig | undefined

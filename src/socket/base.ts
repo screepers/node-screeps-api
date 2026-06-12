@@ -1,17 +1,13 @@
 import { RoomObject } from '../common/rooms'
 
 /**
- * Defines types/constants/enums/etc for {@link SocketEvent} and miscellaneous subtypes
- * @module
- */
-
-/**
  * Parsed version of a message received from the server via the WebSocket API.
  *
  * Unless you are writing code that genuinely should be able to process any
  * Screeps WebSocket API event, this type should not be used directly.
  * Instead, extend the interface and define stricter types for these fields.
  * If you do create a sub-interface, please consider submitting a PR.
+ * @category WebSocket API
  */
 export interface SocketEvent {
   type: string
@@ -45,6 +41,7 @@ export interface SocketEvent {
  * per tick with updated {@link RoomEventData}.
  * @example Raw sample events:
  * ["room:shardSeason/E15N8",{"objects":{"6a1c36afd05a7c237d18c9ae":{"reservation":{"endTime":231807}},"6a1c36afd05a7c237d18c9af":{"energy":2240,"invaderHarvested":38070},"6a1c36afd05a7c237d18c9b0":{"energy":2656,"invaderHarvested":37854},"6a2906a5a367ccd541edc2be":{"store":{"energy":560}},"6a29075abc245f3e92ad02d9":{"store":{"energy":405}},"6a2940bf8e693b5fca2fac27":{"x":28,"y":42},"6a2941332784cf33c0d3f004":{"x":31,"y":44}},"gameTime":231346,"info":{"mode":"world"},"visual":""}]
+ * @category WebSocket API
  */
 export interface RoomEvent extends SocketEvent {
   type: 'room'
@@ -65,7 +62,10 @@ export interface RoomEvent extends SocketEvent {
   data: RoomEventData
 }
 
-/** Payload of a {@link RoomEvent} */
+/**
+ * Payload of a {@link RoomEvent}
+ * @category WebSocket API
+ */
 export interface RoomEventData {
   /** The current game time (in ticks) */
   gameTime: number
@@ -89,6 +89,7 @@ export interface RoomEventData {
  * original map, alpha map, and minimap in the room view).
  * @example Raw sample events:
  * ["roomMap2:shardSeason/E16N7",{"w":[],"r":[],"pb":[],"p":[],"s":[[11,36]],"c":[[43,37]],"m":[[30,29]],"k":[]}]
+ * @category WebSocket API
  */
 export interface RoomMap2Event extends SocketEvent {
   type: 'roomMap2'
@@ -109,7 +110,10 @@ export interface RoomMap2Event extends SocketEvent {
   data: RoomMap2EventData
 }
 
-/** Payload of a {@link RoomMap2Event} */
+/**
+ * Payload of a {@link RoomMap2Event}
+ * @category WebSocket API
+ */
 export interface RoomMap2EventData {
   /** Wall positions? */
   w: PositionTuple[]
@@ -127,7 +131,10 @@ export interface RoomMap2EventData {
   [userId: string]: PositionTuple[]
 }
 
-/** A room (global?) position represented as an [X, Y] tuple */
+/**
+ * An [X, Y] tuple representing a room position
+ * @category WebSocket API
+ */
 export type PositionTuple = [x: number, y: number]
 
 /**
@@ -137,6 +144,7 @@ export type PositionTuple = [x: number, y: number]
  * map visuals generated on the previous tick.
  * @example Raw sample events:
  * ["mapVisual:670e0c607317e200125d3aa2/shardSeason",null]
+ * @category WebSocket API
  */
 export interface MapVisualEvent {
   type: 'mapVisual'

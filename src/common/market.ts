@@ -1,13 +1,8 @@
 import { MarketResource, Resource } from './resources'
 
 /**
- * Defines types/constants/enums/etc related to the
- * {@link https://docs.screeps.com/market.html | in-game market}
- * @module
- */
-
-/**
  * A buy or sell order on the in-game market created by the authenticated user.
+ * @category Common - Market
  */
 export interface Order {
   _id: string
@@ -23,7 +18,10 @@ export interface Order {
   createdTimestamp: number
 }
 
-/** An {@link Order} for a non-account-bound resource */
+/**
+ * An {@link Order} for a non-account-bound resource
+ * @category Common - Market
+ */
 export interface ShardOrder extends Order {
   resourceType: Resource
   roomName: string
@@ -31,7 +29,10 @@ export interface ShardOrder extends Order {
   created: number
 }
 
-/** An active order on the in-game market */
+/**
+ * An active order on the in-game market
+ * @category Common - Market
+ */
 export interface OpenOrder {
   type: 'buy' | 'sell'
   resourceType: MarketResource

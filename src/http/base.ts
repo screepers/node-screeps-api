@@ -1,20 +1,19 @@
 import { RoomObject } from '../common/rooms'
 
 /**
- * Used with HTTP API endpoints on the `/api` path
- * @module
- */
-
-/**
  * HTTP request methods/verbs used with Screeps API endpoints
  * @enum
+ * @category HTTP API
  */
 export const ScreepsHttpMethods = {
   Get: 'GET',
   Post: 'POST'
 } as const
 
-/** A {@link ScreepsHttpMethods} value */
+/**
+ * A {@link ScreepsHttpMethods} value
+ * @category HTTP API
+ */
 export type ScreepsHttpMethod = typeof ScreepsHttpMethods[keyof typeof ScreepsHttpMethods]
 
 /**
@@ -24,6 +23,7 @@ export type ScreepsHttpMethod = typeof ScreepsHttpMethods[keyof typeof ScreepsHt
  * response that extends this type. Any non-conforming responses will
  * be of type {@link ScreepsErrorResponse}.
  * @see {@link ScreepsApiError} for the error type thrown by endpoint methods
+ * @category HTTP API
  */
 export interface ScreepsResponse {
   /** An API success response always contains `{ ok: 1 }` */
@@ -38,6 +38,7 @@ export interface ScreepsResponse {
  * response instead of an error.
  * @see {@link ScreepsResponse} for the standard success response
  * @see {@link ScreepsApiError} for the error type thrown by endpoint methods
+ * @category HTTP API
  */
 export interface ScreepsErrorResponse extends ScreepsResponse {
   error: string
@@ -47,12 +48,16 @@ export interface ScreepsErrorResponse extends ScreepsResponse {
  * Body of an HTTP API success response that has not been typed yet.
  * Please consider submitting a PR to replace this with a defined type
  * if you have a sample response body!
+ * @category HTTP API
  */
 export interface ScreepsUnknownResponse extends ScreepsResponse {
   [propertyName: string]: unknown
 }
 
-/** Generic HTTP API response to a request to update database records */
+/**
+ * Generic HTTP API response to a request to update database records
+ * @category HTTP API
+ */
 export interface ScreepsDbUpdateResponse extends ScreepsResponse {
   result: ScreepsDbUpdateResult
 }
@@ -60,6 +65,7 @@ export interface ScreepsDbUpdateResponse extends ScreepsResponse {
 /**
  * MongoDB result output from an update operation
  * @see {@link ScreepsDbUpdateResponse}
+ * @category HTTP API
  */
 export interface ScreepsDbUpdateResult {
   /** If an error is not raised, this will always be 1 to indicate success */
@@ -76,6 +82,7 @@ export interface ScreepsDbUpdateResult {
 /**
  * Generic HTTP API response to a request to "upsert" (create or update)
  * database records
+ * @category HTTP API
  */
 export interface ScreepsDbUpsertResponse extends ScreepsResponse {
   result: ScreepsDbUpsertResult
@@ -84,6 +91,7 @@ export interface ScreepsDbUpsertResponse extends ScreepsResponse {
 /**
  * MongoDB result output from an upsert operation
  * @see {@link ScreepsDbUpdateResponse}
+ * @category HTTP API
  */
 export interface ScreepsDbUpsertResult extends ScreepsDbUpdateResult {
   upserted: {
@@ -95,6 +103,7 @@ export interface ScreepsDbUpsertResult extends ScreepsDbUpdateResult {
 /**
  * `GET /api/version` response
  * @see {@link ScreepsHttpClient.version}
+ * @category HTTP API
  */
 export interface ScreepsVersionResponse extends ScreepsResponse {
   /** Client version number; undefined on non-official servers */
@@ -144,6 +153,7 @@ export interface ScreepsVersionResponse extends ScreepsResponse {
 /**
  * `GET /api/authmod` response
  * @see {@link ScreepsHttpClient.authmod}
+ * @category HTTP API
  */
 export type ScreepsAuthModResponse
   = | ScreepsOfficialAuthModResponse
@@ -152,6 +162,7 @@ export type ScreepsAuthModResponse
 /**
  * Fake `GET /api/authmod` response returned by official servers
  * @see {@link ScreepsAuthModResponse}
+ * @category HTTP API
  */
 export interface ScreepsOfficialAuthModResponse extends ScreepsResponse {
   name: 'official'
@@ -160,6 +171,7 @@ export interface ScreepsOfficialAuthModResponse extends ScreepsResponse {
 /**
  * `GET /api/authmod` response returned by unofficial servers
  * @see {@link ScreepsAuthModResponse}
+ * @category HTTP API
  */
 export interface ScreepsUnofficialAuthModResponse extends ScreepsResponse {
   allowRegistration: boolean
@@ -175,6 +187,7 @@ export interface ScreepsUnofficialAuthModResponse extends ScreepsResponse {
 /**
  * `GET /api/room-history` / `GET /room-history/${shard}/${room}/${tick}.json` response
  * @see {@link ScreepsHttpClient.history}
+ * @category HTTP API
  */
 export interface ScreepsRoomHistoryResponse extends ScreepsResponse {
   /** UNIX timestamp (UTC) indicating the time at the start of the chunk */
@@ -187,7 +200,10 @@ export interface ScreepsRoomHistoryResponse extends ScreepsResponse {
   ticks: { [tick: number]: ScreepsHistoryTick }
 }
 
-/** Data from a single tick in a {@link ScreepsRoomHistoryResponse} */
+/**
+ * Data from a single tick in a {@link ScreepsRoomHistoryResponse}
+ * @category HTTP API
+ */
 export interface ScreepsHistoryTick {
   [id: string]: RoomObject
 }

@@ -2,13 +2,9 @@ import { UserBadge } from '../common/users'
 import { ScreepsResponse } from './base'
 
 /**
- * Used with HTTP API endpoints on the `/api/scoreboard` path
- * @module
- */
-
-/**
  * `GET /api/scoreboard/list` response
  * @see {@link ScreepsHttpClient.scoreboardList}
+ * @category HTTP API - Scoreboard
  */
 export interface ScoreboardListResponse extends ScreepsResponse {
   meta: {
@@ -19,7 +15,10 @@ export interface ScoreboardListResponse extends ScreepsResponse {
   users: ScoreboardUser[]
 }
 
-/** A user from {@link ScoreboardListResponse} */
+/**
+ * A user from {@link ScoreboardListResponse}
+ * @category HTTP API - Scoreboard
+ */
 export interface ScoreboardUser {
   /** A player's username */
   username: string

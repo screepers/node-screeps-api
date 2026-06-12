@@ -16,8 +16,9 @@ const decoder = new TextDecoder('utf-8', { fatal: true })
 
 /**
  * Configuration options for {@link ScreepsSocketClient}.
- * These are provided when calling {@link ScreepsSocketClient.connect}.
+ * These are used when calling {@link ScreepsSocketClient.connect}.
  * @see {@link DEFAULT_SOCKET_CONFIG} for default values
+ * @category WebSocket API
  */
 export interface ScreepsSocketConfig {
   /**
@@ -49,7 +50,10 @@ export interface ScreepsSocketConfig {
   maxRetryDelay: number
 }
 
-/** Default {@link ScreepsSocketConfig} used by {@link ScreepsSocketClient.connect} */
+/**
+ * Default {@link ScreepsSocketConfig} used by {@link ScreepsSocketClient.connect}
+ * @category WebSocket API
+ */
 export const DEFAULT_SOCKET_CONFIG = {
   reconnect: true,
   resubscribe: true,
@@ -65,6 +69,7 @@ export const DEFAULT_SOCKET_CONFIG = {
  * @hideconstructor
  * @showGroups
  * @see {@link ScreepsHttpClient} for the HTTP API client
+ * @category WebSocket API
  */
 export class ScreepsSocketClient extends EventEmitter {
   /**

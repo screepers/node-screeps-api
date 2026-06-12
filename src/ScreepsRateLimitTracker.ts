@@ -8,6 +8,7 @@ const debugRateLimit = Debug('screepsapi:ratelimit')
  *
  * This relevant state for a given endpoint can be looked up via
  * {@link ScreepsRateLimitTracker.find}.
+ * @category HTTP API
  */
 export interface RateLimit extends RateLimitUpdate {
   /** Time period to which the {@link limit} applies. */
@@ -16,7 +17,10 @@ export interface RateLimit extends RateLimitUpdate {
   toReset: number
 }
 
-/** State that is contained in response headers when a rate limit is hit. */
+/**
+ * State that is included in response headers when a rate limit is hit.
+ * @category HTTP API
+ */
 export interface RateLimitUpdate {
   /** Maximum number of requests that can be sent within a given time period */
   limit: number
@@ -32,6 +36,7 @@ export interface RateLimitUpdate {
 /**
  * All possible time periods over which a {@link RateLimit} can apply.
  * @enum
+ * @category HTTP API
  */
 export const RateLimitPeriods = {
   Minute: 'minute',
@@ -39,7 +44,10 @@ export const RateLimitPeriods = {
   Day: 'day'
 } as const
 
-/** A {@link RateLimitPeriods} value */
+/**
+ * A {@link RateLimitPeriods} value
+ * @category HTTP API
+ */
 export type RateLimitPeriod = typeof RateLimitPeriods[keyof typeof RateLimitPeriods]
 
 /**
@@ -48,6 +56,7 @@ export type RateLimitPeriod = typeof RateLimitPeriods[keyof typeof RateLimitPeri
  * Do not instantiate this class. Instead, use the instance from
  * {@link ScreepsHttpClient.rateLimits}.
  * @document ../guides/rate-limits.md
+ * @category HTTP API
  */
 export class ScreepsRateLimitTracker {
   readonly global: RateLimit
