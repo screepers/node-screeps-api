@@ -6,7 +6,7 @@ import { DepositResource, MineralBoostResource, MineralCompoundResource, Mineral
  * @enum
  * @category Common - Rooms
  */
-export const BuildableStructureConstants = {
+export const BuildableStructureTypes = {
   Container: 'container',
   Controller: 'controller',
   Extension: 'extension',
@@ -27,18 +27,18 @@ export const BuildableStructureConstants = {
 } as const
 
 /**
- * A {@link BuildableStructureConstants} value
+ * A {@link BuildableStructureTypes} value
  * @category Common - Rooms
  */
-export type BuildableStructureConstant = typeof BuildableStructureConstants[keyof typeof BuildableStructureConstants]
+export type BuildableStructureType = typeof BuildableStructureTypes[keyof typeof BuildableStructureTypes]
 
 /**
  * Describes all possible types of {@link Structure}s that can exist in the game world.
  * @enum
  * @category Common - Rooms
  */
-export const StructureConstants = {
-  ...BuildableStructureConstants,
+export const StructureTypes = {
+  ...BuildableStructureTypes,
   InvaderCore: 'invaderCore',
   KeeperLair: 'keeperLair',
   Portal: 'portal',
@@ -46,17 +46,17 @@ export const StructureConstants = {
 } as const
 
 /**
- * A {@link StructureConstants} value
+ * A {@link StructureTypes} value
  * @category Common - Rooms
  */
-export type StructureConstant = typeof StructureConstants[keyof typeof StructureConstants]
+export type StructureType = typeof StructureTypes[keyof typeof StructureTypes]
 
 /**
  * Represents any possible entity that can physically exist in the game world.
  * @enum
  * @category Common - Rooms
  */
-export const RoomObjectConstants = {
+export const RoomObjectTypes = {
   ConstructionSite: 'constructionSite',
   Creep: 'creep',
   Deposit: 'deposit',
@@ -66,15 +66,15 @@ export const RoomObjectConstants = {
   Source: 'source',
   Ruin: 'ruin',
   Tombstone: 'tombstone',
-  ...StructureConstants,
+  ...StructureTypes,
   ...Resources
 } as const
 
 /**
- * A {@link RoomObjectConstants} value
+ * A {@link RoomObjectTypes} value
  * @category Common - Rooms
  */
-export type RoomObjectConstant = typeof RoomObjectConstants[keyof typeof RoomObjectConstants]
+export type RoomObjectType = typeof RoomObjectTypes[keyof typeof RoomObjectTypes]
 
 /**
  * An entity that exists within the game world
@@ -82,7 +82,7 @@ export type RoomObjectConstant = typeof RoomObjectConstants[keyof typeof RoomObj
  */
 export interface RoomObject extends Position {
   _id: string
-  type: RoomObjectConstant
+  type: RoomObjectType
   room: string
   name?: string
   /** Temporary effects that are active on this object */
@@ -140,7 +140,7 @@ export interface Creep extends AnyCreep {
     upgradeController: Position | null
   }
   body: {
-    name: BodyPartConstant
+    name: BodyPartType
     hits: number
     $name: string
     boost?: MineralBoostResource
@@ -153,7 +153,7 @@ export interface Creep extends AnyCreep {
  * @enum
  * @category Common - Rooms
  */
-export const BodyPartConstants = {
+export const BodyPartTypes = {
   Attack: 'attack',
   Carry: 'carry',
   Claim: 'claim',
@@ -165,10 +165,10 @@ export const BodyPartConstants = {
 } as const
 
 /**
- * A {@link BodyPartConstants} value
+ * A {@link BodyPartTypes} value
  * @category Common - Rooms
  */
-export type BodyPartConstant = typeof BodyPartConstants[keyof typeof BodyPartConstants]
+export type BodyPartType = typeof BodyPartTypes[keyof typeof BodyPartTypes]
 
 /**
  * Power Creeps are immortal "heroes" that are tied to your account and
@@ -227,7 +227,7 @@ export type PowerCreepClass = typeof PowerCreepClasses[keyof typeof PowerCreepCl
  * @category Common - Rooms
  */
 export interface Structure extends RoomObject {
-  type: StructureConstant
+  type: StructureType
   _isDisabled: boolean
 }
 
@@ -576,7 +576,7 @@ export interface ConstructionSite extends RoomObject {
   name?: string
   progress: number
   progressTotal: number
-  structureType: StructureConstant
+  structureType: StructureType
 }
 
 /**
@@ -661,7 +661,7 @@ export interface Ruin extends RoomObject, HasOwner {
     id: string
     hits: number
     hitsMax: number
-    type: StructureConstant
+    type: StructureType
     user: null
   }
 }
@@ -674,7 +674,7 @@ export interface Ruin extends RoomObject, HasOwner {
  */
 export interface Tombstone extends RoomObject, HasOwner {
   type: 'tombstone'
-  creepBody: BodyPartConstant[]
+  creepBody: BodyPartType[]
   creepId: string
   creepName: string
   creepSaying: SayAction | null

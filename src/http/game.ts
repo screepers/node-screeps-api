@@ -1,5 +1,5 @@
 import { DecorationInstance } from '../common/decorations'
-import { BuildableStructureConstant, RoomObject, RoomObjectConstant, RoomStat, RoomStatInterval, RoomStats, RoomStatus } from '../common/rooms'
+import { BuildableStructureType, RoomObject, RoomObjectType, RoomStat, RoomStatInterval, RoomStats, RoomStatus } from '../common/rooms'
 import { UserBadge, Users } from '../common/users'
 import { ScreepsResponse } from './base'
 
@@ -102,11 +102,11 @@ export interface GameCreateConstructionResponse extends ScreepsResponse {
   }
   ops: {
     _id: string
-    type: RoomObjectConstant
+    type: RoomObjectType
     room: string
     x: number
     y: number
-    structureType: BuildableStructureConstant
+    structureType: BuildableStructureType
     user: string
     progress: number
     progressTotal: number

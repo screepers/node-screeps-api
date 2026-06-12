@@ -8,7 +8,7 @@ import zlib from 'zlib'
 import { DEFAULT_CLIENT_CONFIG, LoadConfigOptions, ScreepsClientConfig, ScreepsConfigManager, ScreepsHttpConfig, ScreepsRawServerConfig, ScreepsServerConfig } from './ScreepsConfigManager'
 import { RateLimit, ScreepsRateLimitTracker } from './ScreepsRateLimitTracker'
 import { ScreepsSocketClient } from './ScreepsSocketClient'
-import { BuildableStructureConstant, CpuShardLimits, FlagColor, FlagColors, MarketResource, RoomStat, RoomStatInterval, RoomStats, UserBadge, UserCodeModules } from './common'
+import { BuildableStructureType, CpuShardLimits, FlagColor, FlagColors, MarketResource, RoomStat, RoomStatInterval, RoomStats, UserBadge, UserCodeModules } from './common'
 import * as Http from './http'
 import { ScreepsHttpMethod, ScreepsHttpMethods } from './http'
 
@@ -756,7 +756,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     room: string,
     x: number,
     y: number,
-    structureType: BuildableStructureConstant,
+    structureType: BuildableStructureType,
     name?: string,
     shard?: string
   ): Promise<Http.GameCreateConstructionResponse> {

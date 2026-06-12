@@ -1,4 +1,4 @@
-import { RoomObjectConstant } from './rooms'
+import { RoomObjectType } from './rooms'
 import { UserBadgeSvgs } from './users'
 
 /**
@@ -101,7 +101,7 @@ export interface Decoration<P extends string> extends DecorationBase {
    * For object decorations; if defined, indicates the type of room object
    * this can be applied to (ex: 'controller')
    */
-  objectType?: RoomObjectConstant
+  objectType?: RoomObjectType
   /** Configurable properties of a decoration */
   props: { [key in P]: DecorationProperty }
   /** For object decorations; indicates whether {@link objectType} is present */
