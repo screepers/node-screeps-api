@@ -19,12 +19,21 @@ As of v1.0, all endpoint methods are asynchronous.
 import { ScreepsHttpClient } from 'screeps-api'
 import { writeFile } from 'node:fs/promises'
 
-// Supports @tedivm's [Unified Credentials File format](https://github.com/screepers/screepers-standards/blob/34bd4e6e5c8250fa0794d915d9f78d3c45326076/SS3-Unified_Credentials_File.md) (Pending [screepers-standard PR #8](https://github.com/screepers/screepers-standards/pull/8))
-const api = await ScreepsHttpClient.fromConfig('main', { client: 'appName' })
-// This loads the server config 'main' and the configs section 'appName' if it exists
-// config section can be accessed like this:
-console.log(api.appConfig.myConfigVar)
-// If making a CLI app, its suggested to have a `--server` argument for selection
+// `ScreepsHttpClient.fromConfig()` finds your configuration file and picks
+// server and client configs from it.
+// It supports @tedivm's Unified Credentials File format
+// (https://github.com/screepers/screepers-standards/blob/master/SS3-Unified_Credentials_File.md)
+// and screeps.json
+// (https://github.com/screepers/screeps-typescript-starter/blob/master/screeps.sample.json)
+
+// This example initializes the HTTP client using the `servers` section 'main'
+// and the `configs` section 'nuke-announcer' from the config file.
+// In a real application, consider reading the server/app names from env vars,
+// or accepting `--server <serverName>` and `--app <appName>` CLI arguments.
+const api = await ScreepsHttpClient.fromConfig('main', { client: 'nuke-announcer' })
+
+// Client config can be accessed like this:
+console.log(api.appConfig)
 
 // HTTP API
 
@@ -43,59 +52,78 @@ api.userMemoryGet('rooms.W0N0')
   .catch(console.error)
 
 // Get user info
-api.authMe().then(console.log)
+api.authMe().then('My user info:', console.log).catch(console.error)
 
-// Download and upload code
-api.userCodeGet('default').then((data) => console.log('code', data))
+// Download code from the "default" branch and log it
+api.userCodeGet('default')
+  .then((data) => console.log('My code:', JSON.stringify(data, undefined, 2)))
+  .catch(console.error)
+
+// Upload code to the "apiDemo" branch
 api.userCodeSet({
-  branch: 'default',
+  branch: 'apiDemo',
   modules: {
-    main: 'module.exports.loop = function(){ ... }'
+    main: 'module.exports.loop = function() { console.log("Hello, world!") }'
   }
-})
+}).catch(console.error)
 
 // WebSocket API
 
+// Connect and authenticate
 api.socket.connect()
-// Events have the structure of:
+
+// Events follow this format:
 // {
-//   channel: 'room',
-//   id: 'E3N3', // Only on certain events
+//   type: 'room',
+//   id: 'shard0', // Only on certain events, otherwise undefined
+//   path: 'E3N3', // Only on certain events, otherwise an empty string
 //   data: { ... }
 // }
 api.socket.on('connected', () => {
+  console.log('websocket client connected')
 	// Do stuff after connected
 })
 api.socket.on('auth', (event) => {
-	event.data.status // contains either 'ok' or 'failed'
+  // Contains either 'ok' or 'failed'
+	console.log('websocket auth:', event.data.status)
 	// Do stuff after auth
 })
 
-// Events: (Not a complete list)
-// connected disconnected message auth time protocol package subscribe unsubscribe console
-
-// Subscribtions can be queued even before the socket connects or auths,
+// Subscriptions can be queued even before the client connects or auths,
 // although you may want to subscribe from the connected or auth callback
 // to better handle reconnects
+function onConsole(event) {
+  const { messages, error, shard } = event.data
+  const shardTag = shard ? `[${shard}]` : undefined
+  if (error) console.error(shardTag, error)
 
+  // messages is undefined if nothing was logged or evaluated
+  if (!messages) return
+
+  // `console.log()` output from the previous tick
+  messages.log.forEach(console.info)
+
+  // `POST /api/user/console` results from the previous tick
+  messages.results.map(r => `< ${r}`).forEach(console.info)
+}
 api.socket.subscribe('console')
-api.socket.on('console', (event) => {
-	event.data.messages.log // List of console.log output for tick
-})
-
+api.socket.on('console', onConsole)
 
 // Starting in 1.0, you can also pass a handler straight to subscribe!
-api.socket.subscribe('console', (event)=>{
-	event.data.messages.log // List of console.log output for tick
+api.socket.subscribe('console', onConsole)
+
+// Watch CPU/Memory usage
+api.socket.subscribe('cpu', (event) => {
+  console.log('CPU used:', event.data.cpu)
+  console.log('Memory used (bytes):', event.data.memory)
 })
 
-// More common examples
-api.socket.subscribe('cpu', (event) => console.log('cpu', event.data))
+// Watch for updates to Memory paths
 api.socket.subscribe('memory/stats', (event) => {
-	console.log('stats', event.data)
+	console.log('Memory.stats:', JSON.stringify(event.data, undefined, 2))
 })
 api.socket.subscribe('memory/rooms.E0N0', (event) => {
-	console.log('E0N0 Memory', event.data)
+	console.log('Memory.rooms.E0N0:', JSON.stringify(event.data, undefined, 2))
 })
 ```
 
@@ -132,23 +160,25 @@ Please note that the listed endpoints and WebSocket events are not exhaustive.
 
 ## Development
 
-This project uses the `yarn` package manager. To ensure you're using the correct version instead of v1.x:
+This project uses the [yarn package manager](https://yarnpkg.com/). To ensure you're using the correct version instead of v1.x:
 
 ```sh
+# Enable corepack: https://yarnpkg.com/corepack
 set corepack enable
+# Install the version of yarn specified in package.json's "packageManager" field
 yarn install
-# You may need to run the command after installing Yarn for the first time
+# You may need to re-run the command after installing Yarn for the first time
 # in order to install dependencies
 yarn install
 ```
 
 ### Configuration
 
-The [documentation](https://screepers.github.io/node-screeps-api/documents/Configuration_and_Credential_Files.html) goes into detail on how to set up configuration, but the simplest way to get started is to copy a `screeps.yaml` or `screeps.json` file to the repo root directory.
+The [documentation](https://screepers.github.io/node-screeps-api/documents/Configuration_and_Credential_Files.html) goes into detail on how to set up aconfiguration file, but the simplest way to get started is to copy a `screeps.yaml` or `screeps.json` file to the repo root directory.
 
 ### Running Scripts
 
-`tsx` is used to execute TypeScript scripts without performing a full build to transpile them:
+`tsx` is used to execute TypeScript scripts without having to run `tsc` to transpile them:
 
 ```sh
 # Run an example script
