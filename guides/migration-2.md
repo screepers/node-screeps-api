@@ -29,11 +29,11 @@ const apiEx2 = await ScreepsAPI.fromConfig('main', 'myApp')
 // New:
 // Server name is now required to prevent accidental use of the default server
 const apiEx1 = await ScreepsHttpClient.fromConfig('main')
-const apiEx2 = await ScreepsHttpClient.fromConfig('main', { client: 'myApp' })
+const apiEx2 = await ScreepsHttpClient.fromConfig('main', { app: 'myApp' })
 const apiEx3 = await ScreepsHttpClient.fromConfig('main', {
   // Client options can be provided directly to the factory function
   // instead of loading it from the config file
-  client: {
+  app: {
     // The default shard can now be specified as an option. If left undefined,
     // endpoint methods will throw an error if a shard argument is not provided.
     defaultShard: 'shard0',
@@ -56,7 +56,7 @@ const messages = await api.raw.userMessages.index();
 
 // New:
 const api = await ScreepsHttpClient.fromConfig('main', {
-  client: { defaultShard: 'shard0' }
+  app: { defaultShard: 'shard0' }
 })
 const me = await api.authMe()
 const terrain = await api.gameRoomTerrain('W0N0') // shard0

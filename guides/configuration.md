@@ -100,7 +100,7 @@ One approach is {@link ScreepsHttpClient | `new ScreepsHttpClient()`}:
 import { ScreepsConfigManager, ScreepsHttpClient } from 'screeps-api'
 
 const manager = new ScreepsConfigManager()
-const config = await manager.loadConfig('screepsplus', { client: 'nuke-announcer' })
+const config = await manager.loadConfig('screepsplus', { app: 'nuke-announcer' })
 const api = new ScreepsHttpClient(config)
 
 console.log(api.server.url) // => https://screepspl.us/
@@ -137,13 +137,13 @@ If you are loading your credentials and server config directly from a file, it's
 ```ts
 import { ScreepsHttpClient } from 'screeps-api'
 
-const api = await ScreepsHttpClient.fromConfig('screepsplus', { client: 'nuke-announcer' })
+const api = await ScreepsHttpClient.fromConfig('screepsplus', { app: 'nuke-announcer' })
 ```
 
 If you want to use a client configuration that is not available in your config file, you can pass those options directly instead of using an app name:
 
 ```ts
-const api = await ScreepsHttpClient.fromConfig('screepsplus', { client: {
+const api = await ScreepsHttpClient.fromConfig('screepsplus', { app: {
   defaultShard: 'shard2',
   retry429MaxRetries: 6
 } })
@@ -155,7 +155,7 @@ The HTTP client can also be reconfigured after initialization:
 import { ScreepsConfigManager, ScreepsHttpClient } from 'screeps-api'
 
 const manager = new ScreepsConfigManager()
-const config = await manager.loadConfig('screepsplus', { client: 'nuke-announcer' })
+const config = await manager.loadConfig('screepsplus', { app: 'nuke-announcer' })
 const api = new ScreepsHttpClient(config)
 
 // ... operations on the screepsplus server ...

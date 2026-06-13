@@ -4,7 +4,7 @@ import { writeFileSync } from 'node:fs'
 import { ScreepsHttpClient } from '../src'
 
 const api = await ScreepsHttpClient.fromConfig('main', {
-  client: {
+  app: {
     defaultShard: 'shard0'
   }
 })

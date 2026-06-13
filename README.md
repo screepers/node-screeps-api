@@ -30,7 +30,7 @@ import { writeFile } from 'node:fs/promises'
 // and the `configs` section 'nuke-announcer' from the config file.
 // In a real application, consider reading the server/app names from env vars,
 // or accepting `--server <serverName>` and `--app <appName>` CLI arguments.
-const api = await ScreepsHttpClient.fromConfig('main', { client: 'nuke-announcer' })
+const api = await ScreepsHttpClient.fromConfig('main', { app: 'nuke-announcer' })
 
 // Client config can be accessed like this:
 console.log(api.appConfig)

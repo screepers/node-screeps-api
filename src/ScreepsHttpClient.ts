@@ -70,6 +70,23 @@ export const OFFICIAL_HISTORY_INTERVAL = 100
 export const PRIVATE_HISTORY_INTERVAL = 20
 
 /**
+ * Specifies the delay between retry attempts for API requests that are rejected due to the global rate limit.
+ *
+ * The delay for each retry attempt is calculated using the following formula:
+ * ```ts
+ * const delay = Math.floor(var * Math.random()) + min
+ * ```
+ * @see {@link ScreepsClientConfig.retry429Global} to enable/disable this behavior
+ * @category HTTP API
+ */
+export const GLOBAL_RATE_LIMIT_DELAY = {
+  /** The constant portion of the delay */
+  min: 200,
+  /** The random variable portion of the delay */
+  var: 500
+} as const
+
+/**
  * Provides access to the Screeps HTTP Http.
  *
  * Please note that the Screeps HTTP API is not technically a public API; it
@@ -263,14 +280,14 @@ export class ScreepsHttpClient extends EventEmitter {
   constructor(config: ScreepsHttpConfig | ScreepsServerConfig | ScreepsRawServerConfig) {
     super()
 
-    if (!('server' in config) || !('client' in config)) {
+    if (!('server' in config) || !('app' in config)) {
       config = {
         server: new ScreepsConfigManager().normalizeServerConfig(config),
-        client: { ...DEFAULT_CLIENT_CONFIG }
+        app: { ...DEFAULT_CLIENT_CONFIG }
       }
     }
 
-    this.appConfig = config.client
+    this.appConfig = config.app
     this._server = config.server
     this._token = config.server.token
     this._http = axios.create({ baseURL: config.server.url })
@@ -1950,7 +1967,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
 
         // Handle global rate limit
         if (isGlobal && cfg.retry429Global !== false) {
-          const delay = Math.floor(Math.random() * 500) + 200
+          const varDelay = Math.floor(Math.random() * GLOBAL_RATE_LIMIT_DELAY.var)
+          const delay = varDelay + GLOBAL_RATE_LIMIT_DELAY.min
           await setTimeout(delay)
           return await this.req(method, path, params, retriesAttempted + 1)
         }

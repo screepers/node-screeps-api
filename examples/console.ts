@@ -10,7 +10,7 @@ import { ScreepsHttpClient, ServerAuthEvent, ServerAuthStatuses, UserConsoleEven
 // Load server/app names from env vars
 const serverName = process.env.SCREEPS_SERVER ?? 'main'
 const appName = process.env.SCREEPS_APP ?? 'example'
-export const api = await ScreepsHttpClient.fromConfig(serverName, { client: appName })
+export const api = await ScreepsHttpClient.fromConfig(serverName, { app: appName })
 
 export const input = process.stdin
 export const output = process.stdout

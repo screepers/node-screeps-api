@@ -150,7 +150,7 @@ export class ScreepsConfigManager {
     debug(`Loading config: ${file}`)
 
     return {
-      client: this.normalizeClientConfig(parsed, opts?.client),
+      app: this.normalizeClientConfig(parsed, opts?.app),
       server: this.normalizeServersConfig(parsed, serverName),
       parsed
     }
@@ -244,7 +244,7 @@ export class ScreepsConfigManager {
 
   normalizeClientConfig(
     parsed: ScreepsJsonConfig | ScreepsYamlConfig,
-    clientOpts?: string | Partial<ScreepsClientConfig>
+    clientOpts?: string | Partial<ScreepsAppConfig>
   ): ScreepsAppConfig {
     const client: ScreepsAppConfig = { ...DEFAULT_CLIENT_CONFIG }
     if (!clientOpts) {
@@ -282,7 +282,7 @@ export class ScreepsConfigManager {
  */
 export interface ScreepsHttpConfig {
   /** @see {@link ScreepsAppConfig} */
-  client: ScreepsAppConfig
+  app: ScreepsAppConfig
   /**
    * Configuration for the Screeps World server to which this client
    * should connect
@@ -308,10 +308,10 @@ export interface LoadConfigOptions {
   file?: string
   /**
    * If this is a string and a YAML credential file is used,
-   * {@link ScreepsClientConfig} will be pulled from the `configs[client]` key
+   * {@link ScreepsClientConfig} will be pulled from the `configs[app]` key
    * in that file.
    */
-  client?: string | Partial<ScreepsAppConfig>
+  app?: string | Partial<ScreepsAppConfig>
 }
 
 /**
