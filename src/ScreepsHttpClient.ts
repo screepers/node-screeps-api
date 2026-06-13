@@ -1857,7 +1857,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param path The URL path of the endpoint. This will be appeneded to
    *  {@link ScreepsServerConfig.url}. Request parameters should be included for
    *  `GET` requests.
-   * @param body The body of the request (POST only)
+   * @param params The request parameters.
    * @param retriesAttempted The number of retries already attempted due to
    *  HTTP 429 errors. This argument should not be provided by consumers.
    * @returns The parsed response body
@@ -1865,11 +1865,11 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
   async req(
     method: ScreepsHttpMethod,
     path: string,
-    body = {},
+    params = {},
     retriesAttempted = 0
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
-    debugHttp(`${method} ${path} ${JSON.stringify(body)}`)
+    debugHttp(`${method} ${path} ${JSON.stringify(params)}`)
 
     const req: AxiosRequestConfig = {
       method,
@@ -1885,9 +1885,9 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     }
 
     if (method === ScreepsHttpMethods.Get) {
-      req.params = body
+      req.params = params
     } else {
-      req.data = body
+      req.data = params
     }
 
     try {
@@ -1925,7 +1925,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
           this.emit(ScreepsHttpClient.AUTH, false)
           this._authed = false
           await this.auth(err)
-          return await this.req(method, path, body)
+          return await this.req(method, path, params)
         } else {
           throw apiErr
         }
@@ -1941,7 +1941,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         if (isGlobal && cfg.retry429Global !== false) {
           const delay = Math.floor(Math.random() * 500) + 200
           await setTimeout(delay)
-          return await this.req(method, path, body, retriesAttempted + 1)
+          return await this.req(method, path, params, retriesAttempted + 1)
         }
 
         // Handle endpoint-specific rate limits
@@ -1955,7 +1955,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
             )
             debugRateLimitExceeded(rateLimitDesc + ` retriesAttempted=${retriesAttempted} delay=${delay / 1_000}s`)
             await setTimeout(delay)
-            return await this.req(method, path, body, retriesAttempted + 1)
+            return await this.req(method, path, params, retriesAttempted + 1)
           } else {
             debugRateLimitExceeded(rateLimitDesc)
           }

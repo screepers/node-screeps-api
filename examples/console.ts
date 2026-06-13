@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import util from 'node:util'
 // If installed from npm, use:
 // import { ... } from 'screeps-api'
-import { ScreepsHttpClient, ServerAuthEvent, ServerAuthStatus, UserConsoleEvent } from '../src'
+import { ScreepsHttpClient, ServerAuthEvent, ServerAuthStatuses, UserConsoleEvent } from '../src'
 
 // Run this with DEBUG=screepsapi:socket to enable debug logging
 
@@ -68,7 +68,7 @@ function run() {
   })
 
   api.socket.on('auth', (event: ServerAuthEvent) => {
-    if (event.data.status === ServerAuthStatus.OK) {
+    if (event.data.status === ServerAuthStatuses.Ok) {
       api.socket.subscribe('/console')
       console.log('Console authenticated')
     } else {

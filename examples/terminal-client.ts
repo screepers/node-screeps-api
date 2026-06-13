@@ -2,7 +2,7 @@ import readline from 'node:readline/promises'
 import { fileURLToPath } from 'node:url'
 // If installed from npm, use:
 // import { ... } from 'screeps-api'
-import { Resources, RoomEvent, RoomObject, RoomObjectConstant, RoomObjectConstants, UserConsoleEvent, UserCpuEvent, UserCpuEventData } from '../src'
+import { Resources, RoomEvent, RoomObject, RoomObjectType, RoomObjectTypes, UserConsoleEvent, UserCpuEvent, UserCpuEventData } from '../src'
 
 // Borrow API client instance and terminal I/O from the Console example
 import { api, output, rl, stripTags, quit } from './console'
@@ -38,11 +38,11 @@ const TERRAIN_GLYPHS: Readonly<{ [code: string]: string }> = {
 }
 
 /** Glyphs used to represent each {@link RoomObject} type. */
-const OBJECT_GLYPHS: Readonly<{ [resType in RoomObjectConstant]: string }> = {
+const OBJECT_GLYPHS: Readonly<{ [resType in RoomObjectType]: string }> = {
   // Assign `r` to all dropped resources
   ...Object.values(Resources).reduce(
     (glyphs, resType) => { glyphs[resType] = 'r' ; return glyphs },
-    {} as { [resType in RoomObjectConstant]: string },
+    {} as { [resType in RoomObjectType]: string },
   ),
   creep: 'c',
   powerCreep: 'p',
@@ -76,11 +76,11 @@ const OBJECT_GLYPHS: Readonly<{ [resType in RoomObjectConstant]: string }> = {
   tombstone: 'x'
 };
 
-const GLYPH_RENDER_ORDER: Readonly<{ [resType in RoomObjectConstant]: number }> = {
+const GLYPH_RENDER_ORDER: Readonly<{ [resType in RoomObjectType]: number }> = {
   // Assign a default value
-  ...Object.values(RoomObjectConstants).reduce(
+  ...Object.values(RoomObjectTypes).reduce(
     (glyphs, resType) => { glyphs[resType] = 50 ; return glyphs },
-    {} as { [resType in RoomObjectConstant]: number },
+    {} as { [resType in RoomObjectType]: number },
   ),
   nuke: 5,
   container: 10,
