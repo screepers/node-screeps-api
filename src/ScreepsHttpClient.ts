@@ -1797,6 +1797,16 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     return res
   }
 
+  /**
+   * Switch to a different server.
+   *
+   * If the new server is using email/password auth, the client will attempt
+   * to authenticate automatically.
+   * @param rawServer The config for the new server the client should use.
+   *  This will be normalized by {@link ScreepsConfigManager} before
+   *  being stored in {@link server}.
+   * @throws {@link ScreepsApiError} if authentication fails
+   */
   async setServer(rawServer: ScreepsRawServerConfig) {
     const server = configManager.normalizeServerConfig(rawServer)
     debugHttp(`setServer: ${server.url}`)
@@ -1829,6 +1839,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * authentication.
    * @param cause if provided, will be attached to the error thrown when
    *  authentication credentials are missing
+   * @throws {@link ScreepsApiError} if authentication fails
    */
   async auth(cause?: unknown) {
     // Skip if already authenticating via API token
