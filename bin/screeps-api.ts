@@ -32,11 +32,10 @@ async function out(data: unknown) {
 
 const program = new Command()
 
-const commandBase = (name: string, args = '') => {
+const commandBase = (name: string, args?: string) => {
   const command = new Command(name)
-  command
-    .arguments(args)
-    .option('--server <server>', 'Server config to use', 'main')
+  if (args) command.arguments(args)
+  command.option('--server <server>', 'Server config to use', 'main')
   program.addCommand(command)
   return command
 }

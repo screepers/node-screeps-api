@@ -1,6 +1,6 @@
 # Screeps API
 
-## This is a nodejs API for the game Screeps
+## This is a Node.js API for the game Screeps
 
 [![License](https://img.shields.io/npm/l/screeps-api.svg)](https://npmjs.com/package/screeps-api)
 [![Version](https://img.shields.io/npm/v/screeps-api.svg)](https://npmjs.com/package/screeps-api)
@@ -15,7 +15,7 @@
 
 As of v1.0, all endpoint methods are asynchronous.
 
-```typescript
+```javascript
 import { ScreepsHttpClient } from 'screeps-api'
 import { writeFile } from 'node:fs/promises'
 
@@ -52,7 +52,7 @@ api.userMemoryGet('rooms.W0N0')
   .catch(console.error)
 
 // Get user info
-api.authMe().then('My user info:', console.log).catch(console.error)
+api.authMe().then(me => console.log('My user info:', me)).catch(console.error)
 
 // Download code from the "default" branch and log it
 api.userCodeGet('default')
@@ -80,13 +80,13 @@ api.socket.connect()
 //   data: { ... }
 // }
 api.socket.on('connected', () => {
-  console.log('websocket client connected')
-	// Do stuff after connected
+  console.log('Websocket client connected')
+  // Do stuff after connected
 })
 api.socket.on('auth', (event) => {
   // Contains either 'ok' or 'failed'
-	console.log('websocket auth:', event.data.status)
-	// Do stuff after auth
+  console.log('Websocket auth:', event.data.status)
+  // Do stuff after auth
 })
 
 // Subscriptions can be queued even before the client connects or auths,
@@ -94,14 +94,14 @@ api.socket.on('auth', (event) => {
 // to better handle reconnects
 function onConsole(event) {
   const { messages, error, shard } = event.data
-  const shardTag = shard ? `[${shard}]` : undefined
-  if (error) console.error(shardTag, error)
+  const shardTag = shard ? `[${shard}] ` : ''
+  if (error) console.error(shardTag + error)
 
   // messages is undefined if nothing was logged or evaluated
   if (!messages) return
 
   // `console.log()` output from the previous tick
-  messages.log.forEach(console.info)
+  messages.log.map(l => shardTag + l).forEach(console.info)
 
   // `POST /api/user/console` results from the previous tick
   messages.results.map(r => `< ${r}`).forEach(console.info)
@@ -109,7 +109,7 @@ function onConsole(event) {
 api.socket.subscribe('console')
 api.socket.on('console', onConsole)
 
-// Starting in 1.0, you can also pass a handler straight to subscribe!
+// Starting in v1.0, you can also pass a handler straight to subscribe!
 api.socket.subscribe('console', onConsole)
 
 // Watch CPU/Memory usage
@@ -120,10 +120,10 @@ api.socket.subscribe('cpu', (event) => {
 
 // Watch for updates to Memory paths
 api.socket.subscribe('memory/stats', (event) => {
-	console.log('Memory.stats:', JSON.stringify(event.data, undefined, 2))
+  console.log('Memory.stats:', JSON.stringify(event.data, undefined, 2))
 })
 api.socket.subscribe('memory/rooms.E0N0', (event) => {
-	console.log('Memory.rooms.E0N0:', JSON.stringify(event.data, undefined, 2))
+  console.log('Memory.rooms.E0N0:', JSON.stringify(event.data, undefined, 2))
 })
 ```
 
@@ -134,7 +134,7 @@ As of v1.7, a small CLI program (`screeps-api`) is included.
 Server/auth credentials are located using `ScreepsConfigManager.loadConfig()`. All commands aside from `help` accept a `--server <name>` option to specify the name of the server to use from your config file.
 
 ```
-$ screeps-api
+> screeps-api --help
 Usage: screeps-api [options] [command]
 
 Options:
@@ -145,7 +145,7 @@ Commands:
   call [options] <cmd> [args...]  Call an API endpoint method on ScreepsHttpClient
   memory [options] [path]         Read from or write to Memory
   segment [options] <segments>    Read or write RawMemory segments
-  download [options] <>           Download code and WASM binaries
+  download [options]              Download code and WASM binaries
   upload [options] <files...>     Upload code and WASM binaries
   help [command]                  display help for command
 ```
@@ -174,7 +174,7 @@ yarn install
 
 ### Configuration
 
-The [documentation](https://screepers.github.io/node-screeps-api/documents/Configuration_and_Credential_Files.html) goes into detail on how to set up aconfiguration file, but the simplest way to get started is to copy a `screeps.yaml` or `screeps.json` file to the repo root directory.
+The [documentation](https://screepers.github.io/node-screeps-api/documents/Configuration_and_Credential_Files.html) goes into detail on how to set up a configuration file, but the simplest way to get started is to copy a `screeps.yaml` or `screeps.json` file to the repo root directory.
 
 ### Running Scripts
 
