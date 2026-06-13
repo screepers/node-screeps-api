@@ -13,12 +13,37 @@ import * as Http from './http'
 import { ScreepsHttpMethod, ScreepsHttpMethods } from './http'
 
 /**
- * Fired when rate limit state is updated
+ * Contains all information needed to submit an API request via
+ * {@link ScreepsHttpClient.req}.
+ *
+ * This is included in {@link ScreepsApiError}, {@link RateLimitEvent},
+ * and {@link ScreepsHttpResponse}. It allows response data to be matched to a
+ * request, or for requests to be retried if needed.
  * @category HTTP API
  */
-export interface RateLimitEvent extends RateLimit {
+export interface ScreepsHttpRequest {
   method: ScreepsHttpMethod
   path: string
+  params: unknown
+  retriesAttempted: number
+}
+
+/**
+ * Payload of {@link ScreepsHttpClient.RATE_LIMIT} events.
+ * @category HTTP API
+ */
+export interface RateLimitEvent extends RateLimit, ScreepsHttpRequest {
+}
+
+/**
+ * Payload of {@link ScreepsHttpClient.RESPONSE_RESULT} events.
+ * @category HTTP API
+ */
+export interface ScreepsHttpResponse<
+  T extends Http.ScreepsResponse | Http.ScreepsErrorResponse = Http.ScreepsResponse
+> extends ScreepsHttpRequest {
+  /** The data field from the response body */
+  data: T
 }
 
 /**
@@ -201,12 +226,21 @@ export class ScreepsHttpClient extends EventEmitter {
   static readonly RATE_LIMIT = 'rateLimit'
 
   /**
-   * Fired when a response is received from the Http.
+   * Fired when a response is received from the HTTP API.
    *
    * Payload:
    * @event {@link AxiosResponse} The HTTP response
    */
   static readonly RESPONSE = 'response'
+
+  /**
+   * Fired when a response is received from the HTTP API.
+   *
+   * Payload:
+   * @event {@link ScreepsHttpResponse} The HTTP response, including params
+   *  of the associated request
+   */
+  static readonly RESPONSE_RESULT = 'responseResult'
 
   /**
    * Fired immediately before {@link ScreepsHttpClient.token} is updated.
@@ -1877,15 +1911,16 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
   /**
    * Send an API request to the server.
    *
-   * Typically, this should not be called directly. Instead, use the appropriate
-   * endpoint method to get request parameter and response body types.
-   * If an endpoint you rely on does not have an associated method,
+   * Unless you are retrying a request using a {@link ScreepsHttpRequest}
+   * instance, this should not be called directly. Instead, use the appropriate
+   * endpoint method to apply the correct request parameter and response body types.
+   *
+   * If an endpoint you use does not have an associated method,
    * please consider submitting a PR to implement it.
    * @param method The HTTP method to use
    * @param path The URL path of the endpoint. This will be appeneded to
-   *  {@link ScreepsServerConfig.url}. Request parameters should be included for
-   *  `GET` requests.
-   * @param params The request parameters.
+   *  {@link ScreepsServerConfig.url}.
+   * @param params The request parameters
    * @param retriesAttempted The number of retries already attempted due to
    *  HTTP 429 errors. This argument should not be provided by consumers.
    * @returns The parsed response body
@@ -1893,11 +1928,19 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
   async req(
     method: ScreepsHttpMethod,
     path: string,
-    params = {},
+    params?: unknown,
     retriesAttempted = 0
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
+    params ??= {}
     debugHttp(`${method} ${path} ${JSON.stringify(params)}`)
+
+    const reqArgs = {
+      method,
+      path,
+      params,
+      retriesAttempted
+    }
 
     const req: AxiosRequestConfig = {
       method,
@@ -1930,21 +1973,26 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
         this._authed = true
       }
 
-      this.updateRateLimit(method, path, res as RateLimitResponse)
+      this.updateRateLimit(reqArgs, res as RateLimitResponse)
 
       const data = res.data as { data?: unknown }
       if (typeof data.data === 'string' && data.data.startsWith('gz:')) {
         data.data = await this.gz(data.data)
       }
+
       this.emit(ScreepsHttpClient.RESPONSE, res)
+      this.emit(ScreepsHttpClient.RESPONSE_RESULT, {
+        ...reqArgs,
+        data: res.data as unknown as Http.ScreepsResponse | Http.ScreepsErrorResponse
+      })
       return res.data
     } catch (err) {
       const res = (err instanceof AxiosError ? err.response ?? {} : {}) as RateLimitResponse
       const apiErr = err instanceof AxiosError
-        ? new ScreepsApiError(err, res, path)
+        ? new ScreepsApiError(err, res, reqArgs)
         : err
 
-      const rateLimit = this.updateRateLimit(method, path, res)
+      const rateLimit = this.updateRateLimit(reqArgs, res)
 
       // Attempt to authenticate in response to "Not Authorized" errors
       if (res.status === 401) {
@@ -1953,7 +2001,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
           this.emit(ScreepsHttpClient.AUTH, false)
           this._authed = false
           await this.auth(err)
-          return await this.req(method, path, params)
+          return await this.req(method, path, params, retriesAttempted)
         } else {
           throw apiErr
         }
@@ -2001,7 +2049,10 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     return JSON.parse(ret.toString())
   }
 
-  private updateRateLimit(method: ScreepsHttpMethod, path: string, res: RateLimitResponse): RateLimitEvent {
+  private updateRateLimit(
+    req: ScreepsHttpRequest,
+    res: RateLimitResponse
+  ): RateLimitEvent {
     const {
       headers: {
         'x-ratelimit-limit': limit,
@@ -2016,9 +2067,8 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
     }
 
     const event = {
-      ...this.rateLimits.update(method, path, latest),
-      method,
-      path
+      ...this.rateLimits.update(req.method, req.path, latest),
+      ...req
     }
     this.emit(ScreepsHttpClient.RATE_LIMIT, event)
     return event
@@ -2101,35 +2151,43 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
 }
 
 /**
- * Thrown by {@link ScreepsHttpClient} endpoint methods when a HTTP 4xx/5xx
+ * Thrown by {@link ScreepsHttpClient} endpoint methods when an HTTP 4xx/5xx
  * response is received from an endpoint.
+ *
+ * **Warning:** This object is likely to contain auth credentials;
+ * logging it may leak them. See the docs for individual fields for more details.
  * @category HTTP API
  */
 export class ScreepsApiError extends Error {
   /**
-   * Params from the API request which caused the error. These are omitted
-   * for auth endpoints to avoid leaking auth credentials to logs.
+   * All params sent to {@link ScreepsHttpClient.req} for the request
+   * that triggered this error. It can be used to retry a request.
+   *
+   * **Warning:** The `params` field is likely to contain auth credentials
+   * when `path` starts with `auth/`.
    */
-  params: { [paramName: string]: unknown }
+  req: ScreepsHttpRequest
   /**
    * The response body (usually an HTML document
-   * with an error message in the body)
+   * with an error message in the body).
    */
   data?: string
-  /** Response headers */
+  /**
+   * Response headers
+   *
+   * **Warning:** This may contain an `X-Token` field with an API auth token.
+   */
   headers: { [headerName: string]: unknown }
   /** HTTP error status code */
   status: number
   /** Human-readable HTTP error status */
   statusText: string
 
-  constructor(err: AxiosError, res: AxiosResponse, path: string) {
+  constructor(err: AxiosError, res: AxiosResponse, req: ScreepsHttpRequest) {
     super(err.message)
     this.stack = err.stack
 
-    this.params = !path.startsWith('/api/auth')
-      ? (res.config?.params ?? {}) as typeof this['params']
-      : {}
+    this.req = req
     this.data = res.data as string
     this.headers = res.headers
     this.status = res.status

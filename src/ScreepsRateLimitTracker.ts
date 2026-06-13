@@ -11,9 +11,9 @@ const debugRateLimit = Debug('screepsapi:ratelimit')
  * @category HTTP API
  */
 export interface RateLimit extends RateLimitUpdate {
-  /** Time period to which the {@link limit} applies. */
+  /** Time period to which the {@link limit} applies */
   period: RateLimitPeriod
-  /** Time (in milliseconds) until {@link reset}. */
+  /** Time (in seconds) until {@link reset} */
   toReset: number
 }
 
@@ -27,7 +27,7 @@ export interface RateLimitUpdate {
   /** Remaining number of requests that can be sent until {@link reset} */
   remaining: number
   /**
-   * UNIX timestamp (in milliseconds) indicating when the rate limit will
+   * UNIX timestamp (in seconds) indicating when the rate limit will
    * automatically reset.
    */
   reset: number
@@ -94,7 +94,7 @@ export class ScreepsRateLimitTracker {
     const limit = this.find(method, path)
     limit.remaining = latest.remaining
     limit.reset = latest.reset
-    limit.toReset = latest.reset - Date.now()
+    limit.toReset = latest.reset - Math.ceil(Date.now() / 1_000)
 
     debugRateLimit(this.describe(method, path, limit))
 
