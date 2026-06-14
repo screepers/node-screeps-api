@@ -218,7 +218,7 @@ export class ScreepsHttpClient extends EventEmitter {
   static readonly AUTH = 'auth'
 
   /**
-   * Fired when rate limit state is received from an API response.
+   * Fired when a rate limit is exceeded
    *
    * Payload:
    * @event {@link RateLimitEvent} The latest rate limit state
@@ -2014,6 +2014,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
       // Retry (if enabled) in response to "Too Many Requests" errors
       if (res.status === 429) {
         // Global rate limit is indicated by the lack of rate limit headers
+        this.emit(ScreepsHttpClient.RATE_LIMIT, rateLimit)
         const isGlobal = !res.headers['x-ratelimit-limit']
         const cfg = this.appConfig
 
@@ -2074,7 +2075,6 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
       ...this.rateLimits.update(req.method, req.path, latest),
       ...req
     }
-    this.emit(ScreepsHttpClient.RATE_LIMIT, event)
     return event
   }
 

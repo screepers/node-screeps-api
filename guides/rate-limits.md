@@ -55,17 +55,15 @@ When automatic retries are disabled (or the maximum number of retries for an end
 
 ```ts
 import { setTimeout } from 'node:timers/promises'
-import { ScreepsHttpClient, RateLimitEvent } from 'screeps-api'
+import { ScreepsHttpClient, ScreepsHttpResponse, RateLimitEvent } from 'screeps-api'
 
 // Assumes the client has already been initialized and assigned to `api`
 declare const api: ScreepsHttpClient
 
 api.on(ScreepsHttpClient.RATE_LIMIT, async (event: RateLimit) => {
-  // TODO: Params is not currently included; this won't work
   const { method, path, params, toReset } = event
 
   // Determine whether global or endpoint rate limit was exceeded
-  // TODO: Currently, this indicates either global rate limit or that nothing is wrong
   const isGlobal = isNaN(toReset)
   const [desc, delay] = isGlobal
     ? ['Global', 500]
@@ -76,17 +74,16 @@ api.on(ScreepsHttpClient.RATE_LIMIT, async (event: RateLimit) => {
   await setTimeout(delay)
 
   // Retry request:
-  // - If retry succeeds, ScreepsHttpClient.RESPONSE listener will handle the result
+  // - If retry succeeds, ScreepsHttpClient.RESPONSE_RESULT listener will handle the result
   // - If still rate limited, this listener will be invoked again
   api.req(method, path, params)
 })
 
-// TODO: Implement RESPONSE_DATA event with just method, path, params, and res.data
-//  so we can provide reasonable type constraints for consumers
-api.on(ScreepsHttpClient.RESPONSE, async (res: AxiosResponse<any, any, {}>)) => {
-  // ... Use request data from res.config to match this event to request that is awaiting a response ...
+api.on(ScreepsHttpClient.RESPONSE_RESULT, async (event: ScreepsHttpResponse)) => {
+  const { method, path, params } = event
+  // ... Use request data to match this event to request that is awaiting a response ...
 
-  // ... res.data contains the payload that would have been returned as a Promise from an API endpoint method ...
+  // ... event.data contains the payload that would have been returned as a Promise from an API endpoint method ...
 })
 ```
 
