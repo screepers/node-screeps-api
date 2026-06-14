@@ -3,7 +3,8 @@ import { Command } from 'commander'
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
-import { ScreepsAPI } from '../src/ScreepsAPI'
+import { ScreepsHttpClient } from '../src'
+import { UserCodeSetRequest } from './http'
 
 interface CommandOptions {
   server?: string
@@ -11,8 +12,8 @@ interface CommandOptions {
 
 type RawApiFn = (...args: unknown[]) => Promise<unknown>
 
-function init(opts?: CommandOptions): Promise<ScreepsAPI> {
-  return ScreepsAPI.fromConfig(opts?.server ?? 'main')
+function init(opts?: CommandOptions): Promise<ScreepsHttpClient> {
+  return ScreepsHttpClient.fromConfig(opts?.server ?? 'main')
 }
 
 function json(data: unknown) {
@@ -31,11 +32,10 @@ async function out(data: unknown) {
 
 const program = new Command()
 
-const commandBase = (name: string, args = '') => {
+const commandBase = (name: string, args?: string) => {
   const command = new Command(name)
-  command
-    .arguments(args)
-    .option('--server <server>', 'Server config to use', 'main')
+  if (args) command.arguments(args)
+  command.option('--server <server>', 'Server config to use', 'main')
   program.addCommand(command)
   return command
 }
@@ -46,36 +46,26 @@ const pkg = JSON.parse(await readFile(pkgUrl, 'utf8')) as { version: string }
 program
   .version(pkg.version)
 
-commandBase('raw', '<cmd> [args...]')
-  .summary('Call an API endpoint via ScreepsAPI.raw.<cmd>')
-  .description(`Call an API endpoint defined on ScreepsAPI.raw.
+commandBase('call', '<cmd> [args...]')
+  .summary('Call an API endpoint method on ScreepsHttpClient')
+  .description(`Call an API endpoint defined on ScreepsHttpClient.
 
-<cmd> is formatted as it would be if you were calling the endpoint via ScreepsAPI.raw.
-[args...] are passed directly to the relevant ScreepsAPI.raw function.
+<cmd> is formatted as it would be if you were calling the endpoint via ScreepsHttpClient.
+[args...] are passed directly to the relevant ScreepsHttpClient method.
   `)
   .addHelpText('after', `Examples:
-# Run 'GET /api/auth/me' on the 'ptr' server from your credentials file
-screeps-api --server ptr raw auth.me
-# Run 'GET /api/scoreboards/list?limit=20&offset=50' on default server
-screeps-api raw scoreboard 20 50
-# Run 'GET /api/scoreboards/list?limit=20&offset=50' on default server
-screeps-api raw scoreboard 20 50
-# Fetch entire Memory object from shard0 on 'mmo' server from your credentials file
-screeps-api raw user.memory.get "" "shard0"
+# Run 'GET /api/auth/me' on the "ptr" server from your credentials file
+screeps-api --server ptr call authMe
+# Run 'GET /api/scoreboards/list?limit=20&offset=50' on "main" server from your credentials file
+screeps-api call scoreboardList 20 50
+# Fetch entire Memory object from shard0 on "mmo" server from your credentials file
+screeps-api call userMemoryGet "" "shard0"
   `)
-  .action(async function (cmd: string, args: unknown[], opts?: CommandOptions) {
+  .action(async function (endpoint: string, args: unknown[], opts?: CommandOptions) {
     const api = await init(opts)
-    const path = cmd.split('.')
-    let fn: { [key: string]: unknown } | RawApiFn = api.raw
-    for (const part of path) {
-      if (typeof fn === 'function') {
-        console.error(`Command '${cmd}' not found on ScreepsAPI.raw`)
-        this.help({ error: true }) // prints to stderr and exits with error code
-      }
-      fn = fn[part] as typeof fn
-    }
+    const fn = api[endpoint as unknown as keyof typeof api]
     if (!fn || typeof fn !== 'function') {
-      console.error(`Command '${cmd}' not found on ScreepsAPI.raw`)
+      console.error(`Endpoint method '${endpoint}' not found on ScreepsHttpClient`)
       this.help({ error: true }) // prints to stderr and exits with error code
     }
     await out(await (fn as RawApiFn).apply(api, args))
@@ -111,12 +101,12 @@ If --set <file> is used, this command will instead set the value of [path] to th
         this.help({ error: true }) // prints to stderr and exits with error code
       }
       const data = await readFile(opts.set, 'utf8')
-      await api.memory.set(memPath, data, opts.shard)
+      await api.userMemorySet(memPath, data, opts.shard)
       await out('Memory written')
       return
     }
 
-    const res = await api.memory.get(memPath, opts.shard)
+    const res = await api.userMemoryGet(memPath, opts.shard)
     if (!res.data) {
       return
     }
@@ -137,9 +127,8 @@ interface SegmentOptions extends CommandOptions {
 }
 
 commandBase('segment', '<segments>')
-  .description(`Read or write RawMemory segments.
-
-Reads/downloads segment data by default. <segments> should be a comma-delimited
+  .summary('Read or write RawMemory segments')
+  .description(`Reads/downloads segment data by default. <segments> should be a comma-delimited
 list of all segment IDs that should be fetched (or 'all' to get all segments).
 
 If --set <file> is used, <segments> must be the ID of a single segment.
@@ -155,13 +144,13 @@ If --set <file> is used, <segments> must be the ID of a single segment.
         this.help({ error: true }) // prints to stderr and exits with error code
       }
       const data = await readFile(opts.set, 'utf8')
-      await api.memory.segment.set(segment, JSON.parse(data), opts.shard)
+      await api.userMemorySegmentSet(segment, JSON.parse(data), opts.shard)
       await out('Segment uploaded')
     } else {
       if (segment === 'all') {
         segment = Array.from({ length: 100 }, (_v, k) => k).join(',')
       }
-      const { data } = await api.memory.segment.get(segment, opts.shard)
+      const { data } = await api.userMemorySegmentGet(segment, opts.shard)
       const dir = opts.dir
       const segments = data
       if (dir) {
@@ -194,7 +183,7 @@ commandBase('download')
   .action(async function (opts: DownloadOptions) {
     const api = await init(opts)
     const dir = opts.dir
-    const { modules } = await api.code.get(opts.branch)
+    const { modules } = await api.userCodeGet(opts.branch)
     if (dir) {
       await Promise.all(Object.keys(modules).map(async (fn) => {
         const data = modules[fn]
@@ -219,7 +208,7 @@ commandBase('upload', '<files...>')
   .option('-b --branch <branch>', 'Code branch', 'default')
   .action(async function (files: string[], opts: UploadOptions) {
     const api = await init(opts)
-    const modules: Api.UserCodeSetRequest['modules'] = {}
+    const modules: UserCodeSetRequest['modules'] = {}
     const ps = []
     for (const file of files) {
       ps.push((async (file) => {
@@ -234,7 +223,7 @@ commandBase('upload', '<files...>')
       })(file))
     }
     await Promise.all(ps)
-    await out(api.code.set({ branch: opts.branch, modules }))
+    await out(api.userCodeSet({ branch: opts.branch, modules }))
   })
 
 function run() {
