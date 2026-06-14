@@ -1001,6 +1001,10 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
   /**
    * Fetch terrain data for a specific room and return it in an "unencoded" format.
    *
+   * **Warning:** In rare circumstances (unofficial servers that are using maps
+   * generated via the map.generateRoom CLI command), this endpoint will return
+   * encoded terrain data instead of unencoded data.
+   *
    * Endpoint: `GET /api/game/room-terrain`
    * @param room The name of the room
    * @param shard The name of the shard to use (ignored by unofficial servers).
