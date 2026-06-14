@@ -1886,6 +1886,8 @@ export class ScreepsHttpClient extends EventEmitter {
    *
    * If the new server is using email/password auth, the client will attempt
    * to authenticate automatically.
+   *
+   * This will also call {@link ScreepsSocketClient.disconnect}.
    * @param rawServer The config for the new server the client should use.
    *  This will be normalized by {@link ScreepsConfigManager} before
    *  being stored in {@link server}.
@@ -1896,6 +1898,7 @@ export class ScreepsHttpClient extends EventEmitter {
     debugHttp(`setServer: ${server.url}`)
 
     this._server = server
+    this.socket.disconnect()
 
     if (server.token) {
       if (!this._authed) this.emit(ScreepsHttpClient.AUTH, true)

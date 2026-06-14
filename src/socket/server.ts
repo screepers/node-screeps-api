@@ -37,3 +37,39 @@ export const ServerAuthStatuses = {
  * @category WebSocket API - Server
  */
 export type ServerAuthStatus = typeof ServerAuthStatuses[keyof typeof ServerAuthStatuses]
+
+/**
+ * @category WebSocket API - Server
+ */
+export interface ServerPackageEvent extends SocketEvent {
+  type: 'server'
+  id: undefined
+  path: 'package'
+  data: {
+    package: number
+  }
+}
+
+/**
+ * @category WebSocket API - Server
+ */
+export interface ServerProtocolEvent extends SocketEvent {
+  type: 'server'
+  id: undefined
+  path: 'protocol'
+  data: {
+    protocol: number
+  }
+}
+
+/**
+ * @category WebSocket API - Server
+ */
+export interface ServerTimeEvent extends SocketEvent {
+  type: 'server'
+  id: undefined
+  path: 'time'
+  data: {
+    time: number
+  }
+}

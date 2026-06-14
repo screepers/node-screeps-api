@@ -39,8 +39,6 @@ export interface SocketEvent {
  *
  * When subscribed, the server will send one event per subscribed room
  * per tick with updated {@link RoomEventData}.
- * @example Raw sample events:
- * ["room:shardSeason/E15N8",{"objects":{"6a1c36afd05a7c237d18c9ae":{"reservation":{"endTime":231807}},"6a1c36afd05a7c237d18c9af":{"energy":2240,"invaderHarvested":38070},"6a1c36afd05a7c237d18c9b0":{"energy":2656,"invaderHarvested":37854},"6a2906a5a367ccd541edc2be":{"store":{"energy":560}},"6a29075abc245f3e92ad02d9":{"store":{"energy":405}},"6a2940bf8e693b5fca2fac27":{"x":28,"y":42},"6a2941332784cf33c0d3f004":{"x":31,"y":44}},"gameTime":231346,"info":{"mode":"world"},"visual":""}]
  * @category WebSocket API
  */
 export interface RoomEvent extends SocketEvent {
@@ -64,6 +62,55 @@ export interface RoomEvent extends SocketEvent {
 
 /**
  * Payload of a {@link RoomEvent}
+ * @example
+ *  // Initial event:
+ *  {
+ *    objects: {
+ *      '58dbc28b8283ff5308a3c0ba': {
+ *        _id: '58dbc28b8283ff5308a3c0ba',
+ *        room: 'W97S73',
+ *        type: 'source',
+ *        x: 12, y: 14,
+ *        energy: 1908,
+ *        energyCapacity: 3000,
+ *        ticksToRegeneration: 300,
+ *        nextRegenerationTime: 20308471,
+ *        invaderHarvested: 45324
+ *      },
+ *      '59663a8e82b5ab1b911ca1a9': {
+ *        _id: '59663a8e82b5ab1b911ca1a9',
+ *        type: 'road',
+ *        x: 17,
+ *        y: 42,
+ *        room: 'W97S73',
+ *        notifyWhenAttacked: true,
+ *        hits: 22080,
+ *        hitsMax: 25000,
+ *        nextDecayTime: 20308833
+ *      },
+ *    },
+ *    gameTime: 20307112,
+ *    info: {
+ *      mode: 'world'
+ *    },
+ *    visual: ''
+ *  }
+ * @example
+ *  // Results for subsequent events:
+ *  {
+ *    objects: {
+ *      '58dbc28b8283ff5308a3c0ba': {
+ *        energy: 948,
+ *        invaderHarvested: 34284
+ *      },
+ *      '5967d460eebe3d6404c26852': { nextDecayTime: 20307861 },
+ *    },
+ *    gameTime: 20307112,
+ *    info: {
+ *      mode: 'world'
+ *    },
+ *    visual: ''
+ *  }
  * @category WebSocket API
  */
 export interface RoomEventData {
@@ -76,8 +123,11 @@ export interface RoomEventData {
   /**
    * Room objects indexed by ID.
    *
-   * **WARNING:** only the first event returns full room object properties.
+   * **Warning:** only the first event returns full room object properties.
    * Subsequent events only return the modified properties.
+   *
+   * **Unconfirmed:** values might be null to indicate that the associated object
+   * has disappeared.
    */
   objects: { [_id: string]: RoomObject }
   /** {@link https://docs.screeps.com/api/#RoomVisual | RoomVisual} data */
@@ -87,8 +137,8 @@ export interface RoomEventData {
 /**
  * WebSocket event for updates to the map (appears to apply to the
  * original map, alpha map, and minimap in the room view).
- * @example Raw sample events:
- * ["roomMap2:shardSeason/E16N7",{"w":[],"r":[],"pb":[],"p":[],"s":[[11,36]],"c":[[43,37]],"m":[[30,29]],"k":[]}]
+ * @example
+ * ["roomMap2:shardSeason/E16N7",]
  * @category WebSocket API
  */
 export interface RoomMap2Event extends SocketEvent {
@@ -112,6 +162,17 @@ export interface RoomMap2Event extends SocketEvent {
 
 /**
  * Payload of a {@link RoomMap2Event}
+ * @example
+ *  {
+ *    "w": [],
+ *    "r": [],
+ *    "pb": [],
+ *    "p": [],
+ *    "s": [[11,36]],
+ *    "c": [[43,37]],
+ *    "m": [[30,29]],
+ *    "k": []
+ *  }
  * @category WebSocket API
  */
 export interface RoomMap2EventData {
