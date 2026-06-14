@@ -29,6 +29,7 @@
   "externalSymbolLinkMappings": {
     "axios": {
       "AxiosResponse": "https://axios.rest/pages/advanced/response-schema",
+      "AxiosError": "https://axios.rest/pages/advanced/error-handling.html",
     },
     "node": {
       "Error": "https://nodejs.org/docs/latest-v24.x/api/errors.html#class-error",
