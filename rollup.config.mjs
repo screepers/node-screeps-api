@@ -1,10 +1,10 @@
-import { defineConfig } from 'rollup';
+import { defineConfig } from 'rollup'
 import typescript from 'rollup-plugin-typescript2'
 
 export default defineConfig({
   input: {
-    cli: 'bin/screeps-api.ts',
-    index: 'src/index.ts',
+    'cli': 'bin/screeps-api.ts',
+    'index': 'src/index.ts',
     'ws-browser': 'src/ws-browser.ts'
   },
   output: {

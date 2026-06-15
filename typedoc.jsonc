@@ -1,0 +1,48 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  // Input
+  "alwaysCreateEntryPointModule": false,
+  "entryPoints": ["src/index.ts"],
+  "projectDocuments": [
+    "guides/*.md",
+    "examples/*.md",
+  ],
+  // Output
+  "outputs": [
+    {
+      "name": "html",
+      "path": "./docs",
+    },
+  ],
+  "favicon": "https://www.google.com/s2/favicons?sz=64&domain=screeps.com",
+  "markdownLinkExternal": true,
+  "navigation": {
+    "includeCategories": true,
+  },
+  "navigationLinks": {
+    "Github": "https://github.com/screepers/node-screeps-api",
+    "npm": "https://www.npmjs.com/package/screeps-api",
+  },
+  "sourceLinkExternal": true,
+  "useFirstParagraphOfCommentAsSummary": true,
+  // Comments
+  "externalSymbolLinkMappings": {
+    "axios": {
+      "AxiosResponse": "https://axios.rest/pages/advanced/response-schema",
+    },
+    "node": {
+      "Error": "https://nodejs.org/docs/latest-v24.x/api/errors.html#class-error",
+    },
+  },
+  "preservedTypeAnnotationTags": [
+    "@event",
+    "@throws",
+  ],
+  // Organization
+  "categorizeByGroup": false,
+  "categoryOrder": [
+    "Guides",
+    "Examples",
+    "*",
+  ]
+}

@@ -9,18 +9,17 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/src/index.d.ts",
-  "bin": {
-    "screeps-api": "dist/cli.js"
-  },
+  "bin": "dist/cli.js",
   "browser": {
     "ws": "dist/ws-browser.js"
   },
   "scripts": {
     "build": "rollup -c",
+    "build:docs": "typedoc",
     "prepublishOnly": "npm run build",
     "cli": "tsx bin/screeps-api.ts",
-    "lint": "eslint src/**/*.ts bin/**/*.ts",
-    "lint-fix": "eslint --fix src/**/*.ts bin/**/*.ts",
+    "lint": "eslint",
+    "lint-fix": "eslint --fix",
     "test_": "mocha",
     "test": "echo Tests disabled, TODO: FIX THIS!",
     "2npm": "publish-if-not-published"
@@ -54,6 +53,7 @@
     "@typescript-eslint/parser": "^8.59.1",
     "@typescript-eslint/typescript-estree": "^8.59.1",
     "eslint": "^10.3.0",
+    "eslint-plugin-jsdoc": "^63.0.1",
     "lodash": "^4.18.1",
     "mocha": "^11.7.6",
     "publish-if-not-published": "^3.1.3",
@@ -61,6 +61,7 @@
     "rollup-plugin-typescript2": "^0.37.0",
     "tslib": "^2.8.1",
     "tsx": "^4.22.3",
+    "typedoc": "^0.28.19",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.1"
   },

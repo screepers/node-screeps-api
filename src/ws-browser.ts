@@ -1,6 +1,13 @@
 const WebSocket = window.WebSocket ?? import('ws')
 export default WebSocket
 
+/**
+ * The package's web browser entry point.
+ *
+ * **WARNING:** This module has not been tested since v1.
+ * @module
+ */
+
 declare global {
   interface WebSocket {
     on: (event: string, callback: (this: globalThis.WebSocket, ev: unknown) => unknown) => void

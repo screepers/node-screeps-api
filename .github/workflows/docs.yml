@@ -1,0 +1,43 @@
+name: Deploy Docs Site
+on:
+  push:
+    branches:
+    - master
+
+# Prohibit concurrent workflows
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+    - uses: actions/checkout@v6
+    - run: corepack enable
+    - uses: actions/setup-node@v6
+      with:
+        node-version-file: .node-version
+        cache: yarn
+    - run: yarn install --immutable
+    - run: yarn build:docs
+    - id: deployment
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./docs
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      pages: write
+    needs: build
+    steps:
+    - id: deployment
+      uses: actions/deploy-pages@v4
