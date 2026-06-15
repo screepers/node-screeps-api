@@ -23,19 +23,21 @@ This package is now bundled using the [ESM format](https://nodejs.org/docs/lates
 The signature of {@link ScreepsHttpClient.fromConfig | `ScreepsHttpClient.fromConfig()`} has been changed:
 ```ts
 // v1:
-const apiEx1 = await ScreepsAPI.fromConfig() // 'main' server; no app config
+// fromConfig() defaults to the 'main' server and no app config
+const apiEx1 = await ScreepsAPI.fromConfig()
 const apiEx2 = await ScreepsAPI.fromConfig('main', 'myApp')
 
 // v2:
-// Server name is now required to prevent accidental use of the default server
+// Server name is now required to prevent accidental use of the 'main' server
 const apiEx1 = await ScreepsHttpClient.fromConfig('main')
 const apiEx2 = await ScreepsHttpClient.fromConfig('main', { app: 'myApp' })
 const apiEx3 = await ScreepsHttpClient.fromConfig('main', {
-  // Client options can be provided directly to the factory function
+  // App/client options can be provided directly to the factory function
   // instead of loading it from the config file
   app: {
-    // The default shard can now be specified as an option. If left undefined,
-    // endpoint methods will throw an error if a shard argument is not provided.
+    // The default shard can now be specified as an option. In v1, this was
+    // always assumed to be 'shard0'. If left undefined in v2, endpoint methods
+    // will throw an error if a shard argument is not provided.
     defaultShard: 'shard0',
     // This option was named experimentalRetry429 in v1. It is now enabled by
     // default. To maintain legacy behavior:
@@ -47,12 +49,12 @@ const apiEx3 = await ScreepsHttpClient.fromConfig('main', {
 In v1, `ScreepsAPI` grouped its endpoint methods into objects. In v2, all methods are defined directly on {@link ScreepsHttpClient}:
 ```ts
 // v1:
-const api = await ScreepsAPI.fromConfig('main', 'myApp')
-const me = await api.raw.auth.me();
-const terrain = await api.raw.game.roomTerrain('W0N0', 1, 'shard0');
-const objects = await api.raw.game.roomObjects('W0N0', 'shard0');
-const segments = await api.raw.user.memory.segment.get('1,5,10', 'shard2');
-const messages = await api.raw.userMessages.index();
+const api = await ScreepsAPI.fromConfig()
+const me = await api.raw.auth.me()
+const terrain = await api.raw.game.roomTerrain('W0N0', 1, 'shard0')
+const objects = await api.raw.game.roomObjects('W0N0', 'shard0')
+const segments = await api.raw.user.memory.segment.get('1,5,10', 'shard2')
+const messages = await api.raw.userMessages.index()
 
 // v2:
 const api = await ScreepsHttpClient.fromConfig('main', {
@@ -60,21 +62,21 @@ const api = await ScreepsHttpClient.fromConfig('main', {
 })
 const me = await api.authMe()
 const terrain = await api.gameRoomTerrain('W0N0') // shard0
-const terrain = await api.gameRoomObjects('W0N0') // shard0
-const terrain = await api.userMemorySegmentGet('1,5,10', 'shard2')
+const objects = await api.gameRoomObjects('W0N0') // shard0
+const segments = await api.userMemorySegmentGet('1,5,10', 'shard2')
 const messages = await api.userMessagesIndex()
 ```
 
 ## WebSocket API
 
-Relatively fewer breaking changes were made to the {@link ScreepsSocketClient | WebSocket API client}. Check out the Examples section of the documentation for sample code.
+Relatively fewer breaking changes were made to the {@link ScreepsSocketClient | WebSocket API client}. Check out the Examples section of the navigation sidebar for sample code.
 
 The most significant breaking change is that client parameters are now read from {@link ScreepsHttpClient.appConfig} instead of being passed as an argument to {@link ScreepsSocketClient.connect}:
 
 ```ts
 // v1:
-const api = await ScreepsAPI.fromConfig('main')
-api.socket.connect({
+const api = await ScreepsAPI.fromConfig()
+await api.socket.connect({
   reconnect: true,
   resubscribe: true,
   keepAlive: false
@@ -88,7 +90,7 @@ const api = await ScreepsHttpClient.fromConfig('main', {
     wsResubscribe: true
   }
 })
-api.socket.connect()
+await api.socket.connect()
 ```
 
 See {@link ScreepsClientConfig} for a full list of supported parameters.

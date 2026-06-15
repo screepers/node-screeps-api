@@ -176,14 +176,4 @@ api.appConfig = {
 
 ## WebSocket API Config
 
-{@link ScreepsSocketClient} leverages the HTTP client for auth credentials, but WebSocket-specific client params can be provided via {@link ScreepsSocketClient.connect | `ScreepsSocketClient.connect()`}:
-```ts
-await api.socket.connect({
-  // Don't automatically reconnect
-  reconnect: false,
-  // Don't ping the server to keep the connection open
-  keepAlive: false
-})
-```
-
-See {@link ScreepsSocketConfig} for a full list of options.
+{@link ScreepsSocketClient} leverages {@link ScreepsHttpClient.appConfig} for configuration and auth credentials. See {@link ScreepsClientConfig} for a complete list of supported config parameters.
