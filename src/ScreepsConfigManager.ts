@@ -207,7 +207,7 @@ export class ScreepsConfigManager {
     if (!url) {
       rawServer.protocol ??= (rawServer.secure !== false ? 'https' : 'http')
       rawServer.hostname ??= rawServer.host ?? DEFAULT_SERVER_HOST
-      rawServer.port ??= rawServer.protocol === 'https' ? 443 : 80
+      rawServer.port ??= ''
       rawServer.pathname ??= rawServer.path
         ?? (rawServer.ptr ? '/ptr' : undefined)
         ?? (rawServer.season ? '/season' : undefined)
@@ -322,9 +322,35 @@ export interface LoadConfigOptions {
  * @category Common
  */
 export interface ScreepsServerConfig {
+  /**
+   * The base URL for the API. Do not include `/api` in the path;
+   * it will be appended automatically
+   */
   url: string
+  /**
+   * The API authentication token to use with this server.
+   *
+   * If this is not provided, {@link email} and {@link password} must be set
+   * instead.
+   */
   token?: string
+  /**
+   * The email address or username with which to authenticate on this server.
+   *
+   * This is ignored if {@link token} is defined.
+   *
+   * If the server does not support email/pasword authentication
+   * (ex: official servers), {@link token} must be used instead.
+   */
   email?: string
+  /**
+   * The password with which to authenticate on this server.
+   *
+   * This is ignored if {@link token} is defined.
+   *
+   * If the server does not support email/pasword authentication
+   * (ex: official servers), {@link token} must be used instead.
+   */
   password?: string
 }
 
@@ -370,23 +396,88 @@ export interface ScreepsClientConfig {
 export type ScreepsAppConfig = ScreepsClientConfig & { [propertyName: string]: unknown }
 
 /**
- * Server configuration schema from {@link ScreepsJsonConfig}/{@link ScreepsYamlConfig}
+ * Server configuration schema from {@link ScreepsJsonConfig}/{@link ScreepsYamlConfig}.
+ *
+ * {@link ScreepsConfigManager} will convert this into its normalized
+ * form {@link ScreepsServerConfig} before using it.
  * @category Common
  */
 export interface ScreepsRawServerConfig {
+  /**
+   * @see {@link ScreepsServerConfig.token}
+   */
   token?: string
+  /**
+   * @see {@link ScreepsServerConfig.email}
+   */
   email?: string
+  /**
+   * Treated as an alias of {@link email}.
+   */
   username?: string
+  /**
+   * @see {@link ScreepsServerConfig.password}
+   */
   password?: string
-  protocol?: string
+  /**
+   * Protocol portion of {@link url}.
+   *
+   * This is ignored if {@link url} is defined.
+   * @see {@link https://nodejs.org/api/url.html#urlprotocol | URL.protocol}
+   */
+  protocol?: 'http' | 'https'
+  /**
+   * If this is set and {@link protocol} is undefined, sets `protocol` to `https`.
+   *
+   * This is ignored if {@link url} is defined.
+   */
   secure?: boolean
+  /**
+   * Treated as an alias of {@link hostname}.
+   */
   host?: string
+  /**
+   * Host name portion of {@link url}.
+   *
+   * This is ignored if {@link url} is defined.
+   * @see {@link https://nodejs.org/api/url.html#urlhostname | URL.hostname}
+   */
   hostname?: string
-  port?: number
+  /**
+   * Port portion of {@link url}.
+   *
+   * This is ignored if {@link url} is defined.
+   * @see {@link https://nodejs.org/api/url.html#urlport | URL.port}
+   */
+  port?: number | string
+  /**
+   * Treated as an alias of {@link pathname}.
+   */
   path?: string
+  /**
+   * Path portion of {@link url}.
+   *
+   * This is ignored if {@link url} is defined.
+   * @see {@link https://nodejs.org/api/url.html#urlpathname | URL.pathname}
+   */
   pathname?: string
+  /**
+   * @see {@link ScreepsServerConfig.url}
+   */
   url?: string
+  /**
+   * Sets {@link pathname} to `/ptr`. On the screeps.com host, this is the path
+   * of the Public Test Realm (PTR) server.
+   *
+   * This is ignored if {@link url}, {@link path}, or {@link pathname} is defined.
+   */
   ptr?: boolean
+  /**
+   * Sets {@link pathname} to `/season`. On the screeps.com host, this is the path
+   * of the Seasonal World server.
+   *
+   * This is ignored if {@link url}, {@link path}, or {@link pathname} is defined.
+   */
   season?: boolean
 }
 
