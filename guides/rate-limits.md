@@ -25,7 +25,7 @@ Automatic retries are enabled by default for requests that exceed the global rat
 
 ```ts
 // During initialization:
-const api = ScreepsHttpClient.fromConfig('main', { app: { retry429Global: false } })
+const api = await ScreepsHttpClient.fromConfig('main', { app: { retry429Global: false } })
 
 // After initialization:
 api.appConfig.retry429Global = false
@@ -39,7 +39,7 @@ Automatic retries are disabled by default for requests that exceed an endpoint r
 
 ```ts
 // During initialization:
-const api = ScreepsHttpClient.fromConfig('main', { app: { retry429MaxRetries: 5 } })
+const api = await ScreepsHttpClient.fromConfig('main', { app: { retry429MaxRetries: 5 } })
 
 // After initialization:
 api.appConfig.retry429MaxRetries = 5
@@ -47,7 +47,7 @@ api.appConfig.retry429MaxRetries = 5
 
 This feature works best when used with an application that implements other safeguards. For example, if you are writing an application that uses {@link ScreepsHttpClient.userMemoryGet} to monitor and record changes to `Memory.stats` (limit: 1440 / day, or 1 / minute on average), you might implement a one minute delay between requests. Assuming only one instance of the app is running per auth token, if the rate limit is exceeded, it's very likely that the automatic reset would occur soon after.
 
-## DIY Recovery
+## Custom Recovery
 
 When automatic retries are disabled (or the maximum number of retries for an endpoint limit has been exceeded), {@link ScreepsHttpClient} handles 429 errors in the following way:
 
@@ -60,7 +60,7 @@ import { ScreepsHttpClient, ScreepsHttpResponse, RateLimitEvent } from 'screeps-
 // Assumes the client has already been initialized and assigned to `api`
 declare const api: ScreepsHttpClient
 
-api.on(ScreepsHttpClient.RATE_LIMIT, async (event: RateLimit) => {
+api.on(ScreepsHttpClient.RATE_LIMIT, async (event: RateLimitEvent) => {
   const { method, path, params, toReset } = event
 
   // Determine whether global or endpoint rate limit was exceeded
@@ -70,7 +70,7 @@ api.on(ScreepsHttpClient.RATE_LIMIT, async (event: RateLimit) => {
     : [`${method} ${path}`, toReset * 1_000]
 
   // Wait for limit to reset before retrying request
-  console.warn(`${desc} rate limit exceeded; retrying in ${toReset.toLocaleString()} ms`)
+  console.warn(`${desc} rate limit exceeded; retrying in ${delay.toLocaleString()} ms`)
   await setTimeout(delay)
 
   // Retry request:
@@ -79,7 +79,7 @@ api.on(ScreepsHttpClient.RATE_LIMIT, async (event: RateLimit) => {
   api.req(method, path, params)
 })
 
-api.on(ScreepsHttpClient.RESPONSE_RESULT, async (event: ScreepsHttpResponse)) => {
+api.on(ScreepsHttpClient.RESPONSE_RESULT, async (event: ScreepsHttpResponse) => {
   const { method, path, params } = event
   // ... Use request data to match this event to request that is awaiting a response ...
 
@@ -112,4 +112,4 @@ try {
 
 One final option to resolve rate limiting issues is to manually reset rate limits for an auth token via its reset page: {@link ScreepsHttpClient.rateLimitResetUrl}.
 
-This is a stopgap solution that trades convenience and reliability for additional API usage. While rate limits can be reset an indefinite number of times in this way, the reset must be performed manually each time, and the rate limited application/service must usually be restarted as well.
+This is a stopgap solution that trades convenience and reliability for additional API usage. While rate limits can be reset an unlimited number of times in this way, the reset must be performed manually each time, and the rate limited application/service must usually be restarted as well.

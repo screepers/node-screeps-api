@@ -112,7 +112,7 @@ export const GLOBAL_RATE_LIMIT_DELAY = {
 } as const
 
 /**
- * Provides access to the Screeps HTTP Http.
+ * Provides access to the Screeps HTTP API.
  *
  * Please note that the Screeps HTTP API is not technically a public API; it
  * merely exists to power the game's official Steam and web clients.
@@ -141,7 +141,7 @@ export const GLOBAL_RATE_LIMIT_DELAY = {
  * @see {@link ScreepsSocketClient} for the WebSocket API client (accessible via {@link ScreepsHttpClient.socket})
  * @example
  * // To access the `GET /api/auth/me` endpoint:
- * const me = await Http.authMe()
+ * const me = await api.authMe()
  * @category HTTP API
  * @categoryDescription Endpoints: /
  * Top-level API endpoints
@@ -161,6 +161,8 @@ export const GLOBAL_RATE_LIMIT_DELAY = {
  * @categoryDescription Endpoints: /game/market
  * Endpoints for reading or modifying the state of the
  * {@link https://docs.screeps.com/market.html | in-game market}
+ * @categoryDescription Endpoints: /game/shards
+ * Endpoints for listing available shards and querying shard metadata
  * @categoryDescription Endpoints: /leaderboard
  * Endpoints for querying control/power leaderboards
  *
@@ -369,6 +371,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * Fetch a chunk of history data for a single room.
    *
    * Official Endpoint: `GET /room-history/${shard}/${room}/${tick}.json`
+   *
    * Unofficial Endpoint: `GET /room-history`
    * @param room Name of the room for which to fetch history
    * @param tick Tick for which history should be fetched
@@ -470,7 +473,7 @@ export class ScreepsHttpClient extends EventEmitter {
    *
    * Endpoint: `GET /api/register/check-email`
    * @param email The email address to check
-   * @returns If the exmail is available, returns {@link Http.ScreepsResponse}.
+   * @returns If the email is available, returns {@link Http.ScreepsResponse}.
    *  If the email is taken, returns {@link Http.ScreepsErrorResponse}
    *  (`{ error: 'exists' }`).
    * @category Endpoints: /register
@@ -497,7 +500,7 @@ export class ScreepsHttpClient extends EventEmitter {
 
   /**
    * Endpoint: `POST /api/register/set-username`
-   * @param username The username to associated with this account
+   * @param username The username to associate with this account
    * @returns Please consider submitting a PR to document the success response.
    *  If used for an account that is already set up, returns
    *  {@link Http.ScreepsErrorResponse} (`{ error: 'username already set' }`).
@@ -764,13 +767,22 @@ export class ScreepsHttpClient extends EventEmitter {
    *  Defaults to {@link ScreepsClientConfig.defaultShard} if undefined.
    * @throws {@link node!Error | Error} if shard and {@link ScreepsClientConfig.defaultShard} are undefined
    *  while using an official server
-   * @example remove flag: name = "remove", intent = {}
-   * @example destroy structure: _id = "room", name = "destroyStructure", intent = [ {id: <structure id>, roomName, <room name>, user: <user id>} ]
-can destroy multiple structures at once
-   * @example suicide creep: name = "suicide", intent = {id: <creep id>}
-   * @example unclaim controller: name = "unclaim", intent = {id: <controller id>}
-intent can be an empty object for suicide and unclaim, but the web interface sends the id in it, as described
-   * @example remove construction site: name = "remove", intent = {}
+   * @example
+   * // Remove flag:
+   * // name = "remove", intent = {}
+   * @example
+   * // Destroy structure (can destroy multiple structures at once):
+   * // _id = "room", name = "destroyStructure", intent = [ {id: <structure id>, roomName, <room name>, user: <user id>} ]
+   * @example
+   * // Suicide creep:
+   * // name = "suicide", intent = {id: <creep id>}
+   * @example
+   * // Unclaim controller:
+   * // name = "unclaim", intent = {id: <controller id>}
+   * // Intent can be an empty object for suicide and unclaim, but the web interface sends the id in it, as described
+   * @example
+   * // Remove construction site:
+   * // name = "remove", intent = {}
    * @category Endpoints: /game
    */
   gameAddObjectIntent(
@@ -849,7 +861,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * This can be called multiple times in succession to simulate a raid group.
    *
    * Invaders created by this endpoint will not drop any resources on death.
-   * They can be removed by {@link gameRemoveInvader}
+   * They can be removed by {@link gameRemoveInvader}.
    *
    * This operation is only permitted on exit positions of rooms claimed
    * by the authenticated user.
@@ -1147,7 +1159,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
   }
 
   /**
-   * Fetch the leaderboard rankings for a specific user.
+   * Fetch the leaderboard rankings for a list of users.
    *
    * This endpoint does not require authentication.
    *
@@ -1179,7 +1191,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param username The name of the user
    * @param mode 'world' (control points) or 'power' (power processed)
    * @param season An optional date in the format YYYY-MM.
-   *  If undefined, the user's ranks for all seasons is returned.
+   *  If undefined, the user's ranks for all seasons are returned.
    * @category Endpoints: /leaderboard
    */
   leaderboardFind(
@@ -1236,7 +1248,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * Update the authenticated user's {@link UserBadge | badge}.
    *
    * Endpoint: `POST /api/user/badge`
-   * @param badge The new user's new badge. See {@link UserBadge}
+   * @param badge The user's new badge. See {@link UserBadge}
    * @category Endpoints: /user
    */
   userBadge(badge: UserBadge): Promise<Http.ScreepsDbUpdateResponse> {
@@ -1543,13 +1555,13 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    *  while using an official server
    * @example
    * // Fetch a single segment
-   * Http.user.memory.segment.get(7, 'shard3')
+   * api.user.memory.segment.get(7, 'shard3')
    * @example
    * // Fetch a multiple segments with an ID array
-   * Http.user.memory.segment.get([7, '13'], 'shard3')
+   * api.user.memory.segment.get([7, '13'], 'shard3')
    * @example
    * // Fetch a multiple segments with a comma-delimited ID list
-   * Http.user.memory.segment.get('7,13,30', 'shard3')
+   * api.user.memory.segment.get('7,13,30', 'shard3')
    * @category Endpoints: /user/memory/segment
    */
   userMemorySegmentGet(
@@ -2084,7 +2096,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
 
   /**
    * Enable or disable debug logging via the
-   * {@link https://www.npmjs.com/package/debug | Debug} package.
+   * {@link https://www.npmjs.com/package/debug | debug} package.
    * @param opts If undefined, disables debug logs for all namespaces.
    *  Otherwise, enables the specified namespaces and disables all others.
    * @see {@link DebugOptions}
