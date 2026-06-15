@@ -16,7 +16,7 @@ Multiple namespaces can be specified by providing a comma-delimited list (ex: `s
 To enable debug output in Node, set the `DEBUG` environment variable to the
 namespace(s) you want to enable. Here is an example that uses the CLI in bash:
 ```sh
-DEBUG=screepsapi.http,screepsapi.ratelimit screeps-api raw --server main auth.me
+DEBUG=screepsapi.http,screepsapi.ratelimit screeps-api call --server main authMe
 ```
 
 These environment variables work when invoking your own apps as well.
@@ -36,6 +36,6 @@ api.debug()
 
 Most errors thrown by {@link ScreepsHttpClient} will be instances of:
 * {@link ScreepsApiError}: If the error was due to an HTTP 4xx/5xx response from the server
-* {@link Error}: If the error occurred before a request was sent (invalid arguments, missing auth credentials, etc)
+* {@link node!Error | Error}: If the error occurred before a request was sent (invalid arguments, missing auth credentials, etc)
 
-{@link ScreepsSocketClient} emits {@link ScreepsSocketClient.ERROR} events for any errors sent by the server or generated within the client.
+{@link ScreepsSocketClient} emits {@link ScreepsSocketClient.ERROR} events for any errors sent by the server or generated within the client. Please consider submitting a PR to document possible error types and the conditions under which to expect them.
