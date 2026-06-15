@@ -774,17 +774,28 @@ export class ScreepsHttpClient extends EventEmitter {
    * // name = "remove", intent = {}
    * @example
    * // Destroy structure (can destroy multiple structures at once):
-   * // _id = "room", name = "destroyStructure", intent = [ {id: <structure id>, roomName, <room name>, user: <user id>} ]
+   * declare user: string // current user's ID
+   * const room = 'W1N1'
+   * const structureIds = ['6a30501195516b79c5e846da'] // IDs of structures to destroy
+   * api.gameAddObjectIntent('room', room, 'destroyStructure', structureIds.map((id) => {
+   *   return { id, roomName: room, user }
+   * }))
    * @example
    * // Suicide creep:
-   * // name = "suicide", intent = {id: <creep id>}
+   * const id = '6a30501195516b79c5e846da' // ID of creep to suicide
+   * api.gameAddObjectIntent(id, 'W1N1', 'suicide', {})
+   * // Intent can be an empty object, but the web client sends:
+   * // `{ id }`
    * @example
    * // Unclaim controller:
-   * // name = "unclaim", intent = {id: <controller id>}
-   * // Intent can be an empty object for suicide and unclaim, but the web interface sends the id in it, as described
+   * const id = '6a30501195516b79c5e846da' // ID of room controller to unclaim
+   * api.gameAddObjectIntent('room', 'W1N1', 'unclaim', {})
+   * // Intent can be an empty object, but the web client sends:
+   * // `{ id }`
    * @example
    * // Remove construction site:
-   * // name = "remove", intent = {}
+   * const room = 'W1N1' // name of the room containing the contruction site
+   * api.gameAddObjectIntent('room', room, 'removeConstructionSite', { id: '6a30501195516b79c5e846da', roomName: room })
    * @category Endpoints: /game
    */
   gameAddObjectIntent(
