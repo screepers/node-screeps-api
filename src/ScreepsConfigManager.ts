@@ -223,6 +223,8 @@ export class ScreepsConfigManager {
 
     const server: ScreepsServerConfig = { url }
 
+    rawServer.email ??= rawServer.username
+
     if (rawServer.token) {
       Object.assign(server, { token: rawServer.token })
     } else if (rawServer.email && rawServer.password) {
