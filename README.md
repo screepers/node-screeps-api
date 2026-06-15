@@ -160,15 +160,25 @@ Please note that the listed endpoints and WebSocket events are not exhaustive.
 
 ## Development
 
-This project uses the [yarn package manager](https://yarnpkg.com/). To ensure you're using the correct version instead of v1.x:
+First, make sure you're using a compatible version of Node.js. We recommend installing a node version manager like [nvm](https://github.com/nvm-sh/nvm) or a general runtime version manager like [asdf](https://asdf-vm.com/), [mise-en-place](https://mise.jdx.dev/), etc. Once you have one of these installed and configured for node, ensure you have the target version of node installed:
+
+```sh
+# nvm example:
+nvm install "$(cat .node-version)"
+```
+
+This project uses the [yarn package manager](https://yarnpkg.com/). The correct yarn version is pinned in `package.json` using [corepack](https://corepack.org/). To ensure you're using the correct version of yarn instead of the legacy v1.x:
 
 ```sh
 # Enable corepack: https://yarnpkg.com/corepack
-set corepack enable
-# Install the version of yarn specified in package.json's "packageManager" field
-yarn install
-# You may need to re-run the command after installing Yarn for the first time
-# in order to install dependencies
+corepack enable
+
+# If using asdf, update node shims after enabling corepack:
+# https://github.com/asdf-vm/asdf-nodejs#corepack
+if [[ -n "$(which asdf)" ]] ; then asdf reshim nodejs ; fi
+
+# Install dependencies using the version of yarn from package.json's
+# "packageManager" field:
 yarn install
 ```
 
