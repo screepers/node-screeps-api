@@ -20,7 +20,7 @@
     "includeCategories": true,
   },
   "navigationLinks": {
-    "Github": "http://github.com/screepers/node-screeps-api",
+    "Github": "https://github.com/screepers/node-screeps-api",
     "npm": "https://www.npmjs.com/package/screeps-api",
   },
   "sourceLinkExternal": true,
