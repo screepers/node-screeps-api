@@ -713,6 +713,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * Change the color of an existing flag.
    *
    * Endpoint: `POST /api/game/change-flag-color`
+   * @param name The name of the flag to update
    * @param color The color of the left side of the flag
    * @param secondaryColor The color of the right side of the flag
    * @param shard The name of the shard to use (ignored by unofficial servers).
@@ -722,6 +723,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * @category Endpoints: /game
    */
   gameChangeFlagColor(
+    name: string,
     color: FlagColor = FlagColors.White,
     secondaryColor: FlagColor = FlagColors.White,
     shard?: string
@@ -730,7 +732,7 @@ export class ScreepsHttpClient extends EventEmitter {
     if (this.isOfficialServer && shard === undefined) {
       throw new Error('shard must be defined')
     }
-    return this.req(ScreepsHttpMethods.Post, '/api/game/change-flag-color', { color, secondaryColor, shard })
+    return this.req(ScreepsHttpMethods.Post, '/api/game/change-flag-color', { name, color, secondaryColor, shard })
   }
 
   /**
