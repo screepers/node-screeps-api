@@ -40,4 +40,4 @@ Most errors thrown by {@link ScreepsHttpClient} will be instances of:
 
 {@link ScreepsSocketClient} emits {@link ScreepsSocketClient.ERROR} events for any errors sent by the server or generated within the client.
 
-Please consider submitting a PR to document possible error types emitted via {@link ScreepsSocketCLient.ERROR} and the conditions under which to expect them.
+Please consider submitting a PR to document possible error types emitted via {@link ScreepsSocketClient.ERROR} and the conditions under which to expect them.
