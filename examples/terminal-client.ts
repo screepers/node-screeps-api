@@ -26,23 +26,27 @@ interface RenderedObject extends RoomObject {
 }
 
 let cpuData: Partial<UserCpuEventData> = {}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let gameTime: number | undefined
 let roomName: string | undefined
-let terrain: string = ''
+let terrain = ''
 let objects: { [_id: string]: RenderedObject } = {}
 
 const TERRAIN_GLYPHS: Readonly<{ [code: string]: string }> = {
-  '0': ' ', // plain
-  '1': '#', // wall
-  '2': '.' // swamp
+  0: ' ', // plain
+  1: '#', // wall
+  2: '.' // swamp
 }
 
 /** Glyphs used to represent each {@link RoomObject} type. */
 const OBJECT_GLYPHS: Readonly<{ [resType in RoomObjectType]: string }> = {
   // Assign `r` to all dropped resources
   ...Object.values(Resources).reduce(
-    (glyphs, resType) => { glyphs[resType] = 'r' ; return glyphs },
-    {} as { [resType in RoomObjectType]: string },
+    (glyphs, resType) => {
+      glyphs[resType] = 'r'
+      return glyphs
+    },
+    {} as { [resType in RoomObjectType]: string }
   ),
   creep: 'c',
   powerCreep: 'p',
@@ -74,13 +78,16 @@ const OBJECT_GLYPHS: Readonly<{ [resType in RoomObjectType]: string }> = {
   nuke: 'v',
   ruin: 'X',
   tombstone: 'x'
-};
+}
 
 const GLYPH_RENDER_ORDER: Readonly<{ [resType in RoomObjectType]: number }> = {
   // Assign a default value
   ...Object.values(RoomObjectTypes).reduce(
-    (glyphs, resType) => { glyphs[resType] = 50 ; return glyphs },
-    {} as { [resType in RoomObjectType]: number },
+    (glyphs, resType) => {
+      glyphs[resType] = 50
+      return glyphs
+    },
+    {} as { [resType in RoomObjectType]: number }
   ),
   nuke: 5,
   container: 10,
@@ -111,7 +118,7 @@ const GLYPH_RENDER_ORDER: Readonly<{ [resType in RoomObjectType]: number }> = {
   powerCreep: 200
 }
 
-async function changeRoom (newRoomName: string) {
+async function changeRoom(newRoomName: string) {
   // If on an official server, normalize room names by prepending shard names
   let newFullRoomName = newRoomName
   if (api.isOfficialServer && !newRoomName.includes('/')) {
@@ -129,19 +136,19 @@ async function changeRoom (newRoomName: string) {
   }
 
   if (roomName) {
-    api.socket.unsubscribe(`room:${roomName}`, updateRoomObjects)
+    void api.socket.unsubscribe(`room:${roomName}`, updateRoomObjects)
   }
 
   roomName = newFullRoomName
   terrain = (await api.gameRoomTerrain(newRoomName)).terrain[0].terrain
   objects = {}
 
-  api.socket.subscribe(`room:${roomName}`, updateRoomObjects)
+  void api.socket.subscribe(`room:${roomName}`, updateRoomObjects)
 
   await renderPrompt()
 }
 
-async function updateRoomObjects (event: RoomEvent) {
+async function updateRoomObjects(event: RoomEvent) {
   const fullRoomName = event.path ? `${event.id}/${event.path}` : event.id
   if (fullRoomName !== roomName) {
     console.warn(`Ignoring room event for ${fullRoomName}; expected ${roomName}`)
@@ -181,7 +188,7 @@ async function clearScreen() {
   await rlOut.commit()
 }
 
-async function render () {
+async function render() {
   await clearScreen()
   await renderStats()
 
@@ -212,7 +219,7 @@ async function render () {
   }
 }
 
-async function renderStats () {
+async function renderStats() {
   // Render basic stats
   rlOut.cursorTo(0, 0)
   rlOut.clearLine(0)
@@ -230,7 +237,7 @@ async function renderStats () {
   // TODO: Render game time
 }
 
-const consoleLines = new Array()
+const consoleLines: string[] = []
 
 async function renderConsole() {
   // Remove oldest messages if log has overflowed
@@ -255,8 +262,8 @@ async function renderPrompt() {
   rl.prompt(true)
 }
 
-function run() {
-  api.socket.subscribe('console', async (event: UserConsoleEvent) => {
+export async function startClient() {
+  void api.socket.subscribe('console', async (event: UserConsoleEvent) => {
     const { messages, error, shard } = event.data
     const shardTag = shard ? `[${shard}] ` : ''
 
@@ -265,7 +272,7 @@ function run() {
     // Add newest console messages
     const consoleRows = output.rows - ROOM_DIM - 2
     const newMessages = [
-      ...(error ? [`${shardTag}${error}`.split('\n')] : []),
+      ...(error ? `${shardTag}${error}`.split('\n') : []),
       ...messages.results.flatMap(msg => `< ${msg}`.split('\n')),
       ...messages.log.flatMap(msg => `${shardTag}${stripTags(msg)}`.split('\n'))
     ].slice(-consoleRows)
@@ -275,7 +282,7 @@ function run() {
     await renderPrompt()
   })
 
-  api.socket.subscribe('cpu', async (event: UserCpuEvent) => {
+  void api.socket.subscribe('cpu', async (event: UserCpuEvent) => {
     cpuData = event.data
     await renderStats()
     await renderPrompt()
@@ -299,9 +306,9 @@ function run() {
     api.userConsole(line).catch(console.error)
   })
 
-  api.socket.connect()
+  await api.socket.connect()
 }
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
-  run()
+  void startClient()
 }

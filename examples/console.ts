@@ -40,16 +40,16 @@ console.error = rlLog
  * Strip HTML tags from a string to make it more readable.
  * This is not suitable for sanitizing untrusted input.
  */
-export function stripTags (text: string): string {
+export function stripTags(text: string): string {
   return text.replaceAll(/<\s*?\/?\s*?\w+?(?:[\w\s=]+?'[^>]*'?|[\w\s=]+?"[^>]*"?|[\w\s=]+?`[^>]*`?|[\w\s]+?)*>/g, '')
 }
 
-export function quit (message = 'Bye') {
+export function quit(message = 'Bye') {
   console.log(message)
   process.exit(0)
 }
 
-function run() {
+export async function startConsole() {
   rl.on('close', () => quit('I/O closed. Bye!'))
   rl.on('SIGINT', () => quit('Keyboard interrupt. Bye!'))
 
@@ -67,16 +67,16 @@ function run() {
     rl.prompt()
   })
 
-  api.socket.on('auth', (event: ServerAuthEvent) => {
+  api.socket.on('auth', async (event: ServerAuthEvent) => {
     if (event.data.status === ServerAuthStatuses.Ok) {
-      api.socket.subscribe('/console')
       console.log('Console authenticated')
+      await api.socket.subscribe('/console')
     } else {
       console.error(`WebSocket API authentication failed`)
     }
   })
 
-  api.socket.subscribe('console', (event: UserConsoleEvent) => {
+  void api.socket.subscribe('console', (event: UserConsoleEvent) => {
     const { messages, error, shard } = event.data
     const shardTag = shard ? `[${shard}] ` : ''
     if (error) console.error(shardTag, error)
@@ -87,9 +87,9 @@ function run() {
   })
 
   console.debug('Console connecting')
-  api.socket.connect()
+  await api.socket.connect()
 }
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
-  run()
+  void startConsole()
 }
