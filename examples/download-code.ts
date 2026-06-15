@@ -1,15 +1,15 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 // If installed from npm, use:
-// import { ScreepsHttpClient } from 'screeps-api'
+// import { ... } from 'screeps-api'
 import { ScreepsHttpClient, ServerAuthEvent, ServerAuthStatuses, UserCodeEvent } from '../src'
 
 const api = await ScreepsHttpClient.fromConfig('main')
-api.socket.connect()
+await api.socket.connect()
 
 api.socket.on('auth', (event: ServerAuthEvent) => {
   if (event.data.status === ServerAuthStatuses.Ok) {
-    api.socket.subscribe('/code')
+    console.info(`WebSocket API authentication succeeded`)
   } else {
     console.error(`WebSocket API authentication failed`)
   }
@@ -29,6 +29,6 @@ api.on('code', async (event: UserCodeEvent) => {
     const modulePath = path.join(event.data.branch, `${moduleName}.${ext}`)
     void writeFile(modulePath, contents, { encoding })
 
-    console.log(`Wrote ${modulePath} (${contents.length} bytes)`)
+    console.info(`Wrote ${modulePath} (${contents.length} bytes)`)
   }
 })

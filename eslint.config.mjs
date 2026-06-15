@@ -12,8 +12,6 @@ export default defineConfig(
   globalIgnores([
     'dist/',
     'docs/',
-    'examples/',
-    'site/',
     'test/'
   ]),
   {
@@ -41,30 +39,7 @@ export default defineConfig(
       jsdoc
     },
     extends: ['jsdoc/recommended-tsdoc-error'],
-    ignores: ['bin/*.ts']
-  },
-  {
-    plugins: {
-      jsdoc
-    },
     rules: {
-      '@stylistic/brace-style': ['error', '1tbs'],
-      '@stylistic/comma-dangle': ['error', 'never'],
-      '@stylistic/dot-location': ['error', 'property'],
-      '@stylistic/semi': [
-        'error',
-        'never',
-        { beforeStatementContinuationChars: 'always' }
-      ],
-      '@typescript-eslint/consistent-indexed-object-style': ['error', 'index-signature'],
-      '@typescript-eslint/no-base-to-string': 'off',
-      '@typescript-eslint/no-empty-object-type': 'off',
-      '@typescript-eslint/no-namespace': 'off',
-      '@typescript-eslint/prefer-nullish-coalescing': [
-        'error',
-        { ignorePrimitives: { number: true } }
-      ],
-      '@typescript-eslint/restrict-template-expressions': 'off',
       'jsdoc/check-indentation': [
         'error',
         { allowIndentedSections: true }
@@ -81,6 +56,35 @@ export default defineConfig(
           publicOnly: true
         }
       ]
+    },
+    ignores: [
+      'bin/*.ts',
+      'examples/*.ts'
+    ]
+  },
+  {
+    rules: {
+      '@stylistic/brace-style': ['error', '1tbs'],
+      '@stylistic/comma-dangle': ['error', 'never'],
+      '@stylistic/dot-location': ['error', 'property'],
+      '@stylistic/semi': [
+        'error',
+        'never',
+        { beforeStatementContinuationChars: 'always' }
+      ],
+      '@typescript-eslint/consistent-indexed-object-style': ['error', 'index-signature'],
+      '@typescript-eslint/no-base-to-string': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        { checksVoidReturn: false }
+      ],
+      '@typescript-eslint/no-namespace': 'off',
+      '@typescript-eslint/prefer-nullish-coalescing': [
+        'error',
+        { ignorePrimitives: { number: true } }
+      ],
+      '@typescript-eslint/restrict-template-expressions': 'off'
     }
   },
   {
