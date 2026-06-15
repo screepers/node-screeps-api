@@ -55,7 +55,6 @@ export type RateLimitPeriod = typeof RateLimitPeriods[keyof typeof RateLimitPeri
  *
  * Do not instantiate this class. Instead, use the instance from
  * {@link ScreepsHttpClient.rateLimits}.
- * @document ../guides/rate-limits.md
  * @category HTTP API
  */
 export class ScreepsRateLimitTracker {

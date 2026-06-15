@@ -142,7 +142,6 @@ export const GLOBAL_RATE_LIMIT_DELAY = {
  * @example
  * // To access the `GET /api/auth/me` endpoint:
  * const me = await Http.authMe()
- * @document ../guides/rate-limits.md
  * @category HTTP API
  * @categoryDescription Endpoints: /
  * Top-level API endpoints
@@ -165,22 +164,22 @@ export const GLOBAL_RATE_LIMIT_DELAY = {
  * @categoryDescription Endpoints: /leaderboard
  * Endpoints for querying control/power leaderboards
  *
- * See the `Endpoints: /scoreboard` category for seasonal world competition leaderboards
+ * See the `Endpoints: /scoreboard` category for Seasonal World competition leaderboards
  * @categoryDescription Endpoints: /register
  * Endpoints for creating new user accounts
  * @categoryDescription Endpoints: /scoreboard
  * Endpoints for querying scoreboard results
  *
  * This appears to only be relevant to
- * {@link https://screeps.com/season/#!/seasons/chronicle | seasonal world}
+ * {@link https://screeps.com/season/#!/seasons/chronicle | Seasonal World}
  * competitions/events.
  *
  * See also:
- * - `Endpoints: /seasons` category: seasonal world metadata endpoints
+ * - `Endpoints: /seasons` category: Seasonal World metadata endpoints
  * - `Endpoints: /leaderboard` category: for non-seasonal leaderboard endpoints
  * @categoryDescription Endpoints: /seasons
  * Endpoints for {@link https://screeps.com/season/#!/seasons/chronicle | seasonal world} events.
- * See the `Endpoints: /scoreboard` category for seasonal world scoreboard endpoints
+ * See the `Endpoints: /scoreboard` category for Seasonal World scoreboard endpoints
  * @categoryDescription Endpoints: /servers
  * Endpoints that provide information about other servers
  * @categoryDescription Endpoints: /user
@@ -214,6 +213,7 @@ export class ScreepsHttpClient extends EventEmitter {
    *
    * Payload:
    * @event boolean Whether or not the client is now authenticated
+   * @category Events
    */
   static readonly AUTH = 'auth'
 
@@ -222,6 +222,7 @@ export class ScreepsHttpClient extends EventEmitter {
    *
    * Payload:
    * @event {@link RateLimitEvent} The latest rate limit state
+   * @category Events
    */
   static readonly RATE_LIMIT = 'rateLimit'
 
@@ -230,6 +231,7 @@ export class ScreepsHttpClient extends EventEmitter {
    *
    * Payload:
    * @event {@link AxiosResponse} The HTTP response
+   * @category Events
    */
   static readonly RESPONSE = 'response'
 
@@ -239,6 +241,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * Payload:
    * @event {@link ScreepsHttpResponse} The HTTP response, including params
    *  of the associated request
+   * @category Events
    */
   static readonly RESPONSE_RESULT = 'responseResult'
 
@@ -247,6 +250,7 @@ export class ScreepsHttpClient extends EventEmitter {
    *
    * Payload:
    * @event string The new API token
+   * @category Events
    */
   static readonly TOKEN = 'token'
 
@@ -262,7 +266,7 @@ export class ScreepsHttpClient extends EventEmitter {
    * @param opts See {@link LoadConfigOptions}
    * @returns A configured and authenticated {@link ScreepsHttpClient} instance
    * @throws {@link node!Error | Error} if the selected config file is invalid or if no config files are found
-   * @group none
+   * @category none
    */
   static async fromConfig(serverName: string, opts?: LoadConfigOptions): Promise<ScreepsHttpClient> {
     const config = await configManager.loadConfig(serverName, opts)
@@ -307,7 +311,7 @@ export class ScreepsHttpClient extends EventEmitter {
   private _user?: Http.AuthMeResponse | Http.UserInfo
 
   /**
-   * @group none
+   * @category none
    */
   constructor(config: ScreepsHttpConfig)
   constructor(serverConfig: ScreepsServerConfig | ScreepsRawServerConfig)
@@ -1152,7 +1156,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
    * @param mode 'world' (control points) or 'power' (power processed)
    * @param offset The index (starting at zero) of the first leaderboard
    *  position that should be included in the response
-   * @param season A date in the format `YYYY-MM`, NOT a seasonal world name/number.
+   * @param season A date in the format `YYYY-MM`, NOT a Seasonal World name/number.
    *  Defaults to the current season.
    * @category Endpoints: /leaderboard
    */
@@ -1189,7 +1193,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
   /**
    * Fetch a list of all seasons for which leaderboard rankings exist.
    * Note that the "seasons" mentioned here are distinct from the official
-   * {@link https://screeps.com/season/#!/seasons/chronicle | seasonal world}
+   * {@link https://screeps.com/season/#!/seasons/chronicle | Seasonal World}
    * competitions.
    *
    * This endpoint does not require authentication.
@@ -1203,11 +1207,11 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
 
   /**
    * Fetch metadata for the current season. Only works on official servers
-   * when a seasonal world competition is active or about to start.
+   * when a Seasonal World competition is active or about to start.
    *
    * Endpoint: `GET /api/seasons/current`
    * @throws {@link ScreepsApiError} HTTP 404 if called on an unofficial server
-   * @returns Metadata on the current season, or null if a seasonal world
+   * @returns Metadata on the current season, or null if a Seasonal World
    *  competition is not active or about to start
    * @category Endpoints: /seasons
    */
@@ -1798,7 +1802,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
 
   /**
    * Query scoreboard results. This appears to only be relevant to
-   * {@link https://screeps.com/season/#!/seasons/chronicle | seasonal world}
+   * {@link https://screeps.com/season/#!/seasons/chronicle | Seasonal World}
    * competitions/events.
    *
    * Endpoint: `GET /api/scoreboard/list`
@@ -1813,7 +1817,7 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
   }
 
   /**
-   * Get the current leaderboard season (not the current seasonal world season)
+   * Get the current leaderboard season (not the current Seasonal World season)
    * @see the `Endpoints: /leaderboard` category
    */
   get currentLeaderboardSeason(): string {
@@ -1825,19 +1829,19 @@ intent can be an empty object for suicide and unclaim, but the web interface sen
   }
 
   /**
-   * True if this client is configured for the official world, PTR,
-   * or seasonal world servers
+   * True if this client is configured for the official MMO, PTR,
+   * or Seasonal World servers
    */
   get isOfficialServer(): boolean {
     return !!(/screeps\.com/.exec(this.server.url))
   }
 
-  /** True if this client is configured for the seasonal world server */
+  /** True if this client is configured for the Seasonal World server */
   get isSeasonServer(): boolean {
     return !!(/screeps\.com\/season/.exec(this.server.url))
   }
 
-  /** True if this client is configured for the public test realm (PTR) server */
+  /** True if this client is configured for the Public Test Realm (PTR) server */
   get isPtrServer(): boolean {
     return !!(/screeps\.com\/ptr/.exec(this.server.url))
   }
