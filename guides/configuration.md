@@ -10,10 +10,9 @@ We recommend using the [SS3 Screeps Unified Credential File](https://github.com/
 
 ## Config File Paths
 
-{@link ScreepsConfigManager.loadConfig} is used to find and load config files.  searches for config files in a number of places.
+{@link ScreepsConfigManager.loadConfig} is used to find and load config files. It searches for config files in a number of places.
 
-If the `SCREEPS_CONFIG` environment variable is defined, the path it defines
-will be searched first.
+If the `SCREEPS_CONFIG` environment variable is defined, its value will be treated as a directory path. That directory will be searched first.
 
 If `SCREEPS_CONFIG` is undefined or does not point to a file, the config manager searches the following directories:
 
@@ -67,7 +66,6 @@ servers:
   screepsplus:
     host: screepspl.us
     secure: true
-    port: 443
     username: bob
     password: password123
   myserv:
@@ -97,7 +95,7 @@ Configuration data can be passed to the client in a number of different ways.
 One approach is {@link ScreepsHttpClient | `new ScreepsHttpClient()`}:
 
 ```ts
-import { ScreepsConfigManager, ScreepsHttpClient } from 'screeps-api'
+import { ScreepsAppConfig, ScreepsConfigManager, ScreepsHttpClient } from 'screeps-api'
 
 const manager = new ScreepsConfigManager()
 const config = await manager.loadConfig('screepsplus', { app: 'nuke-announcer' })
@@ -107,7 +105,7 @@ console.log(api.server.url) // => https://screepspl.us/
 
 // appConfig properties not used by node-screeps-api are typed as unknown,
 // so type narrowing or type assertions are necessary to use them in TypeScript.
-interface SlackWebhookConfig {
+interface SlackWebhookConfig extends ScreepsAppConfig {
   slack: {
     webhook: string
     channel: string
@@ -115,7 +113,8 @@ interface SlackWebhookConfig {
 }
 
 const appConfig = api.appConfig as SlackWebhookConfig
-console.log(api.appConfig.slack.channel) // => #thewarpath
+console.log('Posting to channel:', appConfig.slack.channel)
+// => Posting to channel: #thewarpath
 ```
 
 You can also pass configuration objects you create yourself:
@@ -123,11 +122,13 @@ You can also pass configuration objects you create yourself:
 ```ts
 const api = new ScreepsHttpClient({
   server: {
-    token: 'Your Token from Account/Auth Tokens'
+    // Create your token at https://screeps.com/a/#!/account/auth-tokens
+    token: 'REPLACE_WITH_YOUR_API_AUTH_TOKEN',
     protocol: 'https',
     hostname: 'screeps.com',
     port: 443,
-    path: '/' // Do no include '/api', it will be added automatically
+    // Do not include '/api'; it will be appended automatically
+    path: '/'
   }
 });
 ```
