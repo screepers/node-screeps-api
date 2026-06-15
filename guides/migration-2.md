@@ -22,11 +22,11 @@ This package is now bundled using the [ESM format](https://nodejs.org/docs/lates
 
 The signature of {@link ScreepsHttpClient.fromConfig | `ScreepsHttpClient.fromConfig()`} has been changed:
 ```ts
-// Old:
+// v1:
 const apiEx1 = await ScreepsAPI.fromConfig() // 'main' server; no app config
 const apiEx2 = await ScreepsAPI.fromConfig('main', 'myApp')
 
-// New:
+// v2:
 // Server name is now required to prevent accidental use of the default server
 const apiEx1 = await ScreepsHttpClient.fromConfig('main')
 const apiEx2 = await ScreepsHttpClient.fromConfig('main', { app: 'myApp' })
@@ -46,7 +46,7 @@ const apiEx3 = await ScreepsHttpClient.fromConfig('main', {
 
 In v1, `ScreepsAPI` grouped its endpoint methods into objects. In v2, all methods are defined directly on {@link ScreepsHttpClient}:
 ```ts
-// Old:
+// v1:
 const api = await ScreepsAPI.fromConfig('main', 'myApp')
 const me = await api.raw.auth.me();
 const terrain = await api.raw.game.roomTerrain('W0N0', 1, 'shard0');
@@ -54,7 +54,7 @@ const objects = await api.raw.game.roomObjects('W0N0', 'shard0');
 const segments = await api.raw.user.memory.segment.get('1,5,10', 'shard2');
 const messages = await api.raw.userMessages.index();
 
-// New:
+// v2:
 const api = await ScreepsHttpClient.fromConfig('main', {
   app: { defaultShard: 'shard0' }
 })
@@ -67,4 +67,28 @@ const messages = await api.userMessagesIndex()
 
 ## WebSocket API
 
-The {@link ScreepsSocketClient | WebSocket API client} is largely unchanged. Check out the Examples section of the documentation.
+Relatively fewer breaking changes were made to the {@link ScreepsSocketClient | WebSocket API client}. Check out the Examples section of the documentation for sample code.
+
+The most significant breaking change is that client parameters are now read from {@link ScreepsHttpClient.appConfig} instead of being passed as an argument to {@link ScreepsSocketClient.connect}:
+
+```ts
+// v1:
+const api = await ScreepsAPI.fromConfig('main')
+api.socket.connect({
+  reconnect: true,
+  resubscribe: true,
+  keepAlive: false
+})
+
+// v2:
+const api = await ScreepsHttpClient.fromConfig('main', {
+  app: {
+    wsKeepAlive: false,
+    wsReconnect: true,
+    wsResubscribe: true
+  }
+})
+api.socket.connect()
+```
+
+See {@link ScreepsClientConfig} for a full list of supported parameters.

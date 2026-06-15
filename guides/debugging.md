@@ -34,5 +34,8 @@ api.debug()
 
 ## Errors
 
-Most errors thrown by the HTTP API should be instances of {@link ScreepsApiError}.
-These errors include HTTP request/response fields that may be helpful.
+Most errors thrown by {@link ScreepsHttpClient} will be instances of:
+* {@link ScreepsApiError}: If the error was due to an HTTP 4xx/5xx response from the server
+* {@link Error}: If the error occurred before a request was sent (invalid arguments, missing auth credentials, etc)
+
+{@link ScreepsSocketClient} emits {@link ScreepsSocketClient.ERROR} events for any errors sent by the server or generated within the client.
