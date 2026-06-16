@@ -2,21 +2,27 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 // If installed from npm, use:
 // import { ... } from 'screeps-api'
-import { ScreepsHttpClient, ServerAuthEvent, ServerAuthStatuses, UserCodeEvent } from '../src'
+import { ScreepsHttpClient, ScreepsSocketClient, ServerAuthEvent, ServerAuthStatuses, UserCodeEvent } from '../src'
 
 const api = await ScreepsHttpClient.fromConfig('main')
+console.debug('Connecting to WebSocket API')
 await api.socket.connect()
 
-api.socket.on('auth', (event: ServerAuthEvent) => {
+api.socket.on(ScreepsSocketClient.CONNECTED, () => {
+  console.info('Connected to WebSocket API')
+})
+
+api.socket.on(ScreepsSocketClient.AUTH, (event: ServerAuthEvent) => {
   if (event.data.status === ServerAuthStatuses.Ok) {
-    console.info(`WebSocket API authentication succeeded`)
+    console.info('Authenticated to WebSocket API')
   } else {
     console.error(`WebSocket API authentication failed`)
+    process.exit(1)
   }
 })
 
 // Upload your code to trigger this event
-api.on('code', async (event: UserCodeEvent) => {
+void api.socket.subscribeUserCode(async (event: UserCodeEvent) => {
   await mkdir(event.data.branch)
 
   for (const moduleName in event.data.modules) {

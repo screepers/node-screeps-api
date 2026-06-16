@@ -16,7 +16,7 @@
 As of v1.0, all endpoint methods are asynchronous.
 
 ```javascript
-import { ScreepsHttpClient } from 'screeps-api'
+import { ScreepsHttpClient, ScreepsSocketClient } from 'screeps-api'
 import { writeFile } from 'node:fs/promises'
 
 // `ScreepsHttpClient.fromConfig()` finds your configuration file and picks
@@ -70,7 +70,7 @@ api.userCodeSet({
 // WebSocket API
 
 // Connect and authenticate
-api.socket.connect()
+await api.socket.connect()
 
 // Events follow this format:
 // {
@@ -79,19 +79,18 @@ api.socket.connect()
 //   path: 'E3N3', // Only on certain events, otherwise an empty string
 //   data: { ... }
 // }
-api.socket.on('connected', () => {
-  console.log('Websocket client connected')
-  // Do stuff after connected
+api.socket.on(ScreepsSocketClient.CONNECTED, () => {
+  console.log('WebSocket client connected')
 })
-api.socket.on('auth', (event) => {
+api.socket.on(ScreepsSocketClient.DISCONNECTED, () => {
+  console.log('WebSocket client disconnected')
+})
+api.socket.on(ScreepsSocketClient.AUTH, (event) => {
   // Contains either 'ok' or 'failed'
-  console.log('Websocket auth:', event.data.status)
-  // Do stuff after auth
+  console.log('WebSocket auth:', event.data.status)
 })
 
-// Subscriptions can be queued even before the client connects or auths,
-// although you may want to subscribe from the connected or auth callback
-// to better handle reconnects
+// Subscriptions can be queued even before the client connects or auths
 function onConsole(event) {
   const { messages, error, shard } = event.data
   const shardTag = shard ? `[${shard}] ` : ''
@@ -112,17 +111,27 @@ api.socket.on('console', onConsole)
 // Starting in v1.0, you can also pass a handler straight to subscribe!
 api.socket.subscribe('console', onConsole)
 
+// Starting in v2.0, you can use specialized subscribe methods for each known
+// event type. These specialized versions automatically determine the correct
+// event string to use and provide better type safety for callback arguments.
+api.socket.subscribeUserConsole(onConsole)
+
+// ScreepsSocketClient tracks which callbacks are registered for which events.
+// By default, `subscribe` and its specialized versions will ignore duplicate
+// callbacks for any given event, so after running all of the previous examples,
+// `onConsole` will still only be invoked once per `UserConsoleEvent`.
+
 // Watch CPU/Memory usage
-api.socket.subscribe('cpu', (event) => {
+api.socket.subscribeUserCpu((event) => {
   console.log('CPU used:', event.data.cpu)
   console.log('Memory used (bytes):', event.data.memory)
 })
 
 // Watch for updates to Memory paths
-api.socket.subscribe('memory/stats', (event) => {
+api.socket.subscribeUserMemory('stats', (event) => {
   console.log('Memory.stats:', JSON.stringify(event.data, undefined, 2))
 })
-api.socket.subscribe('memory/rooms.E0N0', (event) => {
+api.socket.subscribeUserMemory('rooms.E0N0', (event) => {
   console.log('Memory.rooms.E0N0:', JSON.stringify(event.data, undefined, 2))
 })
 ```
