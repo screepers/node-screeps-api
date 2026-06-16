@@ -17,7 +17,6 @@ export default defineConfig({
   },
   external: [
     'axios',
-    'bluebird',
     'commander',
     'debug',
     'node:events',
