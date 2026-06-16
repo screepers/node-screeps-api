@@ -24,7 +24,10 @@
     "test": "echo Tests disabled, TODO: FIX THIS!",
     "2npm": "publish-if-not-published"
   },
-  "author": "Adam Shumann",
+  "author": "Alina Shumann (https://github.com/AlinaNova21)",
+  "contributors": [
+    "DocDvorak <docdvorak@gmail.com> (https://github.com/DocDvorak)"
+  ],
   "license": "ISC",
   "engines": {
     "node": "22.x || 24.x"
