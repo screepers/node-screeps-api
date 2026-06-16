@@ -25,7 +25,14 @@ export const DEFAULT_CLIENT_CONFIG = {
   retry429Global: true,
   retry429InitDelay: 60_000, // 1 minute
   retry429MaxDelay: 10_800_000, // 3 hours
-  retry429MaxRetries: 0
+  retry429MaxRetries: 0,
+  wsKeepAlive: true,
+  wsKeepAliveInterval: 10_000, // 10 seconds
+  wsReconnect: true,
+  wsReconnectInitDelay: 100, // 100 ms
+  wsReconnectMaxDelay: 60_000, // 1 minute
+  wsReconnectMaxRetries: 10,
+  wsResubscribe: true
 } as const
 
 const CONFIG_REL_PATHS = [
@@ -355,7 +362,7 @@ export interface ScreepsServerConfig {
 }
 
 /**
- * User-configurable options for {@link ScreepsHttpClient}
+ * User-configurable options for {@link ScreepsHttpClient} and {@link ScreepsSocketClient}.
  * @see {@link DEFAULT_CLIENT_CONFIG} for default values
  * @category Common
  */
@@ -386,6 +393,39 @@ export interface ScreepsClientConfig {
    * Only applies to retries for endpoint-specific rate limits.
    */
   retry429MaxRetries: number
+  /**
+   * If enabled, {@link ScreepsSocketClient} will call {@link reconnect}
+   * automatically when disconnected.
+   */
+  wsReconnect: boolean
+  /**
+   * If enabled, all previous subscriptions will be recreated
+   * after successfully connecting (automatically or manually).
+   */
+  wsResubscribe: boolean
+  /**
+   * If enabled, ping the server every {@link wsKeepAliveInterval} to prevent
+   * the connection from being closed.
+   */
+  wsKeepAlive: boolean
+  /** Time (in milliseconds) between {@link wsKeepAlive} pings */
+  wsKeepAliveInterval: number
+  /**
+   * The delay (in milliseconds) before the first retry attempt
+   * in {@link ScreepsSocketClient.reconnect}.
+   */
+  wsReconnectInitDelay: number
+  /**
+   * The maximum delay (in milliseconds) before a retry attempt
+   * in {@link ScreepsSocketClient.reconnect}.
+   */
+  wsReconnectMaxDelay: number
+  /**
+   * The maximum number of times {@link ScreepsSocketClient.connect} will be
+   * called from {@link ScreepsSocketClient.reconnect} before giving up and
+   * throwing an error.
+   */
+  wsReconnectMaxRetries: number
 }
 
 /**

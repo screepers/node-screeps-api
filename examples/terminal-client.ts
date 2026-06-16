@@ -1,15 +1,15 @@
 import readline from 'node:readline/promises'
-import { fileURLToPath } from 'node:url'
 // If installed from npm, use:
 // import { ... } from 'screeps-api'
-import { Resources, RoomEvent, RoomObject, RoomObjectType, RoomObjectTypes, UserConsoleEvent, UserCpuEvent, UserCpuEventData } from '../src'
-
-// Borrow API client instance and terminal I/O from the Console example
-import { api, output, rl, stripTags, quit } from './console'
+import { Resources, RoomEvent, RoomObject, RoomObjectType, RoomObjectTypes, ScreepsHttpClient, ScreepsSocketClient, ServerAuthEvent, ServerAuthStatuses, UserConsoleEvent, UserCpuEvent, UserCpuEventData } from '../src'
 
 const ROOM_DIM = 50
 const MIN_COLS = ROOM_DIM
-const MIN_ROWS = ROOM_DIM + 5
+const MIN_ROWS = ROOM_DIM + 2
+
+const input = process.stdin
+const output = process.stdout
+const rlOut = new readline.Readline(output)
 
 // Abort if terminal is too small to render a room
 if (output.columns < MIN_COLS || output.rows < MIN_ROWS) {
@@ -17,7 +17,10 @@ if (output.columns < MIN_COLS || output.rows < MIN_ROWS) {
   process.exit(1)
 }
 
-const rlOut = new readline.Readline(output)
+// Load server/app names from env vars
+const serverName = process.env.SCREEPS_SERVER ?? 'main'
+const appName = process.env.SCREEPS_APP ?? 'example'
+const api = await ScreepsHttpClient.fromConfig(serverName, { app: appName })
 
 /** Additional room object properties used to render them */
 interface RenderedObject extends RoomObject {
@@ -26,11 +29,10 @@ interface RenderedObject extends RoomObject {
 }
 
 let cpuData: Partial<UserCpuEventData> = {}
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let gameTime: number | undefined
-let roomName: string | undefined
-let terrain = ''
+let terrain: string | undefined
 let objects: { [_id: string]: RenderedObject } = {}
+let roomName: string | undefined
 
 const TERRAIN_GLYPHS: Readonly<{ [code: string]: string }> = {
   0: ' ', // plain
@@ -118,33 +120,39 @@ const GLYPH_RENDER_ORDER: Readonly<{ [resType in RoomObjectType]: number }> = {
   powerCreep: 200
 }
 
-async function changeRoom(newRoomName: string) {
-  // If on an official server, normalize room names by prepending shard names
-  let newFullRoomName = newRoomName
-  if (api.isOfficialServer && !newRoomName.includes('/')) {
-    const shardName = api.appConfig.defaultShard
-    if (!shardName) {
-      console.error(`Room name must be prefixed with a shard name because api.appConfig.defaultShard is not set`)
-      return
-    }
-    newFullRoomName = `${api.appConfig.defaultShard}/${newRoomName}`
+async function changeRoom(roomNameInput: string) {
+  // Pull shard and room name from input and config
+  // eslint-disable-next-line prefer-const
+  let [newShardName, newRoomName] = roomNameInput.includes('/')
+    ? roomNameInput.split('/')
+    : [undefined, roomNameInput]
+  newShardName ??= api.appConfig.defaultShard
+
+  // If on an official server, reject inputs without shard names
+  if (api.isOfficialServer && !newShardName) {
+    console.error(`Room name must be prefixed with a shard name because api.appConfig.defaultShard is not set`)
+    return
   }
 
+  const newFullRoomName = api.isOfficialServer
+    ? `${newShardName}/${newRoomName}`
+    : newRoomName
   if (roomName === newFullRoomName) {
     console.info(`${newFullRoomName} is already being shown`)
     return
   }
 
+  terrain = (await api.gameRoomTerrain(newRoomName, newShardName)).terrain[0].terrain
+  objects = {}
+  roomName = newFullRoomName
+
   if (roomName) {
-    void api.socket.unsubscribe(`room:${roomName}`, updateRoomObjects)
+    void api.socket.unsubscribeRoom(newRoomName, newShardName, updateRoomObjects)
   }
 
-  roomName = newFullRoomName
-  terrain = (await api.gameRoomTerrain(newRoomName)).terrain[0].terrain
-  objects = {}
+  void api.socket.subscribeRoom(newRoomName, newShardName, updateRoomObjects)
 
-  void api.socket.subscribe(`room:${roomName}`, updateRoomObjects)
-
+  await renderStats()
   await renderPrompt()
 }
 
@@ -178,33 +186,67 @@ async function updateRoomObjects(event: RoomEvent) {
   //   //   to indicate a missing object
   // }
 
-  await render()
+  await renderRoom()
   await renderPrompt()
 }
 
+/** Clear the screen */
 async function clearScreen() {
   rlOut.cursorTo(0, 0)
   rlOut.clearScreenDown()
   await rlOut.commit()
 }
 
+/** Render entire client UI */
 async function render() {
   await clearScreen()
   await renderStats()
+  await renderRoom()
+  await renderConsole()
+  await renderPrompt()
+}
 
+async function renderStats() {
+  // Clear line and display current room name
+  rlOut.cursorTo(0, 0)
+  rlOut.clearLine(0)
+  await rlOut.commit()
+  output.write(roomName ? `Room: ${roomName}` : 'Enter a room name')
+
+  // Display CPU usage
+  rlOut.cursorTo(26, 0)
+  await rlOut.commit()
+  output.write(`CPU: ${cpuData.cpu ?? '---'}`)
+
+  // Display memory usage
+  rlOut.cursorTo(35, 0)
+  await rlOut.commit()
+  const memKibUsed = cpuData.memory !== undefined
+    ? `${(cpuData.memory / 1024).toFixed(1)} KiB`
+    : '---'
+  output.write(`Memory: ${memKibUsed}`)
+
+  // Display game time
+  rlOut.cursorTo(55, 0)
+  await rlOut.commit()
+  output.write(`Time: ${gameTime?.toLocaleString() ?? '---'}`)
+}
+
+async function renderRoom() {
   // Top-left coordinate of the room display
   const roomX = 0
   const roomY = 1
 
   // Render room terrain
-  rlOut.cursorTo(roomX, roomY)
-  await rlOut.commit()
   for (let y = 0; y < ROOM_DIM; y++) {
+    rlOut.cursorTo(roomX, roomY + y)
+    await rlOut.commit()
+
     const i = y * ROOM_DIM
-    const terrainStr = terrain.substring(i, i + ROOM_DIM)
+    const terrainStr = terrain?.substring(i, i + ROOM_DIM)
       .split('')
       .map(c => TERRAIN_GLYPHS[c])
-      .join('')
+      .join('') ?? ' '.repeat(ROOM_DIM)
     output.write(terrainStr + '\n')
   }
 
@@ -219,96 +261,143 @@ async function render() {
   }
 }
 
-async function renderStats() {
-  // Render basic stats
-  rlOut.cursorTo(0, 0)
-  rlOut.clearLine(0)
-  await rlOut.commit()
-  output.write(roomName ? `Room: ${roomName}` : 'Enter a room name')
-  rlOut.cursorTo(26, 0)
-  await rlOut.commit()
-  output.write(`CPU: ${cpuData.cpu ?? '---'}`)
-  rlOut.cursorTo(35, 0)
-  await rlOut.commit()
-  const memKibUsed = cpuData.memory !== undefined
-    ? `${(cpuData.memory / 1024).toFixed(1)} KiB`
-    : '---'
-  output.write(`Memory: ${memKibUsed}`)
-  // TODO: Render game time
+const consoleBuffer: string[] = []
+const CONSOLE_BUFFER_SIZE = 1_000
+
+function logToConsole(...messages: string[]) {
+  consoleBuffer.push(...(messages.flatMap(msg => msg.split('\n'))))
+
+  if (consoleBuffer.length > CONSOLE_BUFFER_SIZE) {
+    consoleBuffer.splice(0, CONSOLE_BUFFER_SIZE - consoleBuffer.length)
+  }
+
+  void renderConsole()
+  void renderPrompt()
 }
 
-const consoleLines: string[] = []
-
+/** Render console output */
 async function renderConsole() {
   // Remove oldest messages if log has overflowed
   const consoleRows = output.rows - ROOM_DIM - 2
-  if (consoleLines.length > consoleRows) {
-    consoleLines.splice(0, consoleLines.length - consoleRows)
+  if (consoleBuffer.length > consoleRows) {
+    consoleBuffer.splice(0, consoleBuffer.length - consoleRows)
   }
 
   // Render console output
-  rlOut.cursorTo(0, ROOM_DIM + 1)
-  for (const line of consoleLines) {
+  for (let dy = 0; dy < consoleRows; dy++) {
+    rlOut.cursorTo(0, ROOM_DIM + 1 + dy)
     rlOut.clearLine(0)
     await rlOut.commit()
-    output.write(line.substring(0, output.columns) + '\n')
+
+    if (dy < consoleBuffer.length) {
+      output.write(consoleBuffer[dy].substring(0, output.columns))
+    }
   }
 }
 
+/** Render the input prompt */
 async function renderPrompt() {
   rlOut.cursorTo(0, output.rows - 1)
   rlOut.clearLine(0)
   await rlOut.commit()
-  rl.prompt(true)
+  rlInterface.prompt(true)
 }
 
-export async function startClient() {
-  void api.socket.subscribe('console', async (event: UserConsoleEvent) => {
-    const { messages, error, shard } = event.data
-    const shardTag = shard ? `[${shard}] ` : ''
+api.socket.on(ScreepsSocketClient.CONNECTED, () => {
+  console.info('Connected to WebSocket API')
+})
+api.socket.on(ScreepsSocketClient.AUTH, (event: ServerAuthEvent) => {
+  if (event.data.status === ServerAuthStatuses.Failed) {
+    console.error('WebSocket API authentication failed')
+    process.exit(1)
+  }
+  console.info('Authenticated to WebSocket API')
+})
+api.socket.on(ScreepsSocketClient.DISCONNECTED, () => {
+  console.info('Disconnected from WebSocket API')
+})
+api.socket.on(ScreepsSocketClient.ERROR, (err: unknown) => {
+  console.error('WebSocket API error:', err)
+})
 
-    if (!messages) return
+console.debug('Connecting to WebSocket API')
+await api.socket.connect()
 
-    // Add newest console messages
-    const consoleRows = output.rows - ROOM_DIM - 2
-    const newMessages = [
-      ...(error ? `${shardTag}${error}`.split('\n') : []),
-      ...messages.results.flatMap(msg => `< ${msg}`.split('\n')),
-      ...messages.log.flatMap(msg => `${shardTag}${stripTags(msg)}`.split('\n'))
-    ].slice(-consoleRows)
-    consoleLines.push(...newMessages)
-
-    await renderConsole()
-    await renderPrompt()
-  })
-
-  void api.socket.subscribe('cpu', async (event: UserCpuEvent) => {
-    cpuData = event.data
-    await renderStats()
-    await renderPrompt()
-  })
-
-  rl.on('close', () => quit('I/O closed. Bye!'))
-  rl.on('SIGINT', () => quit('Keyboard interrupt. Bye!'))
-
-  rl.on('line', async (line) => {
-    line = line.trim()
-
-    if (line == 'exit') {
-      quit()
-    }
-
-    if (/^(?:(\w+)\/)?(E|W)(\d+)(N|S)(\d+)$/.exec(line)) {
-      await changeRoom(line)
-      return
-    }
-
-    api.userConsole(line).catch(console.error)
-  })
-
-  await api.socket.connect()
+function quit(message: string, code = 0) {
+  console.log(message)
+  process.exit(code)
 }
 
-if (fileURLToPath(import.meta.url) === process.argv[1]) {
-  void startClient()
+const rlInterface = readline.createInterface({
+  input,
+  output,
+  prompt: `${api.appConfig.defaultShard ?? ''}> `
+})
+
+rlInterface.on('close', () => quit('I/O closed. Bye!'))
+rlInterface.on('SIGINT', () => quit('Keyboard interrupt. Bye!', 1))
+
+rlInterface.on('line', async (line) => {
+  line = line.trim()
+
+  if (line === 'exit') {
+    quit('Bye!')
+  }
+
+  if (/^(?:(\w+)\/)?(E|W)(\d+)(N|S)(\d+)$/.exec(line)) {
+    await changeRoom(line)
+    return
+  }
+
+  api.userConsole(line).catch(console.error)
+})
+
+// Monkeypatch console methods to display output in the console area
+function logToConsoleMonkeypatch(...args: unknown[]) {
+  logToConsole('<<< ' + args.map(arg => String(arg)).join(' '))
+}
+
+console.log = logToConsoleMonkeypatch
+console.debug = logToConsoleMonkeypatch
+console.info = logToConsoleMonkeypatch
+console.warn = logToConsoleMonkeypatch
+console.error = logToConsoleMonkeypatch
+
+void render()
+
+/**
+ * Strip HTML tags from a string to make it more readable.
+ * This is not suitable for sanitizing untrusted input.
+ */
+function stripTags(text: string): string {
+  return text.replaceAll(/<\s*?\/?\s*?\w+?(?:[\w\s=]+?'[^>]*'?|[\w\s=]+?"[^>]*"?|[\w\s=]+?`[^>]*`?|[\w\s]+?)*>/g, '')
+}
+
+void api.socket.subscribeUserConsole((event: UserConsoleEvent) => {
+  const { messages, error, shard } = event.data
+  const shardTag = shard ? `[${shard}] ` : ''
+
+  // Add newest console messages
+  const newMessages = messages
+    ? [
+        ...messages.results.flatMap(msg => `< ${msg}`),
+        ...messages.log.flatMap(msg => `${shardTag}${stripTags(msg)}`)
+      ]
+    : []
+  if (error) newMessages.push(`${shardTag}${error}`)
+
+  logToConsole(...newMessages)
+})
+
+void api.socket.subscribeUserCpu(async (event: UserCpuEvent) => {
+  cpuData = event.data
+  await renderStats()
+  await renderPrompt()
+})
+
+// Pick an initial room to load
+const startRoomRes = await api.userWorldStartRoom()
+const startRoom = startRoomRes.room[0]
+if (startRoom) {
+  await changeRoom(startRoom)
 }

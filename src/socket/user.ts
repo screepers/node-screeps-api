@@ -17,6 +17,15 @@ export interface UserCodeEvent extends SocketEvent {
 
 /**
  * Payload of a {@link UserCodeEvent}
+ * @example
+ *  {
+ *    "branch": "simulation",
+ *    "modules": {
+ *      "main": "module.exports.loop = function() { console.log('Hello, world!') }\n"
+ *    },
+ *    timestamp: 1500930041802,
+ *    hash: 424324
+ *  }
  * @category WebSocket API - User
  */
 export interface UserCodeEventData extends SocketEvent {
@@ -45,6 +54,26 @@ export interface UserConsoleEvent extends SocketEvent {
 
 /**
  * Payload of a {@link UserConsoleEvent}
+ * @example
+ *  // After calling `api.userConsole('Game.time')` on an unofficial server:
+ *  {
+ *    messages: {
+ *      log: [],
+ *      results: ["16746996"]
+ *    }
+ *  }
+ * @example
+ *  // After bot emits logs on shard2 of an official server:
+ *  {
+ *    messages: {
+ *      log: [
+ *        "I: Hello, world!",
+ *        "E: Oh noes, an error occurred!"
+ *      ],
+ *      results: []
+ *    }
+ *    shard: "shard2"
+ *  }
  * @category WebSocket API - User
  */
 export interface UserConsoleEventData {
@@ -86,6 +115,11 @@ export interface UserCpuEvent extends SocketEvent {
 
 /**
  * Payload of a {@link UserCpuEvent}
+ * @example
+ *  {
+ *    cpu: 32,
+ *    memory: 126435
+ *  }
  * @category WebSocket API - User
  */
 export interface UserCpuEventData {
@@ -100,11 +134,9 @@ export interface UserCpuEventData {
  *
  * When subscribed, the server will send an event whenever a resource amount
  * is updated.
- * @example Raw sample events:
- * ["user:670e0c607317e200125d3aa2/resources",{"credits":0}]
  * @category WebSocket API - User
  */
-export interface UserResourceEvent {
+export interface UserResourceEvent extends SocketEvent {
   type: 'user'
   path: 'resources'
   data: UserResourceEventData
@@ -112,6 +144,8 @@ export interface UserResourceEvent {
 
 /**
  * Payload of a {@link UserResourceEvent}
+ * @example
+ *  { credits: 0 }
  * @category WebSocket API - User
  */
 export type UserResourceEventData = {
@@ -125,13 +159,24 @@ export type UserResourceEventData = {
 export type ResourceEventConstant = IntershardResource | 'credits'
 
 /**
- * WebSocket event that appears to be related to the Memory inspector watch list.
- * @example Raw sample events:
- * ["user:670e0c607317e200125d3aa2/memory/shardSeason/creeps.Scout-80965","undefined"]
+ * WebSocket event for updates to
+ * {@link https://docs.screeps.com/global-objects.html#Memory-object | Memory}
+ * @example
+ *  // Parsed JSON:
+ *  [
+ *    "user:670e0c607317e200125d3aa2/memory/shardSeason/creeps.Scout-80965",
+ *    "undefined"
+ *  ]
  * @category WebSocket API - User
  */
-export interface MemoryEvent {
+export interface UserMemoryEvent extends SocketEvent {
   type: 'user'
   /** `memory/${shardName}/${memoryPath}` */
   path: string
+  /**
+   * The contents of the Memory path as a JSON string.
+   *
+   * If path is undefined, this will be set to `"undefined"`
+   */
+  data: string
 }
