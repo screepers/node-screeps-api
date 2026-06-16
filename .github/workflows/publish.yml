@@ -19,5 +19,6 @@ jobs:
         registry-url: https://registry.npmjs.org/
         cache: yarn
     - run: yarn install --immutable
+    - run: yarn build
     - run: yarn test
     - run: yarn npm publish --access public
