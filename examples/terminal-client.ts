@@ -165,8 +165,14 @@ async function updateRoomObjects(event: RoomEvent) {
 
   gameTime = event.data.gameTime
 
-  // Add/update objects
+  // Add/update/remove objects
   for (const id in event.data.objects) {
+    // Delete removed objects
+    if (event.data.objects[id] === null) {
+      delete objects[id]
+      continue
+    }
+
     // Assign RoomObject properties
     const updated = event.data.objects[id]
     objects[id] ??= updated as RenderedObject
@@ -177,14 +183,6 @@ async function updateRoomObjects(event: RoomEvent) {
     obj.glyph = OBJECT_GLYPHS[obj.type]
     obj.glyphOrder = GLYPH_RENDER_ORDER[obj.type]
   }
-
-  // // Clear old objects:
-  // for (const id in objects) {
-  //   // TODO:
-  //   // - Remove creeps/powerCreeps if gameTime >= obj.gameTime
-  //   // - Check if the value of event.data.objects[id] is null
-  //   //   to indicate a missing object
-  // }
 
   await renderRoom()
   await renderPrompt()

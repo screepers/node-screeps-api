@@ -126,10 +126,11 @@ export interface RoomEventData {
    * **Warning:** only the first event returns full room object properties.
    * Subsequent events only return the modified properties.
    *
-   * **Unconfirmed:** values might be null to indicate that the associated object
-   * has disappeared.
+   * When an object ID maps to `null`, this indicates that the object with
+   * that ID has disappeared from the room (i.e. it died, got destroyed, expired,
+   * moved to another room, etc).
    */
-  objects: { [_id: string]: RoomObject }
+  objects: { [_id: string]: RoomObject | null }
   /** {@link https://docs.screeps.com/api/#RoomVisual | RoomVisual} data */
   visual: string
 }
