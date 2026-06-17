@@ -1231,8 +1231,23 @@ export class ScreepsHttpClient extends EventEmitter {
   }
 
   /**
-   * Fetch metadata for the current season. Only works on official servers
-   * when a Seasonal World competition is active or about to start.
+   * Fetch a list of all past, current, and upcoming
+   * {@link https://screeps.com/season/#!/seasons/chronicle | Seasonal World} competitions.
+   *
+   * Only works on official servers.
+   * @throws {@link ScreepsApiError} HTTP 404 if called on an unofficial server
+   * @category Endpoints: /seasons
+   */
+  seasonsList(): Promise<Http.SeasonsListResponse> {
+    return this.req(ScreepsHttpMethods.Get, '/api/seasons')
+  }
+
+  /**
+   * Fetch metadata for the current
+   * {@link https://screeps.com/season/#!/seasons/chronicle | Seasonal World} competition.
+   *
+   * Only works on official servers when a Seasonal World competition
+   * is active or about to start.
    *
    * Endpoint: `GET /api/seasons/current`
    * @throws {@link ScreepsApiError} HTTP 404 if called on an unofficial server
