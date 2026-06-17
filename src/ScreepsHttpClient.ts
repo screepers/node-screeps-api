@@ -1826,19 +1826,21 @@ export class ScreepsHttpClient extends EventEmitter {
   }
 
   /**
-   * Query scoreboard results. This appears to only be relevant to
+   * Query scoreboard user results. This appears to only be relevant to
    * {@link https://screeps.com/season/#!/seasons/chronicle | Seasonal World}
-   * competitions/events.
+   * competitions.
    *
    * Endpoint: `GET /api/scoreboard/list`
-   * @param offset The index (starting at zero) of the first leaderboard
-   *  position that should be included in the response
-   * @param limit The number of users to return per request.
+   * @param offset Offset of the first result to return
+   * @param limit The maximum number of results to return per request.
    *  The maximum valid value is 20.
+   * @param search If undefined, returns all users. If defined, results are
+   *  filtered by usernames that include this substring (case sensitive).
+   * @throws {@link ScreepsApiError} HTTP 404 if called on a non- Seasonal World server
    * @category Endpoints: /scoreboard
    */
-  scoreboardList(offset = 0, limit = 20): Promise<Http.ScoreboardListResponse> {
-    return this.req(ScreepsHttpMethods.Get, '/api/scoreboard/list', { limit, offset })
+  scoreboardList(offset = 0, limit = 20, search?: string): Promise<Http.ScoreboardListResponse> {
+    return this.req(ScreepsHttpMethods.Get, '/api/scoreboard/list', { limit, offset, search })
   }
 
   /**
