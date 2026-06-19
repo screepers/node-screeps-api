@@ -8,10 +8,13 @@ import { ScreepsResponse } from './base'
  */
 export interface ScoreboardListResponse extends ScreepsResponse {
   meta: {
-    /** The total number of players who have spawned on this season's map */
+    /** The total number of players in the result set */
     length: number
   }
-  /** A page of player leaderboard results */
+  /**
+   * A page of player scoreboard results
+   * ordered by {@link ScoreboardUser.rank} (ascending)
+   */
   users: ScoreboardUser[]
 }
 
