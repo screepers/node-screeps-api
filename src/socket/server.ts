@@ -63,6 +63,7 @@ export interface ServerProtocolEvent extends SocketEvent {
 }
 
 /**
+ * Event that reports the current system time on the server.
  * @category WebSocket API - Server
  */
 export interface ServerTimeEvent extends SocketEvent {
@@ -70,6 +71,10 @@ export interface ServerTimeEvent extends SocketEvent {
   id: undefined
   path: 'time'
   data: {
+    /**
+     * The current system time of the server represented as a UNIX timestamp
+     * (in milliseconds).
+     */
     time: number
   }
 }
