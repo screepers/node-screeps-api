@@ -89,7 +89,7 @@ export interface RoomEvent extends SocketEvent {
  *        nextDecayTime: 20308833
  *      },
  *    },
- *    gameTime: 20307112,
+ *    gameTime: undefined,
  *    info: {
  *      mode: 'world'
  *    },
@@ -114,7 +114,12 @@ export interface RoomEvent extends SocketEvent {
  * @category WebSocket API
  */
 export interface RoomEventData {
-  /** The current game time (in ticks) */
+  /**
+   * The current game time (in ticks).
+   *
+   * This will be undefined on the initial event.
+   */
+  // TODO: Implement breaking change: mark this field as optional
   gameTime: number
   /** The current game mode (usually `'world'`) */
   info: {
