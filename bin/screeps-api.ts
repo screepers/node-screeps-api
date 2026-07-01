@@ -47,13 +47,14 @@ program
   .version(pkg.version)
 
 commandBase('call', '<cmd> [args...]')
-  .summary('Call an API endpoint method on ScreepsHttpClient')
-  .description(`Call an API endpoint defined on ScreepsHttpClient.
+  .summary('Call a method on ScreepsHttpClient')
+  .description(`Call a method on ScreepsHttpClient.
 
-<cmd> is formatted as it would be if you were calling the endpoint via ScreepsHttpClient.
-[args...] are passed directly to the relevant ScreepsHttpClient method.
+<cmd> is the name of the method.
+[args...] are passed directly to the named method.
   `)
-  .addHelpText('after', `Examples:
+  .addHelpText('after', `
+Examples:
 # Run 'GET /api/auth/me' on the "ptr" server from your credentials file
 screeps-api --server ptr call authMe
 # Run 'GET /api/scoreboards/list?limit=20&offset=50' on "main" server from your credentials file
