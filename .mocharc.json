@@ -1,0 +1,6 @@
+{
+  "extension": ["ts"],
+  "reporter": "spec",
+  "spec": ["test/**/*.ts"],
+  "node-option": ["import=tsx"]
+}

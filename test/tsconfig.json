@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "screeps-api": ["../dist/src/index.d.ts"]
+    },
+    "types": [
+      "debug",
+      "lodash",
+      "mocha",
+      "node"
+    ]
+  },
+  "include": [
+    "./**/*.ts"
+  ]
+}
