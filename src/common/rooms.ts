@@ -139,13 +139,37 @@ export interface Creep extends AnyCreep {
     say: SayAction | null
     upgradeController: Position | null
   }
-  body: {
-    name: BodyPartType
-    hits: number
-    $name: string
-    boost?: MineralBoostResource
-  }[]
+  body: CreepBodyPart[]
   fatigue: number
+}
+
+/**
+ * A single part of a {@link Creep.body}.
+ * @category Common - Rooms
+ */
+export interface CreepBodyPart {
+  /** Determines the capabilities/stats conferred by this body part */
+  type: BodyPartType
+  /**
+   * The current number of hit points of this part.
+   *
+   * If it hits zero, the part becomes unusable until at least 1 hit is restored.
+   * Maximum is 100 using default game settings.
+   */
+  hits: number
+  /** The boost applied to this part. Missing/undefined on unboosted parts. */
+  boost?: MineralBoostResource
+  /**
+   * Index key of this part in the creep's body.
+   * @deprecated This is added by the web client. It does not appear to be
+   *  present in API responses and will be removed in v3.0.
+   */
+  $name: string
+  /**
+   * @deprecated This field does not exist in data returned by the API
+   *  and will be removed in v3.0. Use {@link type} instead.
+   */
+  name: BodyPartType
 }
 
 /**
