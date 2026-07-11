@@ -44,6 +44,7 @@ const pkgUrl = new URL('../package.json', import.meta.url)
 const pkg = JSON.parse(await readFile(pkgUrl, 'utf8')) as { version: string }
 
 program
+  .name('screeps-api')
   .version(pkg.version)
 
 commandBase('call', '<cmd> [args...]')
