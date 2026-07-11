@@ -1,4 +1,4 @@
-import { RoomObject } from '../common/rooms'
+import { RoomObject } from '../common/rooms.js'
 
 /**
  * Parsed version of a message received from the server via the WebSocket API.

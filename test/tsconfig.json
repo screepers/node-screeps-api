@@ -3,8 +3,9 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
+    "rootDir": ".",
     "paths": {
-      "screeps-api": ["../dist/src/index.d.ts"]
+      "screeps-api": ["../dist/index.d.ts"]
     },
     "types": [
       "debug",

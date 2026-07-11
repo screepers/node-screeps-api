@@ -1,11 +1,14 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "../",
-    "rootDirs": ["../src", "./"],
+    "noEmit": true,
+    "rootDir": ".",
+    "paths": {
+      "screeps-api": ["../dist/index.d.ts"]
+    }
   },
   "include": [
-    "src",
-    "./",
-  ],
+    "./**/*.ts"
+  ]
 }

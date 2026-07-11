@@ -1,4 +1,4 @@
-import { ScreepsResponse } from './base'
+import { ScreepsResponse } from './base.js'
 
 /**
  * Response from `GET /api/warpath/battles` on a game server,

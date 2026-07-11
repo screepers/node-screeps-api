@@ -1,7 +1,5 @@
 import readline from 'node:readline/promises'
-// If installed from npm, use:
-// import { ... } from 'screeps-api'
-import { Resources, RoomEvent, RoomObject, RoomObjectType, RoomObjectTypes, ScreepsHttpClient, ScreepsSocketClient, ServerAuthEvent, ServerAuthStatuses, UserConsoleEvent, UserCpuEvent, UserCpuEventData } from '../src'
+import { Resources, RoomEvent, RoomObject, RoomObjectType, RoomObjectTypes, ScreepsHttpClient, ScreepsSocketClient, ServerAuthEvent, ServerAuthStatuses, UserConsoleEvent, UserCpuEvent, UserCpuEventData } from 'screeps-api'
 
 const ROOM_DIM = 50
 const MIN_COLS = ROOM_DIM

@@ -1,7 +1,5 @@
 import { writeFileSync } from 'node:fs'
-// If installed from npm, use:
-// import { ScreepsHttpClient } from 'screeps-api'
-import { ScreepsHttpClient } from '../src'
+import { ScreepsHttpClient } from 'screeps-api'
 
 const api = await ScreepsHttpClient.fromConfig('main', {
   app: {

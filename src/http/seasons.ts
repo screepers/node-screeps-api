@@ -1,4 +1,4 @@
-import { ScreepsResponse } from './base'
+import { ScreepsResponse } from './base.js'
 
 /**
  * `GET /api/seasons` response

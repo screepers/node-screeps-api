@@ -201,10 +201,10 @@ The [documentation](https://screepers.github.io/node-screeps-api/documents/Confi
 
 ```sh
 # Run an example script
-yarn exec tsx examples/console.ts
+yarn exec tsx --tsconfig examples/tsconfig.json examples/console.ts
 
 # Run the screeps-api CLI tool
-yarn exec tsx bin/screeps-api.ts call version
+yarn exec tsx --tsconfig tsconfig.bin.json bin/screeps-api.ts call version
 
 # package.json defines a cli script to make testing the CLI more convenient.
 # The following command is functionally identical to the previous one:

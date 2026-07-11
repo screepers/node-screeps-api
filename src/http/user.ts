@@ -1,7 +1,7 @@
-import { MarketResource } from '../common/resources'
-import { RoomStat } from '../common/rooms'
-import { User, UserCodeModules } from '../common/users'
-import { ScreepsDbUpdateResponse, ScreepsResponse } from './base'
+import { MarketResource } from '../common/resources.js'
+import { RoomStat } from '../common/rooms.js'
+import { User, UserCodeModules } from '../common/users.js'
+import { ScreepsDbUpdateResponse, ScreepsResponse } from './base.js'
 
 /**
  * `POST /api/user/notify-prefs` request

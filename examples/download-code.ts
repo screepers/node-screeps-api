@@ -1,8 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-// If installed from npm, use:
-// import { ... } from 'screeps-api'
-import { ScreepsHttpClient, ScreepsSocketClient, ServerAuthEvent, ServerAuthStatuses, UserCodeEvent } from '../src'
+import { ScreepsHttpClient, ScreepsSocketClient, ServerAuthEvent, ServerAuthStatuses, UserCodeEvent } from 'screeps-api'
 
 const api = await ScreepsHttpClient.fromConfig('main')
 console.debug('Connecting to WebSocket API')

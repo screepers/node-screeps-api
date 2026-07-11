@@ -8,8 +8,8 @@
     "allowUnusedLabels": false,
     "allowSyntheticDefaultImports": true,
     "alwaysStrict": true,
+    "composite": true,
     "declaration": true,
-    "declarationDir": "dist",
     "declarationMap": true,
     "esModuleInterop": true,
     "importHelpers": true,
@@ -17,8 +17,8 @@
       "DOM",
       "ES2022"
     ],
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noImplicitOverride": true,
@@ -27,7 +27,7 @@
     "noUncheckedSideEffectImports": true,
     "outDir": "dist",
     "resolveJsonModule": true,
-    "rootDirs": ["./src", "./bin"],
+    "rootDir": "src",
     "sourceMap": true,
     "strict": true,
     "strictBuiltinIteratorReturn": true,
@@ -40,8 +40,7 @@
     ]
   },
   "include": [
-    "src",
-    "bin"
+    "src"
   ],
   "exclude": [
     "node_modules"

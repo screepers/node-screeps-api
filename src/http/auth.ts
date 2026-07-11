@@ -1,7 +1,7 @@
-import { IntershardResource } from '../common/resources'
-import { UserBadge, CpuShardLimits } from '../common/users'
-import { ScreepsResponse } from './base'
-import { UserNotifyPrefsRequest } from './user'
+import { IntershardResource } from '../common/resources.js'
+import { UserBadge, CpuShardLimits } from '../common/users.js'
+import { ScreepsResponse } from './base.js'
+import { UserNotifyPrefsRequest } from './user.js'
 
 /**
  * `POST /api/auth/signin` response

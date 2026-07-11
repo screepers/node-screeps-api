@@ -1,4 +1,4 @@
-import { DepositResource, MineralBoostResource, MineralCompoundResource, MineralResource, Resource, Resources } from './resources'
+import { DepositResource, MineralBoostResource, MineralCompoundResource, MineralResource, Resource, Resources } from './resources.js'
 
 /**
  * Describes all possible types of {@link Structure}s that can be built

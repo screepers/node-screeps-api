@@ -1,4 +1,4 @@
-import { RoomObject } from '../common/rooms'
+import { RoomObject } from '../common/rooms.js'
 
 /**
  * HTTP request methods/verbs used with Screeps API endpoints

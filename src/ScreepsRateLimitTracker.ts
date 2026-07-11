@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import { ScreepsHttpMethod } from './http'
+import { ScreepsHttpMethod } from './http/index.js'
 
 const debugRateLimit = Debug('screepsapi:ratelimit')
 

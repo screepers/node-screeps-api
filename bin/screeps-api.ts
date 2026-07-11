@@ -3,9 +3,7 @@ import { Command } from 'commander'
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
-import { ScreepsHttpClient } from '../src'
-import { UserCodeSetRequest } from './http'
-
+import { ScreepsHttpClient, UserCodeSetRequest } from 'screeps-api'
 interface CommandOptions {
   server?: string
 }
@@ -40,11 +38,23 @@ const commandBase = (name: string, args?: string) => {
   return command
 }
 
-const pkgUrl = new URL('../package.json', import.meta.url)
-const pkg = JSON.parse(await readFile(pkgUrl, 'utf8')) as { version: string }
+async function readPackageVersion(moduleUrl: string): Promise<string> {
+  const dir = path.dirname(new URL(moduleUrl).pathname)
+  for (const rel of ['../package.json', '../../package.json']) {
+    try {
+      const pkg = JSON.parse(
+        await readFile(new URL(rel, moduleUrl), 'utf8')
+      ) as { version: string }
+      return pkg.version
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err
+    }
+  }
+  throw new Error(`package.json not found near ${dir}`)
+}
 
 program
-  .version(pkg.version)
+  .version(await readPackageVersion(import.meta.url))
 
 commandBase('call', '<cmd> [args...]')
   .summary('Call a method on ScreepsHttpClient')

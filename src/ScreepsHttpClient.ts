@@ -5,12 +5,12 @@ import { EventEmitter } from 'node:events'
 import { setTimeout } from 'node:timers/promises'
 import utils from 'node:util'
 import zlib from 'zlib'
-import { DEFAULT_CLIENT_CONFIG, LoadConfigOptions, ScreepsClientConfig, ScreepsConfigManager, ScreepsHttpConfig, ScreepsRawServerConfig, ScreepsServerConfig } from './ScreepsConfigManager'
-import { RateLimit, ScreepsRateLimitTracker } from './ScreepsRateLimitTracker'
-import { ScreepsSocketClient } from './ScreepsSocketClient'
-import { BuildableStructureType, CpuShardLimits, FlagColor, FlagColors, MarketResource, RoomStat, RoomStatInterval, RoomStats, UserBadge, UserCodeModules } from './common'
-import * as Http from './http'
-import { ScreepsHttpMethod, ScreepsHttpMethods } from './http'
+import { DEFAULT_CLIENT_CONFIG, LoadConfigOptions, ScreepsClientConfig, ScreepsConfigManager, ScreepsHttpConfig, ScreepsRawServerConfig, ScreepsServerConfig } from './ScreepsConfigManager.js'
+import { RateLimit, ScreepsRateLimitTracker } from './ScreepsRateLimitTracker.js'
+import { ScreepsSocketClient } from './ScreepsSocketClient.js'
+import { BuildableStructureType, CpuShardLimits, FlagColor, FlagColors, MarketResource, RoomStat, RoomStatInterval, RoomStats, UserBadge, UserCodeModules } from './common/index.js'
+import * as Http from './http/index.js'
+import { ScreepsHttpMethod, ScreepsHttpMethods } from './http/index.js'
 
 /**
  * Contains all information needed to submit an API request via

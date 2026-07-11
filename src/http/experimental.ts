@@ -1,5 +1,5 @@
-import { Nuke } from '../common/rooms'
-import { ScreepsResponse } from './base'
+import { Nuke } from '../common/rooms.js'
+import { ScreepsResponse } from './base.js'
 
 /**
  * `GET /api/experimental/pvp` response

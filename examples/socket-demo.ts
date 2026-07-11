@@ -1,6 +1,4 @@
-// If installed from npm, use:
-// import { ScreepsHttpClient } from 'screeps-api'
-import { ScreepsHttpClient, ScreepsSocketClient, ServerAuthEvent, ServerAuthStatuses, UserConsoleEvent, UserCpuEvent } from '../src'
+import { ScreepsHttpClient, ScreepsSocketClient, ServerAuthEvent, ServerAuthStatuses, UserConsoleEvent, UserCpuEvent } from 'screeps-api'
 
 // Instantiate client from config file and connect to the WebSocket API
 const api = await ScreepsHttpClient.fromConfig('main')

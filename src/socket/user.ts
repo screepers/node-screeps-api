@@ -1,6 +1,6 @@
-import { IntershardResource } from '../common/resources'
-import { UserCodeModules } from '../common/users'
-import { SocketEvent } from './base'
+import { IntershardResource } from '../common/resources.js'
+import { UserCodeModules } from '../common/users.js'
+import { SocketEvent } from './base.js'
 
 /**
  * WebSocket event for code changes.

@@ -6,8 +6,8 @@ import { URL } from 'node:url'
 import utils from 'node:util'
 import WebSocket from 'ws'
 import zlib from 'zlib'
-import { ScreepsHttpClient } from './ScreepsHttpClient'
-import { MapVisualEvent, RoomEvent, RoomMap2Event, ServerAuthEvent, ServerAuthStatuses, SocketEvent, UserCodeEvent, UserConsoleEvent, UserCpuEvent, UserMemoryEvent, UserResourceEvent } from './socket'
+import { ScreepsHttpClient } from './ScreepsHttpClient.js'
+import { MapVisualEvent, RoomEvent, RoomMap2Event, ServerAuthEvent, ServerAuthStatuses, SocketEvent, UserCodeEvent, UserConsoleEvent, UserCpuEvent, UserMemoryEvent, UserResourceEvent } from './socket/index.js'
 
 const debug = Debug('screepsapi:socket')
 

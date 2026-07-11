@@ -1,5 +1,5 @@
-import { UserBadge } from '../common/users'
-import { ScreepsResponse } from './base'
+import { UserBadge } from '../common/users.js'
+import { ScreepsResponse } from './base.js'
 
 /**
  * `GET /api/scoreboard/list` response

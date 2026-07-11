@@ -4,6 +4,7 @@ node_modules
 auth.js
 dist
 .tsbuild
+tsconfig.tsbuildinfo
 docs
 npm-debug.log
 

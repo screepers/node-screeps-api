@@ -1,4 +1,4 @@
-import { ScreepsResponse } from './base'
+import { ScreepsResponse } from './base.js'
 
 /**
  * `POST /api/servers/list` response: a curated list of community-run servers

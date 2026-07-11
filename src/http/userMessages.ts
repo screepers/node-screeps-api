@@ -1,5 +1,5 @@
-import { Users } from '../common/users'
-import { ScreepsDbUpdateResult, ScreepsResponse } from './base'
+import { Users } from '../common/users.js'
+import { ScreepsDbUpdateResult, ScreepsResponse } from './base.js'
 
 /**
  * `GET /api/user/messages/list` response

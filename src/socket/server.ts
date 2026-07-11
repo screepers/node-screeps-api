@@ -1,4 +1,4 @@
-import { SocketEvent } from './base'
+import { SocketEvent } from './base.js'
 
 /**
  * WebSocket event for authentication responses.

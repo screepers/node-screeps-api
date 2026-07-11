@@ -1,5 +1,5 @@
-import { Users } from '../common/users'
-import { ScreepsResponse } from './base'
+import { Users } from '../common/users.js'
+import { ScreepsResponse } from './base.js'
 
 /**
  * `GET /api/leaderboard/list` response

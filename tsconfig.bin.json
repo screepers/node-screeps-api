@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "bin",
+    "outDir": "dist/bin",
+    "composite": true,
+    "tsBuildInfoFile": ".tsbuild/bin.tsbuildinfo",
+    "paths": {
+      "screeps-api": ["./src/index.ts"]
+    }
+  },
+  "include": [
+    "bin"
+  ],
+  "references": [
+    { "path": "./tsconfig.json" }
+  ]
+}

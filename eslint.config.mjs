@@ -10,6 +10,7 @@ import tseslint from 'typescript-eslint'
 
 export default defineConfig(
   globalIgnores([
+    '.tsbuild/',
     'dist/',
     'docs/',
     'test/'
@@ -20,13 +21,13 @@ export default defineConfig(
       parserOptions: {
         projectService: true,
         allowDefaultProject: [
-          'eslint.config.mjs',
-          'rollup.config.mjs'
+          'eslint.config.mjs'
         ],
         tsconfigRootDir: import.meta.dirname
       }
     },
-    files: ['**/*.ts']
+    files: ['**/*.ts'],
+    ignores: ['bin/**']
   },
   pluginJs.configs.recommended,
   eslint.configs.recommended,
@@ -90,5 +91,14 @@ export default defineConfig(
   {
     files: ['**/*.{js,mjs,cjs}'],
     extends: [tseslint.configs.disableTypeChecked]
+  },
+  {
+    files: ['bin/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.bin.json'],
+        tsconfigRootDir: import.meta.dirname
+      }
+    }
   }
 )

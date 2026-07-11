@@ -48,10 +48,10 @@
  * {@link SocketEvent}s of `type: 'user'`
  */
 
-export * from './common'
-export * from './http'
-export * from './ScreepsConfigManager'
-export * from './ScreepsHttpClient'
-export * from './ScreepsRateLimitTracker'
-export * from './ScreepsSocketClient'
-export * from './socket'
+export * from './common/index.js'
+export * from './http/index.js'
+export * from './ScreepsConfigManager.js'
+export * from './ScreepsHttpClient.js'
+export * from './ScreepsRateLimitTracker.js'
+export * from './ScreepsSocketClient.js'
+export * from './socket/index.js'

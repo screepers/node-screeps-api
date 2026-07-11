@@ -7,17 +7,27 @@
     "url": "git+https://github.com/screepers/node-screeps-api.git"
   },
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/src/index.d.ts",
-  "bin": "dist/cli.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": "./dist/bin/screeps-api.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./ws-browser": {
+      "types": "./dist/ws-browser.d.ts",
+      "import": "./dist/ws-browser.js"
+    }
+  },
   "browser": {
-    "ws": "dist/ws-browser.js"
+    "ws": "./dist/ws-browser.js"
   },
   "scripts": {
-    "build": "rollup -c",
+    "build": "rm -rf dist .tsbuild tsconfig.tsbuildinfo && tsc -b tsconfig.build.json",
     "build:docs": "typedoc",
     "prepublishOnly": "npm run build",
-    "cli": "tsx bin/screeps-api.ts",
+    "cli": "tsx --tsconfig tsconfig.bin.json bin/screeps-api.ts",
     "lint": "eslint",
     "lint-fix": "eslint --fix",
     "test": "npm run build && TSX_TSCONFIG_PATH=test/tsconfig.mocha.json mocha",
@@ -63,8 +73,6 @@
     "lodash-es": "^4.18.1",
     "mocha": "^11.7.6",
     "publish-if-not-published": "^3.1.3",
-    "rollup": "^4.60.4",
-    "rollup-plugin-typescript2": "^0.37.0",
     "tslib": "^2.8.1",
     "tsx": "^4.22.3",
     "typedoc": "^0.28.19",

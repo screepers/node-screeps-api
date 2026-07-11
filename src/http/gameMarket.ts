@@ -1,6 +1,6 @@
-import { OpenOrder, Order } from '../common/market'
-import { MarketResource } from '../common/resources'
-import { ScreepsResponse } from './base'
+import { OpenOrder, Order } from '../common/market.js'
+import { MarketResource } from '../common/resources.js'
+import { ScreepsResponse } from './base.js'
 
 /**
  * `GET /api/game/market/orders-index` response

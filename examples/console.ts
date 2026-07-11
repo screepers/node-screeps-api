@@ -1,8 +1,6 @@
 import readline from 'node:readline'
 import util from 'node:util'
-// If installed from npm, use:
-// import { ... } from 'screeps-api'
-import { ScreepsHttpClient, ScreepsSocketClient, ServerAuthEvent, ServerAuthStatuses, UserConsoleEvent } from '../src'
+import { ScreepsHttpClient, ScreepsSocketClient, ServerAuthEvent, ServerAuthStatuses, UserConsoleEvent } from 'screeps-api'
 
 // Run this with DEBUG=screepsapi:socket to enable debug logging
 

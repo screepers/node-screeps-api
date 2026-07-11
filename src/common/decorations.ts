@@ -1,5 +1,5 @@
-import { RoomObjectType } from './rooms'
-import { UserBadgeSvgs } from './users'
+import { RoomObjectType } from './rooms.js'
+import { UserBadgeSvgs } from './users.js'
 
 /**
  * An instance of a {@link Decoration} that is owned by a user

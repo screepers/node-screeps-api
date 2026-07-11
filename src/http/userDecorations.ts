@@ -1,5 +1,5 @@
-import * as Decorations from '../common/decorations'
-import { ScreepsResponse } from './base'
+import * as Decorations from '../common/decorations.js'
+import { ScreepsResponse } from './base.js'
 
 /**
  * `GET /api/user/decorations/inventory` response

@@ -1,7 +1,7 @@
-import { DecorationInstance } from '../common/decorations'
-import { BuildableStructureType, RoomObject, RoomObjectType, RoomStat, RoomStatInterval, RoomStats, RoomStatus } from '../common/rooms'
-import { UserBadge, Users } from '../common/users'
-import { ScreepsResponse } from './base'
+import { DecorationInstance } from '../common/decorations.js'
+import { BuildableStructureType, RoomObject, RoomObjectType, RoomStat, RoomStatInterval, RoomStats, RoomStatus } from '../common/rooms.js'
+import { UserBadge, Users } from '../common/users.js'
+import { ScreepsResponse } from './base.js'
 
 /**
  * Stats that can be used with the `POST /api/game/map-stats` endpoint

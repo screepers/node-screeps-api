@@ -1,4 +1,4 @@
-import { MarketResource, Resource } from './resources'
+import { MarketResource, Resource } from './resources.js'
 
 /**
  * A buy or sell order on the in-game market created by the authenticated user.
