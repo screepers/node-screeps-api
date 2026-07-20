@@ -20,8 +20,7 @@
     "cli": "tsx bin/screeps-api.ts",
     "lint": "eslint",
     "lint-fix": "eslint --fix",
-    "test_": "mocha",
-    "test": "echo Tests disabled, TODO: FIX THIS!",
+    "test": "tsx --test test/unit/*.test.ts",
     "2npm": "publish-if-not-published"
   },
   "author": "Alina Shumann (https://github.com/AlinaNova21)",
