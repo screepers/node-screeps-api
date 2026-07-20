@@ -196,7 +196,8 @@ export type Resource = typeof Resources[keyof typeof Resources]
 export const IntershardResources = {
   AccessKey: 'accessKey',
   CpuUnlock: 'cpuUnlock',
-  Pixel: 'pixel'
+  Pixel: 'pixel',
+  SubscriptionToken: 'token'
 } as const
 
 /**
