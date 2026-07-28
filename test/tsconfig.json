@@ -3,7 +3,16 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "rootDir": "..",
-    "rootDirs": ["../src", "."]
+    "rootDirs": ["../src", "."],
+    "paths": {
+      "screeps-api": ["../src/index.ts"]
+    },
+    "types": [
+      "debug",
+      "lodash",
+      "mocha",
+      "node"
+    ]
   },
   "include": [
     "../src",

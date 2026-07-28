@@ -3,6 +3,7 @@
 node_modules
 auth.js
 dist
+.tsbuild
 docs
 npm-debug.log
 

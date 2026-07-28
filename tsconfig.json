@@ -15,7 +15,7 @@
     "importHelpers": true,
     "lib": [
       "DOM",
-      "ES2022",
+      "ES2022"
     ],
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -36,14 +36,14 @@
     "types": [
       "debug",
       "lodash",
-      "node",
-    ],
+      "node"
+    ]
   },
   "include": [
     "src",
-    "bin",
+    "bin"
   ],
   "exclude": [
-    "node_modules",
-  ],
+    "node_modules"
+  ]
 }

@@ -2,3 +2,4 @@
 node_modules
 auth.js
 src
+dist/test
