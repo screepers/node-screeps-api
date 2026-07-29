@@ -25,6 +25,7 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noUncheckedSideEffectImports": true,
+    "noEmit": true,
     "outDir": "dist",
     "resolveJsonModule": true,
     "rootDirs": ["./src", "./bin"],
