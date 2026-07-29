@@ -21,5 +21,6 @@ jobs:
         node-version-file: .node-version
         cache: yarn
     - run: yarn install --immutable
+    - run: yarn typecheck:test
     - run: yarn test
     - run: yarn cli --help
