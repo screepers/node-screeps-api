@@ -554,13 +554,16 @@ export class ScreepsSocketClient extends EventEmitter {
    *  while using an official server
    * @see {@link unsubscribeUserMemory}
    */
-  async subscribeUserMemory(memoryPath: string, shardName?: string, cb?: (event: UserMemoryEvent) => void) {
-    if (this.http.isOfficialServer) {
-      shardName ??= this.http.appConfig.defaultShard
-      if (!shardName) throw new Error('shardName must be defined')
-      memoryPath = `${shardName}/${memoryPath}`
-    }
-    return this.subscribe(this.userMemoryEventSpec(memoryPath, shardName), cb)
+  async subscribeUserMemory(memoryPath: string, cb?: (event: UserMemoryEvent) => void): Promise<void>
+  async subscribeUserMemory(memoryPath: string, shardName: string, cb?: (event: UserMemoryEvent) => void): Promise<void>
+  async subscribeUserMemory(
+    memoryPath: string,
+    shardNameOrCb?: string | ((event: UserMemoryEvent) => void),
+    cb?: (event: UserMemoryEvent) => void
+  ) {
+    const shardName = typeof shardNameOrCb === 'string' ? shardNameOrCb : undefined
+    const callback = typeof shardNameOrCb === 'function' ? shardNameOrCb : cb
+    return this.subscribe(this.userMemoryEventSpec(memoryPath, shardName), callback)
   }
 
   /**
@@ -573,8 +576,16 @@ export class ScreepsSocketClient extends EventEmitter {
    *  while using an official server
    * @see {@link subscribeUserMemory}
    */
-  async unsubscribeUserMemory(memoryPath: string, shardName?: string, cb?: (event: UserMemoryEvent) => void) {
-    return this.unsubscribe(this.userMemoryEventSpec(memoryPath, shardName), cb)
+  async unsubscribeUserMemory(memoryPath: string, cb?: (event: UserMemoryEvent) => void): Promise<void>
+  async unsubscribeUserMemory(memoryPath: string, shardName: string, cb?: (event: UserMemoryEvent) => void): Promise<void>
+  async unsubscribeUserMemory(
+    memoryPath: string,
+    shardNameOrCb?: string | ((event: UserMemoryEvent) => void),
+    cb?: (event: UserMemoryEvent) => void
+  ) {
+    const shardName = typeof shardNameOrCb === 'string' ? shardNameOrCb : undefined
+    const callback = typeof shardNameOrCb === 'function' ? shardNameOrCb : cb
+    return this.unsubscribe(this.userMemoryEventSpec(memoryPath, shardName), callback)
   }
 
   protected userMemoryEventSpec(
