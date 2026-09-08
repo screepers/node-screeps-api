@@ -1,5 +1,5 @@
 import { DecorationInstance } from '../common/decorations'
-import { BuildableStructureType, RoomObject, RoomObjectType, RoomStat, RoomStatInterval, RoomStats, RoomStatus } from '../common/rooms'
+import { BuildableStructureType, CreepBodyPart, RoomObject, RoomObjectType, RoomStat, RoomStatInterval, RoomStats, RoomStatus } from '../common/rooms'
 import { UserBadge, Users } from '../common/users'
 import { ScreepsResponse } from './base'
 
@@ -113,6 +113,42 @@ export interface GameCreateConstructionResponse extends ScreepsResponse {
   }[]
   insertedCount: number
   insertedIds: string[]
+}
+
+/**
+ * `POST /api/game/place-spawn` response
+ * @see {@link ScreepsHttpClient.gamePlaceSpawn}
+ * @category HTTP API - Game
+ */
+export interface GamePlaceSpawnResponse extends ScreepsResponse {
+  /**
+   * True when this is the player's first spawn on the server.
+   * Community servers always return `true`.
+   */
+  newbie?: boolean
+}
+
+/**
+ * `POST /api/game/create-invader` response
+ * @see {@link ScreepsHttpClient.gameCreateInvader}
+ * @category HTTP API - Game
+ */
+export interface GameCreateInvaderResponse extends ScreepsResponse {
+  _id: string
+  type: 'creep'
+  /** Invader NPC user ID (`'2'`) */
+  user: string
+  name: string
+  room: string
+  x: number
+  y: number
+  body: CreepBodyPart[]
+  hits: number
+  hitsMax: number
+  ticksToLive: number
+  fatigue: number
+  /** User ID of the player who spawned this invader */
+  userSummoned: string
 }
 
 /**

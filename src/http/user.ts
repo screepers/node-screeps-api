@@ -77,6 +77,19 @@ export interface UserBranchesResponse extends ScreepsResponse {
 }
 
 /**
+ * `POST /api/user/clone-branch`, `POST /api/user/delete-branch`, and
+ * `POST /api/user/code` response
+ * @see {@link ScreepsHttpClient.userCloneBranch}
+ * @see {@link ScreepsHttpClient.userDeleteBranch}
+ * @see {@link ScreepsHttpClient.userCodeSet}
+ * @category HTTP API - User
+ */
+export interface UserCodeTimestampResponse extends ScreepsResponse {
+  /** UNIX timestamp (in milliseconds) */
+  timestamp: number
+}
+
+/**
  * `GET /api/user/code` response
  * @see {@link ScreepsHttpClient.userCodeGet}
  * @category HTTP API - User
@@ -84,7 +97,7 @@ export interface UserBranchesResponse extends ScreepsResponse {
 export interface UserCodeGetResponse extends ScreepsResponse, UserCodeSetRequest {}
 
 /**
- * `POST /api/user/code` response
+ * `POST /api/user/code` request
  * @see {@link ScreepsHttpClient.userCodeSet}
  * @category HTTP API - User
  */

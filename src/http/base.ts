@@ -144,7 +144,11 @@ export interface ScreepsVersionResponse extends ScreepsResponse {
   decorationConvertationCost?: number
   /** undefined on unofficial servers */
   decorationPixelizationCost?: number
-  /** undefined on official servers */
+  /**
+   * True if Steam tickets are decrypted locally (Greenworks); false if they
+   * are validated via the Steam Web API. Undefined on official servers.
+   * @see {@link ScreepsHttpClient.authSteamTicket}
+   */
   useNativeAuth?: boolean
   /** Sum of the number of active players on each shard */
   users: number

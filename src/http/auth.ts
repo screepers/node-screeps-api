@@ -13,6 +13,17 @@ export interface AuthSigninResponse extends ScreepsResponse {
 }
 
 /**
+ * `POST /api/auth/steam-ticket` response
+ * @see {@link ScreepsHttpClient.authSteamTicket}
+ * @category HTTP API - Auth
+ */
+export interface AuthSteamTicketResponse extends ScreepsResponse {
+  token: string
+  /** SteamID64 of the authenticated Steam account */
+  steamid: string
+}
+
+/**
  * `GET /api/auth/me` response
  * @see {@link ScreepsHttpClient.authMe}
  * @category HTTP API - Auth
