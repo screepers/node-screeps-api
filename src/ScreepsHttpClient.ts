@@ -1875,17 +1875,19 @@ export class ScreepsHttpClient extends EventEmitter {
    * or Seasonal World servers
    */
   get isOfficialServer(): boolean {
-    return !!(/screeps\.com/.exec(this.server.url))
+    return new URL(this.server.url).hostname === 'screeps.com'
   }
 
   /** True if this client is configured for the Seasonal World server */
   get isSeasonServer(): boolean {
-    return !!(/screeps\.com\/season/.exec(this.server.url))
+    const url = new URL(this.server.url)
+    return url.hostname === 'screeps.com' && /^\/season(?:\/|$)/.test(url.pathname)
   }
 
   /** True if this client is configured for the Public Test Realm (PTR) server */
   get isPtrServer(): boolean {
-    return !!(/screeps\.com\/ptr/.exec(this.server.url))
+    const url = new URL(this.server.url)
+    return url.hostname === 'screeps.com' && /^\/ptr(?:\/|$)/.test(url.pathname)
   }
 
   protected mapToShard <R extends Response>(
