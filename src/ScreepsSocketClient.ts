@@ -244,9 +244,8 @@ export class ScreepsSocketClient extends EventEmitter {
       this.ws = new WebSocket(wsurl)
       this.ws.on('open', () => {
         this.__connected = true
-        this.__reconnecting = false
         if (this.http.appConfig.wsResubscribe) {
-          this.__subQueue.push(...Object.keys(this.__subs))
+          this.__subQueue.push(...Object.keys(this.__subs).map(sub => `subscribe ${sub}`))
         }
         debug(ScreepsSocketClient.CONNECTED)
         this.emit(ScreepsSocketClient.CONNECTED)
@@ -324,8 +323,8 @@ export class ScreepsSocketClient extends EventEmitter {
 
     // Reconnect attempt succeeded
     if (!retry) {
-      // Resume existing subscriptions on the new socket
-      Object.keys(this.__subs).forEach(sub => void this.subscribe(sub))
+      this.__reconnecting = false
+      return
     }
 
     const err = new Error(`Reconnection failed after ${this.http.appConfig.wsReconnectMaxRetries} retries`)
